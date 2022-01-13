@@ -1,0 +1,34 @@
+#+TITLE: Local Bite Solver
+#+AUTHOR: Russell Helmstedter
+#+DATE: <2022-01-12 Wed>
+
+* Original Work Flow
+
+This is an outline for a project that helps people solve PyBites on the command line. Currently the workflow is annoying (at best). Consider the following:
+
+1. Go to the bite on the website and click the drop down button to solve locally.
+2. Download the zip file for that bite.
+3. Navigate to the directory where you downloaded the bite.
+4. Unzip the new directory into a folder named by the bite number: `/pybites/<bite number>`
+5. Solve the bite.
+6. Go through the steps to push up to GitHub.
+   - `cd ..`
+   - `git add .`
+   - `git commit -m 'solved <bite number>'`
+   - `git push`
+7. Head back to website and download the code from GitHub.
+8. submit bite.
+
+What I would like to have happen:
+
+1. run `eatlocal -d <bite number>` (Download and extract bite into PyBites directory.)
+2. Solve bite
+3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the bite page.)
+
+* Currently
+
+~~I have [bite_organizer](./bite_organizer.py) that searches in the `pybites` directory for any `.zip` file extensions. It then extracts those files into the correct directory and deletes the zipped directory. This is almost what I am looking for. I would like to be able to download a certain bite by entering the bite number on the command line.~~
+
+  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo, and it can push to GitHub. 
+** TODO Work on the name?
+** TODO Find a word around for the authorization issue.

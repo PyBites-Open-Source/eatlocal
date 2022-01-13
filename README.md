@@ -9,6 +9,6 @@ Go through the directions on the Pybites website to connect your GitHub account 
 Extract bites with the --extract flag:
 `eatlocal -e <bite number>`
 
-Submit bites with the --submit flag
+Submit bites with the --submit flag:
 `eatlocal -s <bite number>`
 
