@@ -1,0 +1,13 @@
+Metadata-Version: 1.1
+Name: eatlocal
+Version: 0.2
+Summary: Allows the user to extract and submit pybites
+Home-page: UNKNOWN
+Author: Russell Helmstedter
+Author-email: rhelmstedter@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Unix/Linux

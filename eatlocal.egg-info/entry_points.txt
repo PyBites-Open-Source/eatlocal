@@ -1,0 +1,3 @@
+[console_scripts]
+eatlocal = eatlocal.__main__:main
+

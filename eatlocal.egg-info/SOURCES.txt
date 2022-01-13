@@ -1,0 +1,10 @@
+setup.py
+eatlocal/__init__.py
+eatlocal/__main__.py
+eatlocal/cli.py
+eatlocal/eatlocal.py
+eatlocal.egg-info/PKG-INFO
+eatlocal.egg-info/SOURCES.txt
+eatlocal.egg-info/dependency_links.txt
+eatlocal.egg-info/entry_points.txt
+eatlocal.egg-info/top_level.txt
