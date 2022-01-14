@@ -1,5 +1,9 @@
 from .eatlocal import extract_bite, submit_bite, download_bite
 from .cli import get_args
+import os
+
+USERNAME = os.environ.get("PYBITES_USERNAME")
+PASSWORD = os.environ.get("PYBITES_PASSWORD")
 
 
 def main():
@@ -9,7 +13,7 @@ def main():
     elif args.submit:
         submit_bite(args.submit)
     elif args.download:
-        download_bite(args.download)
+        download_bite(args.download, USERNAME, PASSWORD)
 
 
 if __name__ == "__main__":

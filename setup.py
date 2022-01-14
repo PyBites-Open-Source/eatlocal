@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup( 
     name='eatlocal', 
-    version='0.2', 
+    version='0.3', 
     author='Russell Helmstedter', 
     author_email='rhelmstedter@gmail.com', 
     description='Allows the user to extract and submit pybites', 
@@ -14,7 +14,6 @@ setuptools.setup(
     }, 
     classifiers=[ 
         'Programming Language :: Python :: 3', 
-        'License :: OSI Approved :: MIT License', 
         'Operating System :: OS Unix/Linux', 
     ], 
 )

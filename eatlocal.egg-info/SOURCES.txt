@@ -1,3 +1,5 @@
+README.md
+bite_cli.org
 setup.py
 eatlocal/__init__.py
 eatlocal/__main__.py

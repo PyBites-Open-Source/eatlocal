@@ -1,35 +1,42 @@
-import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from time import sleep
 from zipfile import ZipFile
-import webbrowser
-import requests
-from io import BytesIO
 import subprocess
+import webbrowser
+import os
 
 
-USER = "russell.helmstedter"
-PASSWORD = "not today satan"
-
-
-def download_bite(bite_number):
+def download_bite(bite_number, username, password):
     """Download bite .zip from the platform.
 
     :bite_number: The number of the bite you want to download.
     :returns: None
 
     """
-    zurl = f"https://codechalleng.es/bites/api/downloads/bites/{bite_number}"
-    r = requests.get(
-        url=zurl,
-        auth=(USER, PASSWORD),
-        stream=True,
-    )
-    if r.status_code == 200:
-        z = ZipFile(BytesIO(r.content))
-        z.extractall(f"./{bite_number}/")
-        print(f"bite {bite_number} downloaded and extracted.")
-    else:
-        print(f"Status code: {r.status_code}")
-        print(f"Could not download bite {bite_number}.")
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('window-size=1920x1080')
+
+    driver = webdriver.Chrome(options=options)
+    login_url = "https://codechalleng.es/login"
+    print("Logging into PyBites")
+    driver.get(login_url)
+    username_field = driver.find_element(By.ID, "id_username")
+    username_field.send_keys(username)
+    password_field = driver.find_element(By.ID, "id_password")
+    password_field.send_keys(password)
+    password_field.send_keys(Keys.RETURN)
+
+    print(f"Retrieving bite {bite_number}")
+    sleep(2)
+    bite_url = f"https://codechalleng.es/bites/api/downloads/bites/{bite_number}"
+    driver.get(bite_url)
+    sleep(2)
+    print(f"Bite {bite_number} successully downloaded to current directory")
+    extract_bite(bite_number)
 
 
 def extract_bite(bite_number):
@@ -47,7 +54,7 @@ def extract_bite(bite_number):
             zfile.extractall(f"./{bite_number}")
 
         print(f"Extracted bite {bite_number}")
-        os.remove(bite)
+        subprocess.call(['rm', bite])
 
     except FileNotFoundError:
         print("No bite found.")
@@ -77,10 +84,12 @@ def submit_bite(bite_number):
         stderr=subprocess.STDOUT,
     )
 
-    # os.system("git add .")
-    # os.system(f"git commit -m'submission Bite {bite_number} @ codechalleng.es'")
-    # os.system("git push")
     print(f"\nPushed bite {bite_number} to github")
 
     url = f"https://codechalleng.es/bites/{bite_number}/"
     webbrowser.open(url)
+
+if __name__ == "__main__":
+    USERNAME = os.environ.get("PYBITES_USERNAME")
+    PASSWORD = os.environ.get("PYBITES_PASSWORD")
+    download_bite(45, USERNAME, PASSWORD)
