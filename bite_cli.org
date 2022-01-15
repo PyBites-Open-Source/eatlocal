@@ -25,10 +25,7 @@ What I would like to have happen:
 2. Solve bite
 3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the bite page.)
 
-* Currently
+* Current Work Flow
 
-~~I have [bite_organizer](./bite_organizer.py) that searches in the `pybites` directory for any `.zip` file extensions. It then extracts those files into the correct directory and deletes the zipped directory. This is almost what I am looking for. I would like to be able to download a certain bite by entering the bite number on the command line.~~
-
-  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo, and it can push to GitHub. 
+  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. It can (sort of) submit a bite by first pushing it to GitHub and then opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually.
 ** TODO Work on the name?
-** TODO Find a word around for the authorization issue.

@@ -88,8 +88,3 @@ def submit_bite(bite_number):
 
     url = f"https://codechalleng.es/bites/{bite_number}/"
     webbrowser.open(url)
-
-if __name__ == "__main__":
-    USERNAME = os.environ.get("PYBITES_USERNAME")
-    PASSWORD = os.environ.get("PYBITES_PASSWORD")
-    download_bite(45, USERNAME, PASSWORD)
