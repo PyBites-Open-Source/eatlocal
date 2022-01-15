@@ -20,11 +20,11 @@ def get_args():
         help="Extract files into appropriate directory",
         dest="extract",
     )
-
     group.add_argument(
         "-s",
         "--submit",
         help="Submit bite",
         dest="submit",
     )
+
     return parser.parse_args()

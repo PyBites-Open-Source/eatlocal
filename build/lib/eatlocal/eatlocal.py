@@ -6,7 +6,6 @@ from time import sleep
 from zipfile import ZipFile
 import subprocess
 import webbrowser
-import os
 
 
 def download_bite(bite_number, username, password):
@@ -14,14 +13,15 @@ def download_bite(bite_number, username, password):
 
     :bite_number: The number of the bite you want to download.
     :returns: None
-
     """
+
     options = Options()
     options.add_argument('--headless')
     options.add_argument('window-size=1920x1080')
-
     driver = webdriver.Chrome(options=options)
+
     login_url = "https://codechalleng.es/login"
+
     print("Logging into PyBites")
     driver.get(login_url)
     username_field = driver.find_element(By.ID, "id_username")
@@ -66,8 +66,8 @@ def submit_bite(bite_number):
 
     :bite_number: The number of the bite you want to submit.
     :returns: None
-
     """
+
     subprocess.call(
         ["git", "add", "."],
         stdout=subprocess.DEVNULL,
