@@ -12,20 +12,18 @@ This is an outline for a project that helps people solve PyBites on the command 
 4. Unzip the new directory into a folder named by the bite number: `/pybites/<bite number>`
 5. Solve the bite.
 6. Go through the steps to push up to GitHub.
-   - `cd ..`
    - `git add .`
    - `git commit -m 'solved <bite number>'`
    - `git push`
 7. Head back to website and download the code from GitHub.
 8. submit bite.
 
-What I would like to have happen:
+* Wishlist
+  What I would like to have happen:
 
-1. run `eatlocal -d <bite number>` (Download and extract bite into PyBites directory.)
-2. Solve bite
-3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the bite page.)
+  1. run `eatlocal -d <bite number>` (Package downloads and extracts a bite into PyBites directory.)
+  2. Solve bite
+  3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the corresponding bite page.)
 
 * Current Work Flow
-
-  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. It can (sort of) submit a bite by first pushing it to GitHub and then opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually.
-** TODO Work on the name?
+  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. It can (sort of) submit a bite by first pushing it to GitHub and then opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually. Potentially I could use selenium to open the page, download the code, and submit. That is not in the works yet.
