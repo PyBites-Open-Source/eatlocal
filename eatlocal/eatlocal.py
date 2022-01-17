@@ -16,8 +16,8 @@ def download_bite(bite_number, username, password):
     """
 
     options = Options()
-    options.add_argument('--headless')
-    options.add_argument('window-size=1920x1080')
+    options.add_argument("--headless")
+    options.add_argument("window-size=1920x1080")
     driver = webdriver.Chrome(options=options)
 
     login_url = "https://codechalleng.es/login"
@@ -54,7 +54,7 @@ def extract_bite(bite_number):
             zfile.extractall(f"./{bite_number}")
 
         print(f"Extracted bite {bite_number}")
-        subprocess.call(['rm', bite])
+        subprocess.call(["rm", bite])
 
     except FileNotFoundError:
         print("No bite found.")
