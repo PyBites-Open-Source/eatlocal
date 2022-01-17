@@ -4,7 +4,7 @@ This package helps the user solve [Pybites](https://codechallang.es) code challe
 
 ## Installation
 
-`pip3 install eatlocal`
+`pip install eatlocal`
 
 ## Usage
 
