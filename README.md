@@ -2,6 +2,10 @@
 
 This package helps the user solve [Pybites](https://codechallang.es) code challenges locally.
 
+## Installation
+
+`pip3 install eatlocal`
+
 ## Usage
 
 Go through the directions on the PyBites website to connect your GitHub account to your PyBites account. eatlocal allows you to download bites, unzip, and organize them according to the expected structure from the directions on the PyBites website. Once you have solved the bite you can submit it and the eatlocal will open a bowser tab at the correct location.
