@@ -68,23 +68,27 @@ def submit_bite(bite_number):
     :returns: None
     """
 
-    subprocess.call(
-        ["git", "add", "."],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
-    subprocess.call(
-        ["git", "commit", f"-m'submission Bite {bite_number} @ codechalleng.es'"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
-    subprocess.call(
-        ["git", "push"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
+    try:
+        subprocess.check_call(
+            ["git", "add", "."],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
+        subprocess.check_call(
+            ["git", "commit", f"-m'submission Bite {bite_number} @ codechalleng.es'"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
+        subprocess.check_call(
+            ["git", "push"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
 
-    print(f"\nPushed bite {bite_number} to github")
+        print(f"\nPushed bite {bite_number} to github")
+
+    except subprocess.CalledProcessError:
+        print("Failed to push to GitHub")
 
     url = f"https://codechalleng.es/bites/{bite_number}/"
     webbrowser.open(url)
