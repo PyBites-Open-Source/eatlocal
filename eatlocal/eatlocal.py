@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 from zipfile import ZipFile
+
+import os
 import subprocess
 import webbrowser
 
@@ -54,7 +56,7 @@ def extract_bite(bite_number):
             zfile.extractall(f"./{bite_number}")
 
         print(f"Extracted bite {bite_number}")
-        subprocess.call(["rm", bite])
+        os.unlink(f"rm {bite}")
 
     except FileNotFoundError:
         print("No bite found.")
