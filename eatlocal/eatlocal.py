@@ -91,4 +91,3 @@ def submit_bite(bite_number):
         webbrowser.open(url)
     except subprocess.CalledProcessError:
         print("Failed to push to GitHub")
-
