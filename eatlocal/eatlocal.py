@@ -6,6 +6,7 @@ from time import sleep
 from zipfile import ZipFile
 
 import os
+import platform
 import subprocess
 import webbrowser
 
@@ -17,13 +18,17 @@ def download_bite(bite_number, username, password):
     :returns: None
     """
 
+    downloaded_bite = f"pybites_bite{bite_number}.zip"
+
     options = Options()
     options.add_argument("--headless")
     options.add_argument("window-size=1920x1080")
+    if platform.system() == "Windows":
+        chrome_prefs = {"download.default_directory": os.getcwd()} # (windows)
+        options.experimental_options["prefs"] = chrome_prefs
     driver = webdriver.Chrome(options=options)
 
     login_url = "https://codechalleng.es/login"
-
     print("Logging into PyBites")
     driver.get(login_url)
     username_field = driver.find_element(By.ID, "id_username")
@@ -37,8 +42,12 @@ def download_bite(bite_number, username, password):
     bite_url = f"https://codechalleng.es/bites/api/downloads/bites/{bite_number}"
     driver.get(bite_url)
     sleep(2)
-    print(f"Bite {bite_number} successully downloaded to current directory")
-    extract_bite(bite_number)
+    if os.path.exists(downloaded_bite):
+        print(f"Bite {bite_number} successully downloaded to current directory")
+        extract_bite(bite_number)
+    else:
+        print(f"Bite {bite_number} was not downloaded")
+
 
 
 def extract_bite(bite_number):
