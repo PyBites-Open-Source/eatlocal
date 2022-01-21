@@ -50,7 +50,6 @@ def download_bite(bite_number, username, password):
         print(f"Bite {bite_number} was not downloaded")
 
 
-
 def extract_bite(bite_number):
     """Extracts all the required files into a new directory
     named by the bite number.
@@ -117,6 +116,7 @@ def submit_bite(bite_number, username, password):
     password_field = driver.find_element(By.ID, "id_password")
     password_field.send_keys(password)
     password_field.send_keys(Keys.RETURN)
+
     driver.get(url)
     sleep(1)
     offline_mode_btn = driver.find_element(By.ID, "githubDropdown")
@@ -126,7 +126,3 @@ def submit_bite(bite_number, username, password):
     github_pull_btn.click()
     sleep(2)
     webbrowser.open(url)
-
-
-if __name__ == "__main__":
-    submit_bite(1, 'russell.helmstedter', '58PSxp1JDzklWYx%')
