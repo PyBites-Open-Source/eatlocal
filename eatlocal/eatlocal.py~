@@ -72,7 +72,7 @@ def extract_bite(bite_number):
         print("No bite found.")
 
 
-def submit_bite(bite_number, username, password):
+def submit_bite(bite_number):
     """Submits bite by pushing to git hub and opening
     webbrowser to the bit page.
 
