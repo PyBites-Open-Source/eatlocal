@@ -81,7 +81,7 @@ def submit_bite(bite_number, username, password):
 
     try:
         subprocess.run(
-            ["git", "add", "."],
+            ["git", "add", f"{bite_number}"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
         )
@@ -117,12 +117,18 @@ def submit_bite(bite_number, username, password):
     password_field.send_keys(password)
     password_field.send_keys(Keys.RETURN)
 
+    print(f"Locating bite {bite_number} webpage.")
     driver.get(url)
-    sleep(1)
+    sleep(2)
+    print(f"Downloading code from GitHub for bite {bite_number}.")
     offline_mode_btn = driver.find_element(By.ID, "githubDropdown")
     offline_mode_btn.click()
     sleep(2)
     github_pull_btn = driver.find_element(By.ID, "ghpull")
     github_pull_btn.click()
-    sleep(2)
+    sleep(1)
+    print(f"Submitting bite {bite_number}.")
+    submit_btn = driver.find_element(By.ID, "save")
+    submit_btn.click()
+    sleep(1)
     webbrowser.open(url)
