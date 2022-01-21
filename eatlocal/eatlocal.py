@@ -98,7 +98,24 @@ def submit_bite(bite_number):
 
         print(f"\nPushed bite {bite_number} to github")
 
-        url = f"https://codechalleng.es/bites/{bite_number}/"
-        webbrowser.open(url)
     except subprocess.CalledProcessError:
         print("Failed to push to GitHub")
+
+
+    url = f"https://codechalleng.es/bites/{bite_number}/"
+
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("window-size=1920x1080")
+    driver = webdriver.Chrome(options=options)
+    driver.get(url)
+    sleep(1)
+    offline_mode_btn = driver.find_element(By.ID, "githubDropdown")
+    offline_mode_btn.click()
+    sleep(2)
+    github_pull_btn = driver.find_element(By.ID, "ghpull")
+    github_pull_btn.click()
+    sleep(2)
+    webbrowser.open(url)
+
+
