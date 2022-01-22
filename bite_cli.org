@@ -1,6 +1,6 @@
 #+TITLE: Local Bite Solver
 #+AUTHOR: Russell Helmstedter
-#+DATE: <2022-01-12 Wed>
+#+DATE: <2022-01-19 Wed>
 
 * Original Work Flow
 
@@ -26,4 +26,9 @@ This is an outline for a project that helps people solve PyBites on the command 
   3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the corresponding bite page.)
 
 * Current Work Flow
-  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. It can (sort of) submit a bite by first pushing it to GitHub and then opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually. Potentially I could use selenium to open the page, download the code, and submit. That is not in the works yet.
+  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. This only works in macOS. It *does not* work in windows powershell and needs to be tested in Linux. It can, kind of, submit a bite by first pushing it to GitHub and opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually.
+
+* Enhancements
++ In the future, I will use selenium to open the page, download the code from GitHub, and submit. That is currently in the works.
+* Issues
++ zip files don't download in windows powershell.
