@@ -1,4 +1,4 @@
 """ A package to solve PyBites locally"""
 
 
-__version__ = "0.5"
+__version__ = "0.6"
