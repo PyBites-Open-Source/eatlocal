@@ -1,6 +1,6 @@
 #+TITLE: Local Bite Solver
 #+AUTHOR: Russell Helmstedter
-#+DATE: <2022-01-21 Fri>
+#+DATE: <2022-01-22 Sat>
 
 * Original Work Flow
 
@@ -23,16 +23,18 @@ This is an outline for a project that helps people solve PyBites on the command 
 
   What I would like to have happen:
 
-  1. run `eatlocal -d <bite number>` (Package downloads and extracts a bite into PyBites directory.)
+  1. run `eatlocal -d <bite number> && eatlocal -e <bite number>` (Package downloads and extracts a bite into PyBites directory.)
   2. Solve bite
   3. run `eatlocal -s <bite number>` (Submit bite and open web browser to the corresponding bite page.)
 
 * Current Work Flow
   I have a working version of eatlocal and the [[Wishlist][wishlist]] has been completely fulfilled. It can extract a zipped file that is already in the local repo. It can now submit a bite by first pushing it to GitHub and opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually. It can download and extract a bite using selenium in headless mode. It works in windows powershell and on macOS. It still needs to be tested on Linux.
 
+  After talking with Bob, we decided that the download flag should only download and not include the extract function. This adds a little extra typing, but is more transparent about what is happening.
+
 * Enhancements
 
-+ Add a read flag to read the instructions of the bite in the terminal.
+** TODO Add a read flag to read the instructions of the bite in the terminal.
 
 * Known Issues
 

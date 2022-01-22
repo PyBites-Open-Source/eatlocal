@@ -50,7 +50,6 @@ def download_bite(bite_number, username, password):
     sleep(1.5)
     if os.path.exists(downloaded_bite):
         print(f"Bite {bite_number} successully downloaded to current directory")
-        extract_bite(bite_number)
     else:
         print(f"Bite {bite_number} was not downloaded")
 
@@ -68,7 +67,6 @@ def extract_bite(bite_number):
     try:
         with ZipFile(bite, "r") as zfile:
             zfile.extractall(f"./{bite_number}")
-
         print(f"Extracted bite {bite_number}")
         os.unlink(bite)
 
