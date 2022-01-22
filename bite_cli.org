@@ -1,34 +1,39 @@
 #+TITLE: Local Bite Solver
 #+AUTHOR: Russell Helmstedter
-#+DATE: <2022-01-19 Wed>
+#+DATE: <2022-01-21 Fri>
 
 * Original Work Flow
 
 This is an outline for a project that helps people solve PyBites on the command line. Currently the workflow is annoying (at best). Consider the following:
 
-1. Go to the bite on the website and click the drop down button to solve locally.
+1. Navigate to the bite page on the website and click the drop down button to solve locally.
 2. Download the zip file for that bite.
-3. Navigate to the directory where you downloaded the bite.
+3. Navigate to the directory where the bite was downloaded.
 4. Unzip the new directory into a folder named by the bite number: `/pybites/<bite number>`
 5. Solve the bite.
 6. Go through the steps to push up to GitHub.
    - `git add .`
    - `git commit -m 'solved <bite number>'`
    - `git push`
-7. Head back to website and download the code from GitHub.
-8. submit bite.
+7. Head back to website
+8. Download the code from GitHub.
+9. Submit bite.
 
 * Wishlist
+
   What I would like to have happen:
 
   1. run `eatlocal -d <bite number>` (Package downloads and extracts a bite into PyBites directory.)
   2. Solve bite
-  3. run `eatlocal -s <bite number>` (Submit bite and open webrowser to the corresponding bite page.)
+  3. run `eatlocal -s <bite number>` (Submit bite and open web browser to the corresponding bite page.)
 
 * Current Work Flow
-  I have a working version of eatlocal. It can extract a zipped file that is already in the local repo. It can download and extract a bite using selenium in headless mode. This only works in macOS. It *does not* work in windows powershell and needs to be tested in Linux. It can, kind of, submit a bite by first pushing it to GitHub and opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually.
+  I have a working version of eatlocal and the [[Wishlist][wishlist]] has been completely fulfilled. It can extract a zipped file that is already in the local repo. It can now submit a bite by first pushing it to GitHub and opening your default web browser to the corresponding bite page. I still need to down load the code from GitHub and then submit manually. It can download and extract a bite using selenium in headless mode. It works in windows powershell and on macOS. It still needs to be tested on Linux.
 
 * Enhancements
-+ In the future, I will use selenium to open the page, download the code from GitHub, and submit. That is currently in the works.
-* Issues
-+ zip files don't download in windows powershell.
+
++ Add a read flag to read the instructions of the bite in the terminal.
+
+* Known Issues
+
++ None
