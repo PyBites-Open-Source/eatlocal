@@ -11,7 +11,7 @@ def main():
     if args.extract:
         extract_bite(args.extract)
     elif args.submit:
-        submit_bite(args.submit)
+        submit_bite(args.submit, USERNAME, PASSWORD)
     elif args.download:
         download_bite(args.download, USERNAME, PASSWORD)
 
