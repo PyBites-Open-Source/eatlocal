@@ -8,7 +8,7 @@ authors = [{name = "Russell Helmstedter", email = "rhelmstedter@gmail.com"}]
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
 dynamic = ["version", "description"]
-dependencies = ["selenium==4.1.0"]
+dependencies = ["selenium==4.1.0", "python-dotenv==0.19.2"]
 
 [project.urls]
 Home = "https://github.com/rhelmstedter/eatlocal"
