@@ -10,6 +10,8 @@ import platform
 import subprocess
 import webbrowser
 
+from .constants import BITE_URL
+
 
 def driver_setup():
     options = Options()
@@ -45,7 +47,7 @@ def download_bite(bite_number, username, password):
 
     print(f"Retrieving bite {bite_number}")
     sleep(1.5)
-    bite_url = f"https://codechalleng.es/bites/api/downloads/bites/{bite_number}"
+    bite_url = BITE_URL.format(bite_number=bite_number)
     driver.get(bite_url)
     sleep(1.5)
     if os.path.exists(downloaded_bite):
