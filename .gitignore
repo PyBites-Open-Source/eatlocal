@@ -3,3 +3,4 @@ venv
 dist
 __pycache__
 .DS_Store
+.env

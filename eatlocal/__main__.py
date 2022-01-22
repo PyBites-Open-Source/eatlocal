@@ -1,9 +1,14 @@
-from .eatlocal import extract_bite, submit_bite, download_bite
-from .cli import get_args
 import os
 
-USERNAME = os.environ.get("PYBITES_USERNAME")
-PASSWORD = os.environ.get("PYBITES_PASSWORD")
+from dotenv import load_dotenv
+
+from .cli import get_args
+from .eatlocal import extract_bite, submit_bite, download_bite
+
+load_dotenv()
+
+USERNAME = os.environ["PYBITES_USERNAME"]
+PASSWORD = os.environ["PYBITES_PASSWORD"]
 
 
 def main():
