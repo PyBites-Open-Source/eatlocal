@@ -34,4 +34,5 @@ What I would like to have happen:
 ** TODO Add a read flag to read the instructions of the bite in the terminal.
    
 * Known Issues
-  + None
+  + Erik mentioned that he needed to set up a pasword since he had authenticated pybites using github. Need to add this caveat to the readme. 
+  + Once Erik's fork is merged, I need to restructure the read me. Perhaps have a quickstart documentation directly in the readme and then the full help documentation linked?
