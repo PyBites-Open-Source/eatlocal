@@ -10,10 +10,14 @@ import platform
 import subprocess
 import webbrowser
 
-from .constants import BITE_URL
+from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
 
 
-def driver_setup():
+def driver_setup() -> webdriver.Chrome:
+    """Sets up a headless Chrome wedriver and returns it.
+
+    :returns: webdriver.Chrome
+    """
     options = Options()
     options.add_argument("--headless")
     options.add_argument("window-size=1920x1080")
@@ -23,10 +27,18 @@ def driver_setup():
     return webdriver.Chrome(options=options)
 
 
-def pybites_login(driver, username, password):
-    login_url = "https://codechalleng.es/login"
+def pybites_login(driver: webdriver.Chrome, username: str, password: str) -> None:
+    """Authenticate this driver instance with the given credentials.
+
+    :driver: webdriver.Chrome
+    :username: str
+    :password: str
+    :returns: None
+    """
+
     print("Logging into PyBites")
-    driver.get(login_url)
+    driver.get(LOGIN_URL)
+
     username_field = driver.find_element(By.ID, "id_username")
     username_field.send_keys(username)
     password_field = driver.find_element(By.ID, "id_password")
@@ -34,53 +46,66 @@ def pybites_login(driver, username, password):
     password_field.send_keys(Keys.RETURN)
 
 
-def download_bite(bite_number, username, password):
+def download_bite(
+    bite_number: int, username: str, password: str, delay: float = 1.5
+) -> None:
     """Download bite .zip from the platform.
 
-    :bite_number: The number of the bite you want to download.
+    :bite_number: int The number of the bite to download.
+    :username: str
+    :password: str
+    :delay: float Time in seconds to pause between operations
     :returns: None
     """
 
-    downloaded_bite = f"pybites_bite{bite_number}.zip"
+    downloaded_bite = BITE_ZIPFILE.format(bite_number=bite_number)
     driver = driver_setup()
     pybites_login(driver, username, password)
 
     print(f"Retrieving bite {bite_number}")
-    sleep(1.5)
-    bite_url = BITE_URL.format(bite_number=bite_number)
-    driver.get(bite_url)
-    sleep(1.5)
+    sleep(delay)
+
+    driver.get(BITE_URL.format(bite_number=bite_number))
+    sleep(delay)
+
     if os.path.exists(downloaded_bite):
         print(f"Bite {bite_number} successully downloaded to current directory")
     else:
         print(f"Bite {bite_number} was not downloaded")
 
 
-def extract_bite(bite_number):
+def extract_bite(bite_number: int, cleanup: bool = True) -> None:
     """Extracts all the required files into a new directory
     named by the bite number.
 
-    :bite_number: The number of the bite you want to extract.
+    :bite_number: int The number of the bite you want to extract.
+    :cleanup: bool if True removes the downloaded zipfile
     :returns: None
     """
 
-    bite = f"pybites_bite{bite_number}.zip"
+    bite = BITE_ZIPFILE.format(bite_number=bite_number)
 
     try:
         with ZipFile(bite, "r") as zfile:
             zfile.extractall(f"./{bite_number}")
         print(f"Extracted bite {bite_number}")
-        os.unlink(bite)
+        if cleanup:
+            os.unlink(bite)
 
     except FileNotFoundError:
         print("No bite found.")
 
 
-def submit_bite(bite_number, username, password):
+def submit_bite(
+    bite_number: int, username: str, password: str, delay: float = 1.0
+) -> None:
     """Submits bite by pushing to git hub and opening
     webbrowser to the bit page.
 
-    :bite_number: The number of the bite you want to submit.
+    :bite_number: int The number of the bite you want to submit.
+    :username: str
+    :password: str
+    :delay: float Time in seconds to pause between operations
     :returns: None
     """
 
@@ -105,23 +130,28 @@ def submit_bite(bite_number, username, password):
 
     except subprocess.CalledProcessError:
         print("Failed to push to GitHub")
+        return
 
     driver = driver_setup()
+
     pybites_login(driver, username, password)
 
     print(f"Locating bite {bite_number} webpage.")
-    url = f"https://codechalleng.es/bites/{bite_number}/"
-    driver.get(url)
-    sleep(1)
-    print("Downloading code from GitHub.")
-    offline_mode_btn = driver.find_element(By.ID, "githubDropdown")
-    offline_mode_btn.click()
-    sleep(1)
-    github_pull_btn = driver.find_element(By.ID, "ghpull")
-    github_pull_btn.click()
-    sleep(1)
-    print(f"Submitting bite {bite_number}.")
-    submit_btn = driver.find_element(By.ID, "save")
-    submit_btn.click()
-    sleep(1)
+
+    driver.get(SUBMIT_URL.format(bite_number=bite_number))
+    sleep(delay)
+
+    buttons = {
+        "githubDropdown": "Downloading code from GitHub.",
+        "ghpull": None,
+        "save": f"Submitting bite {bite_number}.",
+    }
+
+    for button_name, message in buttons.items():
+        if message:
+            print(message)
+        button = driver.find_element(By.ID, button_name)
+        button.click()
+        sleep(delay)
+
     webbrowser.open(url)
