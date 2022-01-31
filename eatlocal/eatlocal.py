@@ -154,4 +154,4 @@ def submit_bite(
         button.click()
         sleep(delay)
 
-    webbrowser.open(url)
+    webbrowser.open(SUBMIT_URL)
