@@ -1,7 +1,10 @@
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+
 from time import sleep
 from zipfile import ZipFile
 
@@ -136,22 +139,29 @@ def submit_bite(
 
     pybites_login(driver, username, password)
 
-    print(f"Locating bite {bite_number} webpage.")
+    bite_url = SUBMIT_URL.format(bite_number=bite_number)
 
-    driver.get(SUBMIT_URL.format(bite_number=bite_number))
+    print(f"Locating bite {bite_number} webpage")
+
+    driver.get(bite_url)
     sleep(delay)
 
     buttons = {
         "githubDropdown": "Downloading code from GitHub.",
-        "ghpull": None,
+        "ghpull": "",
         "save": f"Submitting bite {bite_number}.",
     }
 
     for button_name, message in buttons.items():
         if message:
             print(message)
-        button = driver.find_element(By.ID, button_name)
+        try:
+            button = driver.find_element(By.ID, button_name)
+        except NoSuchElementException as error:
+            print("Looks like you've already completed this bite!")
+            break
+
         button.click()
         sleep(delay)
 
-    webbrowser.open(SUBMIT_URL)
+    webbrowser.open(bite_url)
