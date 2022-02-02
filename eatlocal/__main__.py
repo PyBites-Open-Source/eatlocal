@@ -4,6 +4,7 @@
 
 import sys
 
+from collections import namedtuple
 from pathlib import Path
 
 import typer
@@ -24,8 +25,12 @@ def report_version(display: bool) -> None:
         raise typer.Exit()
 
 
-@cli.command()
-def main(
+GlobalOptions = namedtuple("GlobalOptions", "creds")
+
+
+@cli.callback()
+def global_options(
+    ctx: typer.Context,
     version: bool = typer.Option(
         False,
         "--version",
@@ -34,42 +39,42 @@ def main(
         is_eager=True,
         callback=report_version,
     ),
-    download: int = typer.Option(
-        None,
-        "--download",
-        "-d",
-        help="Download bite to current directory.",
-    ),
-    extract: int = typer.Option(
-        None,
-        "--extract",
-        "-e",
-        help="Extract ZIP file into current directory.",
-    ),
-    submit: int = typer.Option(
-        None,
-        "--submit",
-        "-s",
-        help="Submit bite.",
-    ),
 ):
     """Download, extract and submit PyBites code challenges."""
 
-    if sum(map(bool, [extract, submit, download])) != 1:
-        print("Please specify only one of --extract, --submit or --download")
-        raise typer.Exit(code=1)
+    ctx.obj = GlobalOptions((USERNAME, PASSWORD))
 
-    if extract:
-        extract_bite(extract)
-        raise typer.Exit()
 
-    if submit:
-        submit_bite(submit, USERNAME, PASSWORD)
-        raise typer.Exit()
+@cli.command(name="download")
+def download_subcommand(
+    ctx: typer.Context,
+    bite_number: int,
+    keep_zip: bool = typer.Option(
+        False,
+        "--keep-zip",
+        "-k",
+        is_flag=True,
+        help="Keep the bite zip archive.",
+    ),
+) -> None:
+    """Download and extract bite code from Codechalleng.es.
 
-    if download:
-        download_bite(download, USERNAME, PASSWORD)
-        raise typer.Exit()
+    The bites are downloaded in a zip archive file and unzipped
+    in the current directory. If the `keep_zip` option is False
+    the archive is deleted after extraction.
+    """
+    download_bite(bite_number, *ctx.obj.creds)
+    extract_bite(bite_number, keep_zip=keep_zip)
+
+
+@cli.command(name="submit")
+def submit_subcommand(
+    ctx: typer.Context,
+    bite_number: int,
+) -> None:
+    """Submit a bite back to Codechalleng.es."""
+
+    submit_bite(bite_number, *ctx.obj.creds)
 
 
 if __name__ == "__main__":
