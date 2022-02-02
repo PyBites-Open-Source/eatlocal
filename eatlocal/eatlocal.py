@@ -77,12 +77,12 @@ def download_bite(
         print(f"Bite {bite_number} was not downloaded")
 
 
-def extract_bite(bite_number: int, cleanup: bool = True) -> None:
+def extract_bite(bite_number: int, keep_zip: bool = False) -> None:
     """Extracts all the required files into a new directory
     named by the bite number.
 
     :bite_number: int The number of the bite you want to extract.
-    :cleanup: bool if True removes the downloaded zipfile
+    :keep_zip: bool if False removes the downloaded zipfile
     :returns: None
     """
 
@@ -92,7 +92,7 @@ def extract_bite(bite_number: int, cleanup: bool = True) -> None:
         with ZipFile(bite, "r") as zfile:
             zfile.extractall(f"./{bite_number}")
         print(f"Extracted bite {bite_number}")
-        if cleanup:
+        if not keep_zip:
             os.unlink(bite)
 
     except FileNotFoundError:
