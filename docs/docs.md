@@ -22,19 +22,14 @@ Eatlocal helps the user solve [PyBites](https://codechallang.es) code challenges
 
 Navigate to your local PyBites repo.
 
-Download and extract bites with the --download flag:
+Download and extract bites:
 ```bash
-eatlocal -d <bite number>
+eatlocal download <bite number>
 ```
 
-Unzip and organize bites that have been already downloaded with the --extract flag:
+Submit bites:
 ```bash
-eatlocal -e <bite number>
-```
-
-Submit bites with the --submit flag:
-```bash
-eatlocal -s <bite number>
+eatlocal submit <bite number>
 ```
 
 ## Installation
