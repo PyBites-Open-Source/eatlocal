@@ -4,7 +4,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from rich import Layout, Live, Syntax, Panel
+from rich.layout import Layout
+from rich.live import Live
+from rich.syntax import Syntax
+from rich.panel import Panel
+
 from bs4 import BeautifulSoup
 
 from time import sleep
@@ -175,7 +179,7 @@ def read_bite(bite_number: int) -> None:
     """
     
     layout = Layout()
-    layout.spilt(
+    layout.split(
         Layout(name="header", size=3),
         Layout(name="main", ratio=1),
     )
@@ -185,11 +189,11 @@ def read_bite(bite_number: int) -> None:
     )
 
     with open(f"/home/helm/pybites/{bite_number}/bite.html", "r") as bite_html:
-        soup = BeautifulSoup(bite_html, 'html_parser')
+        soup = BeautifulSoup(bite_html, 'html.parser')
         instructions = soup.text
 
     
-    with open(f"/home/helm/pybites/{bite_number}/") as code_file:
+    with open(f"/home/helm/pybites/{bite_number}/fizzbuzz.py") as code_file:
         code = Syntax(code_file.read(), "python", theme='material')
 
     layout["header"].update(Panel(f"Reading Bite {bite_number}", title='eatlocal'))
