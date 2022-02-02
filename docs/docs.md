@@ -22,16 +22,27 @@ Eatlocal helps the user solve [Pybites](https://codechallang.es) code challenges
 
 Navigate to your local PyBites repo.
 
-Download and extract bites with the --download flag: `eatlocal -d <bite number>`
+Download and extract bites with the --download flag:
+```bash
+eatlocal -d <bite number>
+```
 
-Unzip and organize bites that have been already downloaded with the --extract flag: `eatlocal -e <bite number>`
+Unzip and organize bites that have been already downloaded with the --extract flag:
+```bash
+eatlocal -e <bite number>
+```
 
-Submit bites with the --submit flag: `eatlocal -s <bite number>`
+Submit bites with the --submit flag:
+```bash
+eatlocal -s <bite number>
+```
 
 
 ## Installation
 
-`pip install eatlocal`
+```bash
+pip install eatlocal
+```
 
 ## Setup
 
@@ -47,15 +58,21 @@ Install chrome and chromedriver with with [homebrew](https://brew.sh/).
 
 Install chrome:
 
-`brew install --cask google-chrome`
+```bash
+brew install --cask google-chrome
+```
 
 Install chromedriver:
 
-`brew install chromedriver`
+```bash
+brew install chromedriver
+```
 
 Before you run chromedriver for the first time, you must explicitly give permission since the developer has not been verified. Running the following command in the terminal removes the warning put in place by Apple:
 
-`xattr -d com.apple.quarantine $(which chromedriver)`
+```bash
+xattr -d com.apple.quarantine $(which chromedriver)
+```
 
 Homebrew automatically puts chromedriver on `$PATH` for you. And since homebrew handles both chrome and chromedriver installations for me, I can run `brew update && brew upgrade` to help ensure I have the same version number for both chrome and chromedriver. If you do not go the homebrew route, you must manually ensure that your version of chrome matches the version of chromedriver.
 
@@ -80,15 +97,28 @@ google-chrome --version
 ##### Install chromedriver
 
 Navigate to the chromedriver download page and choose the version that matches the output from `google-chrome --version`. Download that file that matches your system. Head back to your terminal.
-1. Ensure that you have unzip installed: `sudo apt install unzip`
-2. Unzip the chromedriver file. For me it was located in the downloads folder: `unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads`
+1. Ensure that you have unzip installed:
+```bash
+sudo apt install unzip
+```
+
+2. Unzip the chromedriver file. For me it was located in the downloads folder: 
+```bash
+unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads
+```
 3. Make it executable and move to `/usr/local/share`:
 ```bash
 chmod +x ~/Downloads/chromedriver
 sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver
 ```
-4. Create symlinks: `sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver`
-5. Confirm you have access: `which chromedriver`
+4. Create symlinks:
+```bash
+sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+```
+5. Confirm you have access:
+```bash
+which chromedriver
+```
 
 ### PyBites Credentials
 
@@ -103,8 +133,13 @@ There are two methods to handle this in.
 A note of warning. If you use this method make sure that your virtual environment is not being pushed to GitHub. If you have pushed your virtual environment you exposed your password and should change it immediately.
 
 1. Create a virtual environment for your PyBites repo:
-	- `python3 -m venv .venv`
+```bash
+python3 -m venv .venv
+```
 2. Add the line `.venv` to your `.gitignore` file.
+```bash
+echo ".venv" >> .gitignore
+```
 3. With the environment deactivated, use your favorite text editor to open the activate file, e.g., `nvim .venv/bin/activate` and add the following lines:
 	- `export PYBITES_USERNAME=<username>`
 	- `export PYBITES_PASSWORD=<password>`
