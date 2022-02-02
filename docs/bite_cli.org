@@ -1,22 +1,23 @@
 #+TITLE: Local Bite Solver
 #+AUTHOR: Russell Helmstedter
-#+DATE: <2022-01-22 Sat>
+#+DATE: <2022-02-01>
 
 * Original Work Flow
 This is an outline for a project that helps people solve PyBites on the command line. Currently the workflow is annoying (at best). Consider the following:
 
-1. Navigate to the bite page on the website and click the drop down button to solve locally.
-2. Download the zip file for that bite.
-3. Navigate to the directory where the bite was downloaded.
-4. Unzip the new directory into a folder named by the bite number: `/pybites/<bite number>`
-5. Solve the bite.
-6. Go through the steps to push up to GitHub.
+1. Navigate to the bite page on the website and 
+2. click the drop down button to solve locally.
+3. Download the zip file for that bite.
+4. Navigate to the directory where the bite was downloaded.
+5. Unzip the new directory into a folder named by the bite number: `../pybites/<bite number>`
+6. Solve the bite.
+7. Go through the steps to push up to GitHub:
   + `git add .`
   - `git commit -m 'solved <bite number>'`
   - `git push`
-7. Head back to website
-8. Download the code from GitHub.
-9. Submit bite.
+8. Navigate back to website.
+9. Download the code from GitHub.
+10. Submit bite.
 
 * Wishlist
 
@@ -35,4 +36,6 @@ What I would like to have happen:
    
 * Known Issues
   + Erik mentioned that he needed to set up a pasword since he had authenticated pybites using github. Need to add this caveat to the readme. 
-  + Once Erik's fork is merged, I need to restructure the read me. Perhaps have a quickstart documentation directly in the readme and then the full help documentation linked?
+  + Once Erik's pull requests are merged, I need to restructure the read me. Perhaps have a quickstart documentation directly in the readme and then the full help documentation linked?
+  + Need tests that cover submiting a bite
+
