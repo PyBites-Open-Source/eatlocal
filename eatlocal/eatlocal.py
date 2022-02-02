@@ -113,21 +113,18 @@ def submit_bite(
     """
 
     try:
-        subprocess.run(
+        git_commands = [
             ["git", "add", f"{bite_number}"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
-        subprocess.run(
             ["git", "commit", f"-m'submission Bite {bite_number} @ codechalleng.es'"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
-        subprocess.run(
             ["git", "push"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
+        ]
+
+        for command in git_commands:
+            subprocess.run(
+                command,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT,
+            )
 
         print(f"\nPushed bite {bite_number} to github")
 
