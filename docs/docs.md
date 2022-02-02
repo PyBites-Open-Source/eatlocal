@@ -6,16 +6,16 @@ Eatlocal helps the user solve [PyBites](https://codechallang.es) code challenges
 
 + [Usage](#Usage)
 + [Installation](#Installation)
-	+ [macOS/Linux](#macOS/Linux-1)
-	+ [Windows](#Windows-1)
+	+ [macOS/Linux](#macOS/Linux)
+	+ [Windows](#Windows)
 + [Setup](#Setup)
 	+ [Install Chrome and Chromedriver](#Install-Chrome-and-Chromedriver)
 		+ [macOS](#macOS)
 		+ [Linux](#Linux)
-		+ [Windows](#Windows-2)
+		+ [Windows](#Windows-1)
 	+ [PyBites Credentials](#PyBites-Credentials)
-		+ [macOS/Linux](#macOS/Linux-2)
-		+ [Windows](#Windows-3)
+		+ [macOS/Linux](#macOS/Linux-1)
+		+ [Windows](#Windows-2)
 
 
 ## Usage
