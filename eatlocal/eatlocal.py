@@ -4,6 +4,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+from rich import Layout, Live, Syntax, Panel
+from bs4 import BeautifulSoup
 
 from time import sleep
 from zipfile import ZipFile
@@ -162,3 +164,41 @@ def submit_bite(
         sleep(delay)
 
     webbrowser.open(bite_url)
+
+
+def read_bite(bite_number: int) -> None:
+    """Display the instructions provided in bite.html and display source code.
+
+    :bite_number: int The number of the bite you want to read
+    :returns: None
+
+    """
+    
+    layout = Layout()
+    layout.spilt(
+        Layout(name="header", size=3),
+        Layout(name="main", ratio=1),
+    )
+    layout['main'].split_row(
+        Layout(name="directions"),
+        Layout(name="code"),
+    )
+
+    with open(f"/home/helm/pybites/{bite_number}/bite.html", "r") as bite_html:
+        soup = BeautifulSoup(bite_html, 'html_parser')
+        instructions = soup.text
+
+    
+    with open(f"/home/helm/pybites/{bite_number}/") as code_file:
+        code = Syntax(code_file.read(), "python", theme='material')
+
+    layout["header"].update(Panel(f"Reading Bite {bite_number}", title='eatlocal'))
+    layout['main']['directions'].update(Panel(instructions, title='Directions'))
+    layout['main']['code'].update(Panel(code, title='Code'))
+
+
+    with Live(layout, screen=True):
+        input()
+
+if __name__ == "__main__":
+    read_bite(46)
