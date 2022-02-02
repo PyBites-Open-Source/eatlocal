@@ -19,7 +19,7 @@ import platform
 import subprocess
 import webbrowser
 
-from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
+# from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
 
 
 def driver_setup() -> webdriver.Chrome:
@@ -177,6 +177,20 @@ def read_bite(bite_number: int) -> None:
     :returns: None
 
     """
+
+    for file in os.listdir(f"/home/helm/pybites/{bite_number}/"):
+        if file.endswith(".html"):
+            html_file = file 
+        if file.endswith(".py") and not file.startswith('test_'):
+            python_file = file
+
+
+    with open(f"/home/helm/pybites/{bite_number}/" + html_file, "r") as bite_html:
+        soup = BeautifulSoup(bite_html, "html.parser")
+        instructions = soup.text
+
+    with open(f"/home/helm/pybites/{bite_number}/" + python_file, "r") as code_file:
+        code = Syntax(code_file.read(), "python", theme='material')
     
     layout = Layout()
     layout.split(
@@ -188,14 +202,6 @@ def read_bite(bite_number: int) -> None:
         Layout(name="code"),
     )
 
-    with open(f"/home/helm/pybites/{bite_number}/bite.html", "r") as bite_html:
-        soup = BeautifulSoup(bite_html, 'html.parser')
-        instructions = soup.text
-
-    
-    with open(f"/home/helm/pybites/{bite_number}/fizzbuzz.py") as code_file:
-        code = Syntax(code_file.read(), "python", theme='material')
-
     layout["header"].update(Panel(f"Reading Bite {bite_number}", title='eatlocal'))
     layout['main']['directions'].update(Panel(instructions, title='Directions'))
     layout['main']['code'].update(Panel(code, title='Code'))
@@ -205,4 +211,4 @@ def read_bite(bite_number: int) -> None:
         input()
 
 if __name__ == "__main__":
-    read_bite(46)
+    read_bite(5)

@@ -33,6 +33,10 @@ What I would like to have happen:
 
 * Enhancements
 ** TODO Add a read flag to read the instructions of the bite in the terminal.
++ [ ] clean up code.
++ [ ] find a nice way of finding the pybites repo
++ [ ] nice way of exiting the read display
+
    
 * Known Issues
   + Erik mentioned that he needed to set up a pasword since he had authenticated pybites using github. Need to add this caveat to the readme. 
