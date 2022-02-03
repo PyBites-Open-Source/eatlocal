@@ -10,7 +10,7 @@ from pathlib import Path
 import typer
 
 from .constants import USERNAME, PASSWORD
-from .eatlocal import extract_bite, submit_bite, download_bite
+from .eatlocal import extract_bite, submit_bite, download_bite, read_bite
 
 from . import __version__
 
@@ -49,22 +49,22 @@ def global_options(
 def download_subcommand(
     ctx: typer.Context,
     bite_number: int,
-    keep_zip: bool = typer.Option(
+    cleanup: bool = typer.Option(
         False,
-        "--keep-zip",
-        "-k",
+        "--cleanup",
+        "-C",
         is_flag=True,
-        help="Keep the bite zip archive.",
+        help="Remove downloaded bite archive file.",
     ),
 ) -> None:
     """Download and extract bite code from Codechalleng.es.
 
     The bites are downloaded in a zip archive file and unzipped
-    in the current directory. If the `keep_zip` option is False
+    in the current directory. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
-    download_bite(bite_number, *ctx.obj.creds)
-    extract_bite(bite_number, keep_zip=keep_zip)
+    download_bite(bite_number, *ctx.obj.creds, cache_path="cache")
+    extract_bite(bite_number, cleanup=cleanup, cache_path="cache")
 
 
 @cli.command(name="submit")
@@ -75,6 +75,17 @@ def submit_subcommand(
     """Submit a bite back to Codechalleng.es."""
 
     submit_bite(bite_number, *ctx.obj.creds)
+
+
+@cli.command(name="read")
+def read_subcommand(
+    ctx: typer.Context,
+    bite_number: int,
+    bite_path: Path = None
+) -> None:
+    """Read a bite directly in the terminal."""
+
+    read_bite(bite_number)
 
 
 if __name__ == "__main__":

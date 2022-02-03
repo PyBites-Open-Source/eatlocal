@@ -1,3 +1,15 @@
+""" download and submit bites
+
+"""
+
+import subprocess
+import webbrowser
+
+from pathlib import Path
+from time import sleep
+from typing import Union
+from zipfile import ZipFile, is_zipfile
+
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -11,28 +23,27 @@ from rich.panel import Panel
 
 from bs4 import BeautifulSoup
 
-from time import sleep
-from zipfile import ZipFile
-
-import os
-import platform
-import subprocess
-import webbrowser
-
-# from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
+from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
 
 
-def driver_setup() -> webdriver.Chrome:
-    """Sets up a headless Chrome wedriver and returns it.
+def driver_setup(path: Union[str, Path] = None) -> webdriver.Chrome:
+    """Configures a headless Chrome wedriver and returns it.
 
-    :returns: webdriver.Chrome
+    If a path is given, it's used to set the driver's default download
+    directory.
+
+    :path: Union[str, Path]
+    :returns: configured webdriver.Chrome
     """
+
+    path = str(Path(path or Path.cwd()).resolve())
+
     options = Options()
     options.add_argument("--headless")
     options.add_argument("window-size=1920x1080")
-    if platform.system() == "Windows":
-        chrome_prefs = {"download.default_directory": os.getcwd()}
-        options.experimental_options["prefs"] = chrome_prefs
+    chrome_prefs = {"download.default_directory": path}
+    options.experimental_options["prefs"] = chrome_prefs
+
     return webdriver.Chrome(options=options)
 
 
@@ -55,67 +66,122 @@ def pybites_login(driver: webdriver.Chrome, username: str, password: str) -> Non
     password_field.send_keys(Keys.RETURN)
 
 
+def find_cached_archive(bite_number: int, path: Union[str, Path] = None) -> Path:
+    """Return a Path for a PyBites bite zip archive in the given `path`.
+
+    :bite_number: int
+    :path: optional Path, resolved path defaults to current directory.
+    :return: Path
+
+    Raises:
+    - FileNotFoundError if archive not found in the target path.
+    """
+
+    path = Path(path or Path.cwd())
+
+    filename = BITE_ZIPFILE.format(bite_number=bite_number)
+
+    try:
+        archive = list(path.rglob(filename))[0]
+    except IndexError:
+        raise FileNotFoundError(filename) from None
+
+    return archive.resolve()
+
+
 def download_bite(
-    bite_number: int, username: str, password: str, delay: float = 1.5
+    bite_number: int,
+    username: str,
+    password: str,
+    delay: float = 1.5,
+    cache_path: Path = None,
 ) -> None:
-    """Download bite .zip from the platform.
+    """Download bite ZIP archive file from the platform to the current directory.
 
     :bite_number: int The number of the bite to download.
     :username: str
     :password: str
     :delay: float Time in seconds to pause between operations
+    :cache_path: Path for cached ZIP archive files, defaults to current directory
     :returns: None
     """
 
-    downloaded_bite = BITE_ZIPFILE.format(bite_number=bite_number)
-    driver = driver_setup()
-    pybites_login(driver, username, password)
+    try:
+        path = find_cached_archive(bite_number, path=cache_path)
+        print(f"Bite {bite_number} found: {path}")
+        return
+    except FileNotFoundError:
+        pass
 
-    print(f"Retrieving bite {bite_number}")
+    cache_path = Path(cache_path or Path.cwd()).resolve()
+    cache_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+
+    print(f"Retrieving bite {bite_number}...")
     sleep(delay)
 
+    driver = driver_setup(cache_path)
+    pybites_login(driver, username, password)
     driver.get(BITE_URL.format(bite_number=bite_number))
     sleep(delay)
 
-    if os.path.exists(downloaded_bite):
-        print(f"Bite {bite_number} successully downloaded to current directory")
-    else:
-        print(f"Bite {bite_number} was not downloaded")
+    try:
+        bite_ziparchive = find_cached_archive(bite_number, path=cache_path)
+    except FileNotFoundError:
+        print(f"Bite {bite_number} was not downloaded.")
+        return
+
+    if not is_zipfile(bite_ziparchive):
+        print(f"Bite {bite_number} is not a valid archive file.")
+        return
+
+    print(f"Bite {bite_number} successully downloaded: {bite_ziparchive}")
 
 
-def extract_bite(bite_number: int, keep_zip: bool = False) -> None:
+def extract_bite(
+    bite_number: int,
+    dest_path: Path = None,
+    cleanup: bool = False,
+    cache_path: Path = None,
+) -> None:
     """Extracts all the required files into a new directory
     named by the bite number.
 
     :bite_number: int The number of the bite you want to extract.
-    :keep_zip: bool if False removes the downloaded zipfile
+    :cleanup: bool if False removes the downloaded zipfile.
+    :cache_path: Path to search for ZIp archive, defaults to current directory.
     :returns: None
     """
 
-    bite = BITE_ZIPFILE.format(bite_number=bite_number)
-
     try:
-        with ZipFile(bite, "r") as zfile:
-            zfile.extractall(f"./{bite_number}")
-        print(f"Extracted bite {bite_number}")
-        if not keep_zip:
-            os.unlink(bite)
+        bite = find_cached_archive(bite_number, path=cache_path)
+    except FileNotFoundError as error:
+        print(f"Missing ZIP archive for bite {bite_number}: {error}")
+        return
 
-    except FileNotFoundError:
-        print("No bite found.")
+    dest_path = Path(dest_path or Path.cwd()).resolve() / str(bite_number)
+
+    with ZipFile(bite, "r") as zipfile:
+        zipfile.extractall(dest_path)
+
+    print(f"Extracted bite {bite_number} @ {dest_path}")
+
+    if cleanup:
+        print(f"Cleaning up bite {bite_number} archive: {bite}")
+        bite.unlink()
 
 
 def submit_bite(
     bite_number: int, username: str, password: str, delay: float = 1.0
 ) -> None:
-    """Submits bite by pushing to git hub and opening
-    webbrowser to the bit page.
+    """Submits bite by pushing to GitHub and then opens a browser for the
+       bite page.
 
-    :bite_number: int The number of the bite you want to submit.
+    :bite_number: int The number of the bite to submit.
     :username: str
     :password: str
-    :delay: float Time in seconds to pause between operations
+    :delay: float time in seconds to pause between operations.
     :returns: None
+
     """
 
     try:
@@ -170,7 +236,7 @@ def submit_bite(
     webbrowser.open(bite_url)
 
 
-def read_bite(bite_number: int) -> None:
+def read_bite(bite_number: int, bite_path: Path = None) -> None:
     """Display the instructions provided in bite.html and display source code.
 
     :bite_number: int The number of the bite you want to read
@@ -178,17 +244,19 @@ def read_bite(bite_number: int) -> None:
 
     """
 
-    for file in os.listdir(f"/Users/russell/code/pybites/{bite_number}/"):
-        if file.endswith(".html"):
+    path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
+
+    for file in path.iterdir():
+        if str(file).endswith(".html"):
             html_file = file
-        if file.endswith(".py") and not file.startswith('test_'):
+        if str(file).endswith(".py") and not str(file.parts[-1]).startswith('test_'):
             python_file = file
 
-    with open(f"/Users/russell/code/pybites/{bite_number}/" + html_file, "r") as bite_html:
+    with open(path / html_file, "r") as bite_html:
         soup = BeautifulSoup(bite_html, "html.parser")
         instructions = soup.text
 
-    with open(f"/Users/russell/code/pybites/{bite_number}/" + python_file, "r") as code_file:
+    with open(path / python_file, "r") as code_file:
         code = Syntax(code_file.read(), "python", theme='material')
 
     layout = Layout()
@@ -207,7 +275,3 @@ def read_bite(bite_number: int) -> None:
 
     with Live(layout, screen=True):
         input()
-
-
-if __name__ == "__main__":
-    read_bite(5)
