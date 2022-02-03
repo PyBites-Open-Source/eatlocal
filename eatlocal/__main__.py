@@ -10,7 +10,7 @@ from pathlib import Path
 import typer
 
 from .constants import USERNAME, PASSWORD
-from .eatlocal import extract_bite, submit_bite, download_bite, read_bite
+from .eatlocal import extract_bite, submit_bite, download_bite, display_bite
 
 from . import __version__
 
@@ -77,15 +77,16 @@ def submit_subcommand(
     submit_bite(bite_number, *ctx.obj.creds)
 
 
-@cli.command(name="read")
+@cli.command(name="display")
 def read_subcommand(
     ctx: typer.Context,
     bite_number: int,
-    bite_path: Path = None
+    bite_path: Path = None,
+    theme: str = "material",
 ) -> None:
     """Read a bite directly in the terminal."""
 
-    read_bite(bite_number)
+    display_bite(bite_number)
 
 
 if __name__ == "__main__":

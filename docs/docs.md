@@ -27,6 +27,11 @@ Download and extract bites:
 eatlocal download <bite number>
 ```
 
+Display bites in the terminal:
+```bash
+eatlocal display <bite number>
+```
+
 Submit bites:
 ```bash
 eatlocal submit <bite number>

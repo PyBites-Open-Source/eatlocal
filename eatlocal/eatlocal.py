@@ -171,7 +171,10 @@ def extract_bite(
 
 
 def submit_bite(
-    bite_number: int, username: str, password: str, delay: float = 1.0
+    bite_number: int,
+    username: str,
+    password: str,
+    delay: float = 1.0,
 ) -> None:
     """Submits bite by pushing to GitHub and then opens a browser for the
        bite page.
@@ -236,7 +239,11 @@ def submit_bite(
     webbrowser.open(bite_url)
 
 
-def read_bite(bite_number: int, bite_path: Path = None) -> None:
+def display_bite(
+    bite_number: int,
+    bite_path: Path = None,
+    theme: str = "material",
+) -> None:
     """Display the instructions provided in bite.html and display source code.
 
     :bite_number: int The number of the bite you want to read
@@ -246,32 +253,32 @@ def read_bite(bite_number: int, bite_path: Path = None) -> None:
 
     path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
 
+    html_file = path / list(path.glob('*.html'))[0]
+
     for file in path.iterdir():
-        if str(file).endswith(".html"):
-            html_file = file
-        if str(file).endswith(".py") and not str(file.parts[-1]).startswith('test_'):
+        if str(file).endswith(".py") and not str(file.parts[-1]).startswith("test_"):
             python_file = file
 
-    with open(path / html_file, "r") as bite_html:
+    with open(html_file, "r") as bite_html:
         soup = BeautifulSoup(bite_html, "html.parser")
         instructions = soup.text
 
     with open(path / python_file, "r") as code_file:
-        code = Syntax(code_file.read(), "python", theme='material')
+        code = Syntax(code_file.read(), "python", theme=theme)
 
     layout = Layout()
     layout.split(
         Layout(name="header", size=3),
         Layout(name="main", ratio=1),
     )
-    layout['main'].split_row(
+    layout["main"].split_row(
         Layout(name="directions"),
         Layout(name="code"),
     )
 
-    layout["header"].update(Panel(f"Reading Bite {bite_number}", title='eatlocal'))
-    layout['main']['directions'].update(Panel(instructions, title='Directions'))
-    layout['main']['code'].update(Panel(code, title='Code'))
+    layout["header"].update(Panel(f"Displaying Bite {bite_number} at {html_file}", title="eatlocal"))
+    layout["main"]["directions"].update(Panel(instructions, title="Directions"))
+    layout["main"]["code"].update(Panel(code, title="Code"))
 
     with Live(layout, screen=True):
         input()
