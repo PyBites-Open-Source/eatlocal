@@ -178,20 +178,19 @@ def read_bite(bite_number: int) -> None:
 
     """
 
-    for file in os.listdir(f"/home/helm/pybites/{bite_number}/"):
+    for file in os.listdir(f"/Users/russell/code/pybites/{bite_number}/"):
         if file.endswith(".html"):
-            html_file = file 
+            html_file = file
         if file.endswith(".py") and not file.startswith('test_'):
             python_file = file
 
-
-    with open(f"/home/helm/pybites/{bite_number}/" + html_file, "r") as bite_html:
+    with open(f"/Users/russell/code/pybites/{bite_number}/" + html_file, "r") as bite_html:
         soup = BeautifulSoup(bite_html, "html.parser")
         instructions = soup.text
 
-    with open(f"/home/helm/pybites/{bite_number}/" + python_file, "r") as code_file:
+    with open(f"/Users/russell/code/pybites/{bite_number}/" + python_file, "r") as code_file:
         code = Syntax(code_file.read(), "python", theme='material')
-    
+
     layout = Layout()
     layout.split(
         Layout(name="header", size=3),
@@ -206,9 +205,9 @@ def read_bite(bite_number: int) -> None:
     layout['main']['directions'].update(Panel(instructions, title='Directions'))
     layout['main']['code'].update(Panel(code, title='Code'))
 
-
     with Live(layout, screen=True):
         input()
+
 
 if __name__ == "__main__":
     read_bite(5)
