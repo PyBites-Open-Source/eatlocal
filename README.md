@@ -6,7 +6,7 @@ Eatlocal helps the user solve [PyBites](https://codechallang.es) code challenges
 
 + [Usage](#Usage)
 + [Installation](#Installation)
-	+ [macOS/Linux](#macOS/Linux)
+	+ [macOS/Linux](#macoslinux)
 	+ [Windows](#Windows)
 + [Setup](#Setup)
 	+ [Install Chrome and Chromedriver](#Install-Chrome-and-Chromedriver)
@@ -14,7 +14,7 @@ Eatlocal helps the user solve [PyBites](https://codechallang.es) code challenges
 		+ [Linux](#Linux)
 		+ [Windows](#Windows-1)
 	+ [PyBites Credentials](#PyBites-Credentials)
-		+ [macOS/Linux](#macOS/Linux-1)
+		+ [macOS/Linux](#macoslinux-1)
 		+ [Windows](#Windows-2)
 
 
