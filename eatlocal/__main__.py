@@ -82,7 +82,13 @@ def read_subcommand(
     ctx: typer.Context,
     bite_number: int,
     bite_path: Path = None,
-    theme: str = "material",
+    theme: str = typer.Option(
+        "material",
+        "--theme",
+        "-t",
+        is_flag=True,
+        help="Choose syntax highlight for code.",
+    ),
 ) -> None:
     """Read a bite directly in the terminal."""
 
