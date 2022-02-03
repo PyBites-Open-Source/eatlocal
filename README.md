@@ -145,7 +145,7 @@ There are two methods to handle this in.
 
 **Virtual Environment Method**
 
-A note of warning. If you use this method make sure that your virtual environment is not being pushed to GitHub. If you have pushed your virtual environment you exposed your password and should change it immediately.
+A note of warning: If you use this method make sure that your virtual environment is not being pushed to GitHub. If you accidentally push your virtual environment—clearly that has never happened to me—then you have exposed your password and should change it immediately.
 
 1. Create a virtual environment for your PyBites repo:
 
