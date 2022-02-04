@@ -28,7 +28,7 @@ What I would like to have happen:
     3. run `eatlocal submit <bite number>` (Submit bite and open web browser to the corresponding bite page.)
 
 * Current Work Flow
-    I have a working version of eatlocal and the [[Wishlist][wishlist]] has been completely fulfilled. It can extract a zipped file that is already in the local repo. It can now submit a bite by first pushing it to GitHub and opening your default web browser to the corresponding bite page. It can download and extract a bite using selenium in headless mode. It works in windows powershell and on macOS.
+    I have a working version of eatlocal and the [[Wishlist][wishlist]] has been completely fulfilled. It can extract a zipped file that is already in the local repo. It can now submit a bite by first pushing it to GitHub then opening your default web browser to the corresponding bite page. It can download and extract a bite using selenium in headless mode. It works in windows powershell and on macOS.
 
 * Enhancements
 ** TODO Add a display command to read the instructions of the bite in the terminal.
@@ -37,7 +37,7 @@ What I would like to have happen:
 
 * Known Issues
   + [X] Erik mentioned that he needed to set up a pasword since he had authenticated pybites using github. Need to add this caveat to the readme. 
-  + [X] Once Erik's pull requests are merged, I need to restructure the read me. Perhaps have a quickstart documentation directly in the readme and then the full help documentation linked?
+  + [-] Once Erik's pull requests are merged, I need to restructure the read me. Perhaps have a quickstart documentation directly in the readme and then the full help documentation linked?
   + [ ] Need tests that cover submiting a bite
   + [ ] Need tests that cover the display function
 
