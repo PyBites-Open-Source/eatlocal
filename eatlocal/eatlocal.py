@@ -21,6 +21,7 @@ from rich.live import Live
 from rich.syntax import Syntax
 from rich.panel import Panel
 
+import sys
 from bs4 import BeautifulSoup
 
 from .constants import BITE_URL, BITE_ZIPFILE, LOGIN_URL, SUBMIT_URL
@@ -253,7 +254,7 @@ def display_bite(
 
     path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
 
-    html_file = path / list(path.glob('*.html'))[0]
+    html_file = path / list(path.glob("*.html"))[0]
 
     for file in path.iterdir():
         if str(file).endswith(".py") and not str(file.parts[-1]).startswith("test_"):
@@ -264,7 +265,12 @@ def display_bite(
         instructions = soup.text
 
     with open(path / python_file, "r") as code_file:
-        code = Syntax(code_file.read(), "python", theme=theme)
+        code = Syntax(
+            code_file.read(),
+            "python",
+            theme=theme,
+            background_color="default",
+        )
 
     layout = Layout()
     layout.split(
@@ -276,9 +282,15 @@ def display_bite(
         Layout(name="code"),
     )
 
-    layout["header"].update(Panel(f"Displaying Bite {bite_number} at {html_file}", title="eatlocal"))
+    layout["header"].update(
+        Panel(f"Displaying Bite {bite_number} at {html_file}", title="eatlocal")
+    )
     layout["main"]["directions"].update(Panel(instructions, title="Directions"))
     layout["main"]["code"].update(Panel(code, title="Code"))
 
+    def exit_display():
+        if input().lower in ["q", "^["]:
+            sys.exit()
+
     with Live(layout, screen=True):
-        input()
+        exit_display()
