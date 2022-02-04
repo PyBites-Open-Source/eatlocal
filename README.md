@@ -139,6 +139,14 @@ I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windo
 
 You must have your PyBites username and password stored in the environment variables `PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively.
 
+If you have cloned the repo, you can use the conveniently provided `.env-template` to store your credentials. Copy the template and save as `.env`. Then set your username and password on two separate lines. 
+
+```bash
+# set username and password
+PYBITES_USERNAME=<username>
+PYBITES_PASSWORD=<password>
+```
+
 #### macOS/Linux
 
 There are two methods to handle this in.
