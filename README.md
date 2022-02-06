@@ -13,7 +13,7 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 		+ [macOS](#macOS)
 		+ [Linux](#Linux)
 		+ [Windows](#Windows-1)
-	+ [PyBites Credentials](#PyBites-Credentials)
+	+ [PyBites Credentials and Local Repo](#PyBites-Credentials-and-Local-Repo)
 		+ [macOS/Linux](#macoslinux-1)
 		+ [Windows](#Windows-2)
 
@@ -54,7 +54,8 @@ pip install eatlocal
 
 1. Go through the directions on the PyBites website to connect your GitHub account to your PyBites account.
 2. Make sure you have Chrome and chromedriver installed and on `$PATH`.
-3. Setup your PyBites login credentials as environment variables. If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use eatlocal.
+3. Create environment variables for your PyBites username and password (`PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively). If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
+4. Create an environment variable for you local Pybites repo(`PYBITES_REPO`).
 
 ### Install Chrome and Chromedriver
 
@@ -135,9 +136,9 @@ I've found that in order to install packages I have to use an elevated administr
 
 I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about) but there seems to be an issue with `google-chrome` itself. I could not get it to work.
 
-### PyBites Credentials
+### PyBites Credentials and Local Repo
 
-You must have your PyBites username and password stored in the environment variables `PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively.
+You must have your PyBites username and password stored in the environment variables `PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively. Your local PyBites Repo should be stored in the environment variable `PYBITES_REPO`.
 
 If you have cloned the repo, you can use the conveniently provided `.env-template` to store your credentials. Copy the template and save as `.env`. Then set your username and password on two separate lines. 
 
@@ -145,6 +146,7 @@ If you have cloned the repo, you can use the conveniently provided `.env-templat
 # set username and password
 PYBITES_USERNAME=<username>
 PYBITES_PASSWORD=<password>
+PYBITES_REPO=</path/to/local/repo>
 ```
 
 #### macOS/Linux
@@ -172,6 +174,7 @@ echo ".venv" >> .gitignore
 ```bash
 export PYBITES_USERNAME=<username>
 export PYBITES_PASSWORD=<password>
+PYBITES_REPO=</path/to/local/repo>
 ```
 
 4. Activate the environment `source .venv/bin/activate`.
@@ -180,11 +183,12 @@ export PYBITES_PASSWORD=<password>
 
 If you are not using a virtual environment, you can add the variables directly to your shell config. 
 
-1. I use zsh, so I would use my favorite text editor `nvim ~/.zshrc` and set the variables by adding the same two lines as above:
+1. I use zsh. So I would use my favorite text editor `nvim ~/.zshrc` and set the variables by adding the same three lines as above:
 
 ```bash
 export PYBITES_USERNAME=<username>
 export PYBITES_PASSWORD=<password>
+PYBITES_REPO=</path/to/local/repo>
 ```
 
 2. Either exit your terminal completely and reopen, or source your config file with `source ~/.zshrc`.
@@ -201,6 +205,7 @@ I don't know of a way to do this other than graphically (Booo!). If you like pic
 6. In the "Variable name" field enter: PYBITES_USERNAME
 7. In the "Variable value" field enter: <username>
 8. Repeat steps 5-7 for the password variable.
-9. Click "Ok"
-10. Click "Apply"
-11. Restart your computer.
+9. Repeat steps 5-7 for the repo variable.
+10. Click "Ok"
+11. Click "Apply"
+12. Restart your computer.
