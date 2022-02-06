@@ -166,8 +166,6 @@ def submit_bite(
 
     bite_url = SUBMIT_URL.format(bite_number=bite_number)
 
-    print(f"Locating bite {bite_number} webpage")
-
     driver.get(bite_url)
     sleep(delay)
 
