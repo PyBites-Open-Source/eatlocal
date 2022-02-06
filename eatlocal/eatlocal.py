@@ -2,7 +2,6 @@
 
 """
 
-import subprocess
 import webbrowser
 
 from pathlib import Path
@@ -11,6 +10,7 @@ from typing import Union
 from zipfile import ZipFile, is_zipfile
 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 from .pydriver import driver_setup, pybites_login
 
 from rich.layout import Layout
@@ -19,9 +19,13 @@ from rich.syntax import Syntax
 from rich.panel import Panel
 
 from bs4 import BeautifulSoup
+from git import Repo, GitCommandError
 
 
-from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL
+from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL, BITE_REPO
+
+from rich.traceback import install
+install(show_locals=True)
 
 
 def find_cached_archive(bite_number: int, path: Union[str, Path] = None) -> Path:
@@ -146,23 +150,14 @@ def submit_bite(
     """
 
     try:
-        git_commands = [
-            ["git", "add", f"{bite_number}"],
-            ["git", "commit", f"-m'submission Bite {bite_number} @ codechalleng.es'"],
-            ["git", "push"],
-        ]
-
-        for command in git_commands:
-            subprocess.run(
-                command,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-            )
-
+        repo = Repo(BITE_REPO)
+        repo.index.add(str(bite_number))
+        repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
+        repo.remotes.origin.push().raise_if_error()
         print(f"\nPushed bite {bite_number} to github")
 
-    except subprocess.CalledProcessError:
-        print("Failed to push to GitHub")
+    except GitCommandError as e:
+        print(e)
         return
 
     driver = driver_setup()
@@ -187,7 +182,7 @@ def submit_bite(
             print(message)
         try:
             button = driver.find_element(By.ID, button_name)
-        except NoSuchElementException as error:
+        except NoSuchElementException:
             print("Looks like you've already completed this bite!")
             break
 

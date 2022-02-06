@@ -5,6 +5,7 @@ load_dotenv()
 
 USERNAME = os.environ.get("PYBITES_USERNAME", None)
 PASSWORD = os.environ.get("PYBITES_PASSWORD", None)
+BITE_REPO = os.environ.get("PYBITES_REPO", None)
 
 BITE_URL = "https://codechalleng.es/bites/api/eatlocal/{bite_number}"
 LOGIN_URL = "https://codechalleng.es/login"
