@@ -18,6 +18,8 @@ from rich.live import Live
 from rich.syntax import Syntax
 from rich.panel import Panel
 
+import keyboard
+
 from bs4 import BeautifulSoup
 from git import Repo, GitCommandError
 
@@ -240,10 +242,11 @@ def display_bite(
 
     with Live(layout, screen=True):
         while True:
-            close = input()
-            if close == 'q':
+            if keyboard.is_pressed('q'):
                 break
-            if close == 'Q':
+            elif keyboard.is_pressed('Q'):
+                break
+            elif keyboard.is_pressed('esc'):
                 break
             else:
-                conitnue
+                continue
