@@ -239,4 +239,11 @@ def display_bite(
     layout["main"]["code"].update(Panel(code, title="Code"))
 
     with Live(layout, screen=True):
-        input()
+        while True:
+            close = input()
+            if close == 'q':
+                break
+            if close == 'Q':
+                break
+            else:
+                conitnue
