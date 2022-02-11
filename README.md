@@ -174,7 +174,7 @@ echo ".venv" >> .gitignore
 ```bash
 export PYBITES_USERNAME=<username>
 export PYBITES_PASSWORD=<password>
-PYBITES_REPO=</path/to/local/repo>
+export PYBITES_REPO=</path/to/local/repo>
 ```
 
 4. Activate the environment `source .venv/bin/activate`.
@@ -188,7 +188,7 @@ If you are not using a virtual environment, you can add the variables directly t
 ```bash
 export PYBITES_USERNAME=<username>
 export PYBITES_PASSWORD=<password>
-PYBITES_REPO=</path/to/local/repo>
+export PYBITES_REPO=</path/to/local/repo>
 ```
 
 2. Either exit your terminal completely and reopen, or source your config file with `source ~/.zshrc`.
