@@ -20,11 +20,13 @@ from rich.panel import Panel
 
 from bs4 import BeautifulSoup
 from git import Repo, GitCommandError
+from getkey import getkey, keys
 
 
 from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL, BITE_REPO
 
 from rich.traceback import install
+
 install(show_locals=True)
 
 
@@ -190,9 +192,20 @@ def submit_bite(
     webbrowser.open(bite_url)
 
 
+def quit_display():
+    """Quit the display"""
+    quit_keys = ["q", "Q", keys.ESC]
+    while True:
+        key = getkey()
+        if key not in quit_keys:
+            continue
+        else:
+            break
+
+
 def display_bite(
     bite_number: int,
-    bite_path: Path = None,
+    bite_path: Path = BITE_REPO,
     theme: str = "material",
 ) -> None:
     """Display the instructions provided in bite.html and display source code.
@@ -239,4 +252,4 @@ def display_bite(
     layout["main"]["code"].update(Panel(code, title="Code"))
 
     with Live(layout, screen=True):
-        input()
+        quit_display()

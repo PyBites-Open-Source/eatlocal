@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eatlocal"
-version = "0.7.1"
+version = "0.7.2"
 description = "eatlocal helps the user solve PyBite code challenges on their local machine"
 authors = ["Russell Helmstedter <rhelmstedter@gmail.com>"]
 license = "LICENSE"
@@ -19,6 +19,7 @@ python-dotenv = "^0.19.2"
 rich = "^11.1.0"
 beautifulsoup4 = "^4.10.0"
 GitPython = "^3.1.26"
+getkey = "^0.6.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
