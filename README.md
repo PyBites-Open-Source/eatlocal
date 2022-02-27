@@ -2,6 +2,20 @@
 
 Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
 
+## DEMOS
+
+### Download Bites
+
+![gif of download command](./docs/demos/download.gif) 
+
+### Display Bites
+
+![gif of display command](./docs/demos/display.gif) 
+
+### Submit Bites
+
+![gif of submit command](./docs/demos/submit.gif) 
+
 ## Table of Contents
 
 + [Usage](#Usage)
