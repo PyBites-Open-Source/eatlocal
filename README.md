@@ -35,6 +35,8 @@ eatlocal display <bite number>
 Submit bites:
 ```bash
 eatlocal submit <bite number>
+
+# exit display with q, Q, or <esc>
 ```
 
 ## Installation
