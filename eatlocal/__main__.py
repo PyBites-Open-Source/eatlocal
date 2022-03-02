@@ -41,7 +41,7 @@ def global_options(
         callback=report_version,
     ),
 ):
-    """Download, extract and submit PyBites code challenges."""
+    """Download, extract, and submit PyBites code challenges."""
 
     ctx.obj = GlobalOptions((USERNAME, PASSWORD))
 

@@ -37,20 +37,27 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 Navigate to your local PyBites repo.
 
 Download and extract bites:
+
 ```bash
+# use -V, --verbose to print what's happening
 eatlocal download <bite number>
 ```
 
 Display bites in the terminal:
+
 ```bash
+# change the theme with -t <theme name>
 eatlocal display <bite number>
+
+# exit display with q, Q, or <esc>
 ```
 
 Submit bites:
+
 ```bash
+# use -V, --verbose to print what's happening
 eatlocal submit <bite number>
 
-# exit display with q, Q, or <esc>
 ```
 
 ## Installation
