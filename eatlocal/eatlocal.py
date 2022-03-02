@@ -197,9 +197,7 @@ def quit_display():
     quit_keys = ["q", "Q", keys.ESC]
     while True:
         key = getkey()
-        if key not in quit_keys:
-            continue
-        else:
+        if key in quit_keys:
             break
 
 
