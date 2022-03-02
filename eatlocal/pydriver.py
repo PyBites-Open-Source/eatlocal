@@ -30,7 +30,9 @@ def driver_setup(path: Union[str, Path] = None) -> webdriver.Chrome:
     return webdriver.Chrome(options=options)
 
 
-def pybites_login(driver: webdriver.Chrome, username: str, password: str) -> None:
+def pybites_login(
+    driver: webdriver.Chrome, username: str, password: str, verbose: bool = False
+) -> None:
     """Authenticate this driver instance with the given credentials.
 
     :driver: webdriver.Chrome
@@ -39,7 +41,8 @@ def pybites_login(driver: webdriver.Chrome, username: str, password: str) -> Non
     :returns: None
     """
 
-    print("Logging into PyBites")
+    if verbose:
+        print("Logging into PyBites")
     driver.get(LOGIN_URL)
 
     username_field = driver.find_element(By.ID, "id_username")

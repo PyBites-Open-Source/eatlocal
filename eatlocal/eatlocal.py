@@ -59,6 +59,7 @@ def download_bite(
     password: str,
     delay: float = 1.5,
     cache_path: Path = None,
+    verbose: bool = False,
 ) -> None:
     """Download bite ZIP archive file from the platform to the current directory.
 
@@ -80,11 +81,12 @@ def download_bite(
     cache_path = Path(cache_path or Path.cwd()).resolve()
     cache_path.mkdir(mode=0o755, parents=True, exist_ok=True)
 
-    print(f"Retrieving bite {bite_number}...")
+    if verbose:
+        print(f"Retrieving bite {bite_number}...")
     sleep(delay)
 
     driver = driver_setup(cache_path)
-    pybites_login(driver, username, password)
+    pybites_login(driver, username, password, verbose=verbose)
     driver.get(BITE_URL.format(bite_number=bite_number))
     sleep(delay)
 
@@ -98,7 +100,8 @@ def download_bite(
         print(f"Bite {bite_number} is not a valid archive file.")
         return
 
-    print(f"Bite {bite_number} successully downloaded: {bite_ziparchive}")
+    if verbose:
+        print(f"Bite {bite_number} successully downloaded: {bite_ziparchive}")
 
 
 def extract_bite(
@@ -139,6 +142,7 @@ def submit_bite(
     username: str,
     password: str,
     delay: float = 1.0,
+    verbose: bool = False,
 ) -> None:
     """Submits bite by pushing to GitHub and then opens a browser for the
        bite page.
@@ -156,7 +160,8 @@ def submit_bite(
         repo.index.add(str(bite_number))
         repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
         repo.remotes.origin.push().raise_if_error()
-        print(f"\nPushed bite {bite_number} to github")
+        if verbose:
+            print(f"\nPushed bite {bite_number} to github")
 
     except GitCommandError as e:
         print(e)
@@ -164,7 +169,7 @@ def submit_bite(
 
     driver = driver_setup()
 
-    pybites_login(driver, username, password)
+    pybites_login(driver, username, password, verbose=verbose)
 
     bite_url = SUBMIT_URL.format(bite_number=bite_number)
 
@@ -179,7 +184,8 @@ def submit_bite(
 
     for button_name, message in buttons.items():
         if message:
-            print(message)
+            if verbose:
+                print(message)
         try:
             button = driver.find_element(By.ID, button_name)
         except NoSuchElementException:

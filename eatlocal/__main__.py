@@ -14,6 +14,7 @@ from .eatlocal import extract_bite, submit_bite, download_bite, display_bite
 
 from . import __version__
 
+from rich.status import Status
 
 cli = typer.Typer(add_completion=False)
 
@@ -56,6 +57,13 @@ def download_subcommand(
         is_flag=True,
         help="Remove downloaded bite archive file.",
     ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-V",
+        is_flag=True,
+        help="Print each step as it happens",
+    ),
 ) -> None:
     """Download and extract bite code from Codechalleng.es.
 
@@ -63,18 +71,28 @@ def download_subcommand(
     in the current directory. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
-    download_bite(bite_number, *ctx.obj.creds, cache_path="cache")
-    extract_bite(bite_number, cleanup=cleanup, cache_path="cache")
+    with Status(f"Downloading Bite {bite_number}") as status:
+        download_bite(bite_number, *ctx.obj.creds, cache_path="cache", verbose=verbose)
+        status.update(f"Extracting Bite {bite_number}")
+        extract_bite(bite_number, cleanup=cleanup, cache_path="cache")
 
 
 @cli.command(name="submit")
 def submit_subcommand(
     ctx: typer.Context,
     bite_number: int,
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-V",
+        is_flag=True,
+        help="Print each step as it happens",
+    ),
 ) -> None:
     """Submit a bite back to Codechalleng.es."""
 
-    submit_bite(bite_number, *ctx.obj.creds)
+    with Status(f"Submitting Bite {bite_number}"):
+        submit_bite(bite_number, *ctx.obj.creds)
 
 
 @cli.command(name="display")
@@ -87,12 +105,12 @@ def read_subcommand(
         "--theme",
         "-t",
         is_flag=True,
-        help="Choose syntax highlight for code.",
+        help="Choose syntax highlighting for code.",
     ),
 ) -> None:
     """Read a bite directly in the terminal."""
 
-    display_bite(bite_number)
+    display_bite(bite_number, theme=theme)
 
 
 if __name__ == "__main__":
