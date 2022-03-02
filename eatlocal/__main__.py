@@ -92,7 +92,7 @@ def submit_subcommand(
     """Submit a bite back to Codechalleng.es."""
 
     with Status(f"Submitting Bite {bite_number}"):
-        submit_bite(bite_number, *ctx.obj.creds)
+        submit_bite(bite_number, *ctx.obj.creds, verbose=verbose)
 
 
 @cli.command(name="display")
