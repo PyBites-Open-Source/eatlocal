@@ -11,6 +11,7 @@ from zipfile import ZipFile, is_zipfile
 from bs4 import BeautifulSoup
 from getkey import getkey, keys
 from git import GitCommandError, Repo
+from rich import print
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
@@ -151,7 +152,13 @@ def submit_bite(
     """
 
     repo = Repo(BITE_REPO)
-    repo.index.add(str(bite_number))
+
+    try:
+        repo.index.add(str(bite_number))
+    except FileNotFoundError as e:
+        print(f"[yellow]{e}:\nSeems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[yellow]")
+        return
+
     repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
     repo.remotes.origin.push().raise_if_error()
     if verbose:
