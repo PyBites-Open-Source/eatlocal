@@ -49,8 +49,6 @@ Display bites in the terminal:
 # change the theme with -t <theme name>
 eatlocal display <bite number>
 
-# exit display with q, Q, or <esc>
-```
 
 Submit bites:
 
