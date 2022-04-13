@@ -1,31 +1,26 @@
 """ download and submit bites
-
 """
 
-import webbrowser
 
+import webbrowser
 from pathlib import Path
 from time import sleep
 from typing import Union
 from zipfile import ZipFile, is_zipfile
 
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from .pydriver import driver_setup, pybites_login
-
+from bs4 import BeautifulSoup
+from getkey import getkey, keys
+from git import GitCommandError, Repo
 from rich.layout import Layout
 from rich.live import Live
-from rich.syntax import Syntax
 from rich.panel import Panel
-
-from bs4 import BeautifulSoup
-from git import Repo, GitCommandError
-from getkey import getkey, keys
-
-
-from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL, BITE_REPO
-
+from rich.syntax import Syntax
 from rich.traceback import install
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+
+from .constants import BITE_REPO, BITE_URL, BITE_ZIPFILE, SUBMIT_URL
+from .pydriver import driver_setup, pybites_login
 
 install(show_locals=True)
 
