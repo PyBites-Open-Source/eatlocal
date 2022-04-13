@@ -150,17 +150,12 @@ def submit_bite(
 
     """
 
-    try:
-        repo = Repo(BITE_REPO)
-        repo.index.add(str(bite_number))
-        repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
-        repo.remotes.origin.push().raise_if_error()
-        if verbose:
-            print(f"\nPushed bite {bite_number} to github")
-
-    except GitCommandError as e:
-        print(e)
-        return
+    repo = Repo(BITE_REPO)
+    repo.index.add(str(bite_number))
+    repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
+    repo.remotes.origin.push().raise_if_error()
+    if verbose:
+        print(f"\nPushed bite {bite_number} to github")
 
     driver = driver_setup()
 
