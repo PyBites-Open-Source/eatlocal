@@ -10,7 +10,7 @@ from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
 from getkey import getkey, keys
-from git import GitCommandError, Repo
+from git import Repo
 from rich import print
 from rich.layout import Layout
 from rich.live import Live
@@ -89,7 +89,7 @@ def download_bite(
     try:
         bite_ziparchive = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError:
-        print(f"Bite {bite_number} was not downloaded.")
+        print(f"[yellow]Bite {bite_number} was not downloaded.[/yellow]")
         return
 
     if not is_zipfile(bite_ziparchive):
@@ -118,7 +118,7 @@ def extract_bite(
     try:
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
-        print(f"Missing ZIP archive for bite {bite_number}: {error}")
+        print(f"[yellow]Missing ZIP archive for bite {bite_number}: {error}[/yellow]")
         return
 
     dest_path = Path(dest_path or Path.cwd()).resolve() / str(bite_number)
@@ -155,8 +155,8 @@ def submit_bite(
 
     try:
         repo.index.add(str(bite_number))
-    except FileNotFoundError as e:
-        print(f"[yellow]{e}:\nSeems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[yellow]")
+    except FileNotFoundError:
+        print(f"[yellow]\nSeems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[/yellow]")
         return
 
     repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
@@ -186,7 +186,7 @@ def submit_bite(
         try:
             button = driver.find_element(By.ID, button_name)
         except NoSuchElementException:
-            print("Looks like you've already completed this bite!")
+            print("[yellow]Looks like you've already completed this bite![/yellow]")
             break
 
         button.click()
