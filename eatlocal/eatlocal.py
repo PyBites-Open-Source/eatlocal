@@ -227,15 +227,13 @@ def display_bite(
 
     html_file = path / list(path.glob("*.html"))[0]
 
-    for file in path.iterdir():
-        if str(file).endswith(".py") and not str(file.parts[-1]).startswith("test_"):
-            python_file = file
+    python_file = [file for file in list(path.glob("*.py")) if not file.name.startswith("test_")][0]
 
     with open(html_file, "r") as bite_html:
         soup = BeautifulSoup(bite_html, "html.parser")
         instructions = soup.text
 
-    with open(path / python_file, "r") as code_file:
+    with open(python_file, "r") as code_file:
         code = Syntax(
             code_file.read(),
             "python",
