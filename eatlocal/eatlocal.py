@@ -163,7 +163,7 @@ def submit_bite(
     try:
         repo.index.add(str(bite_number))
     except FileNotFoundError:
-        print(f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[/yellow]")
+        print(f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?[/yellow]")
         return
 
     repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
