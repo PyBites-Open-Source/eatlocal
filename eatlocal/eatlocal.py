@@ -69,7 +69,7 @@ def download_bite(
 
     try:
         path = find_cached_archive(bite_number, path=cache_path)
-        print(f"Bite {bite_number} found: {path}")
+        print(f"Bite {bite_number} found: @ {path}")
         return
     except FileNotFoundError:
         pass
@@ -93,7 +93,7 @@ def download_bite(
         return
 
     if not is_zipfile(bite_ziparchive):
-        print(f"Bite {bite_number} is not a valid archive file.")
+        print(f"[yellow]Bite {bite_number} is not a valid archive file.[/yellow]")
         return
 
     if verbose:
@@ -156,7 +156,7 @@ def submit_bite(
     try:
         repo.index.add(str(bite_number))
     except FileNotFoundError:
-        print(f"[yellow]\nSeems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[/yellow]")
+        print(f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?\n[/yellow]")
         return
 
     repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
