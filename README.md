@@ -48,6 +48,7 @@ Display bites in the terminal:
 ```bash
 # change the theme with -t <theme name>
 eatlocal display <bite number>
+```
 
 
 Submit bites:
