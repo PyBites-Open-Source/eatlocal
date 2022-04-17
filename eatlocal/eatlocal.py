@@ -105,6 +105,7 @@ def extract_bite(
     dest_path: Path = None,
     cleanup: bool = False,
     cache_path: Path = None,
+    force: bool = False,
 ) -> None:
     """Extracts all the required files into a new directory
     named by the bite number.
@@ -112,6 +113,7 @@ def extract_bite(
     :bite_number: int The number of the bite you want to extract.
     :cleanup: bool if False removes the downloaded zipfile.
     :cache_path: Path to search for ZIp archive, defaults to current directory.
+    :force: bool if True overwrites the directory for the bite_number.
     :returns: None
     """
 
@@ -123,14 +125,19 @@ def extract_bite(
 
     dest_path = Path(dest_path or Path.cwd()).resolve() / str(bite_number)
 
-    with ZipFile(bite, "r") as zipfile:
-        zipfile.extractall(dest_path)
+    if dest_path.is_dir() and not force:
+        print(f"[yellow]There already exists a directory for bite {bite_number}. Use the --force flag to overwite.[/yellow]")
+        return
 
-    print(f"Extracted bite {bite_number} @ {dest_path}")
+    else:
+        with ZipFile(bite, "r") as zipfile:
+            zipfile.extractall(dest_path)
 
-    if cleanup:
-        print(f"Cleaning up bite {bite_number} archive: {bite}")
-        bite.unlink()
+        print(f"Extracted bite {bite_number} @ {dest_path}")
+
+        if cleanup:
+            print(f"Cleaning up bite {bite_number} archive: {bite}")
+            bite.unlink()
 
 
 def submit_bite(

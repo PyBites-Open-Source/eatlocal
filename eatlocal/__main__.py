@@ -3,18 +3,15 @@
 """
 
 import sys
-
 from collections import namedtuple
 from pathlib import Path
 
 import typer
-
-from .constants import USERNAME, PASSWORD
-from .eatlocal import extract_bite, submit_bite, download_bite, display_bite
+from rich.status import Status
 
 from . import __version__
-
-from rich.status import Status
+from .constants import PASSWORD, USERNAME
+from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
 
 cli = typer.Typer(add_completion=False)
 
@@ -62,7 +59,14 @@ def download_subcommand(
         "--verbose",
         "-V",
         is_flag=True,
-        help="Print each step as it happens",
+        help="Print each step as it happens.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-F",
+        is_flag=True,
+        help="Overwrite bite directory with a fresh version.",
     ),
 ) -> None:
     """Download and extract bite code from Codechalleng.es.
@@ -74,7 +78,7 @@ def download_subcommand(
     with Status(f"Downloading Bite {bite_number}") as status:
         download_bite(bite_number, *ctx.obj.creds, cache_path="cache", verbose=verbose)
         status.update(f"Extracting Bite {bite_number}")
-        extract_bite(bite_number, cleanup=cleanup, cache_path="cache")
+        extract_bite(bite_number, cleanup=cleanup, cache_path="cache", force=force)
 
 
 @cli.command(name="submit")
