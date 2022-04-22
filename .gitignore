@@ -5,4 +5,5 @@ __pycache__
 .DS_Store
 .env
 pybites_bite*.zip
+wily-report.html
 [0-9]*
