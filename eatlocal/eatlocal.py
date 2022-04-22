@@ -126,7 +126,9 @@ def extract_bite(
     dest_path = Path(dest_path or Path.cwd()).resolve() / str(bite_number)
 
     if dest_path.is_dir() and not force:
-        print(f"[yellow]There already exists a directory for bite {bite_number}. Use the --force flag to overwite.[/yellow]")
+        print(
+            f"[yellow]There already exists a directory for bite {bite_number}. Use the --force flag to overwite.[/yellow]"
+        )
         return
 
     else:
@@ -163,7 +165,9 @@ def submit_bite(
     try:
         repo.index.add(str(bite_number))
     except FileNotFoundError:
-        print(f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?[/yellow]")
+        print(
+            f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?[/yellow]"
+        )
         return
 
     repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
@@ -227,7 +231,9 @@ def display_bite(
 
     html_file = path / list(path.glob("*.html"))[0]
 
-    python_file = [file for file in list(path.glob("*.py")) if not file.name.startswith("test_")][0]
+    python_file = [
+        file for file in list(path.glob("*.py")) if not file.name.startswith("test_")
+    ][0]
 
     with open(html_file, "r") as bite_html:
         soup = BeautifulSoup(bite_html, "html.parser")
