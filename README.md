@@ -18,18 +18,24 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 
 ## Table of Contents
 
-+ [Usage](#Usage)
-+ [Installation](#Installation)
-	+ [macOS/Linux](#macoslinux)
-	+ [Windows](#Windows)
-+ [Setup](#Setup)
-	+ [Install Chrome and Chromedriver](#Install-Chrome-and-Chromedriver)
-		+ [macOS](#macOS)
-		+ [Linux](#Linux)
-		+ [Windows](#Windows-1)
-	+ [PyBites Credentials and Local Repo](#PyBites-Credentials-and-Local-Repo)
-		+ [macOS/Linux](#macoslinux-1)
-		+ [Windows](#Windows-2)
+- [eatlocal](#eatlocal)
+  - [DEMOS](#demos)
+    - [Download Bites](#download-bites)
+    - [Display Bites](#display-bites)
+    - [Submit Bites](#submit-bites)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+  - [Installation](#installation)
+    - [macOS/Linux](#macoslinux)
+    - [Windows](#windows)
+  - [Setup](#setup)
+    - [Install Chrome and Chromedriver](#install-chrome-and-chromedriver)
+      - [macOS](#macos)
+      - [Linux](#linux)
+      - [Windows](#windows-1)
+    - [PyBites Credentials and Local Repo](#pybites-credentials-and-local-repo)
+      - [macOS/Linux](#macoslinux-1)
+      - [Windows](#windows-2)
 
 
 ## Usage
@@ -74,10 +80,13 @@ pip install eatlocal
 
 ## Setup
 
-1. Go through the directions on the PyBites website to connect your GitHub account to your PyBites account.
-2. Make sure you have Chrome and chromedriver installed and on `$PATH`.
-3. Create environment variables for your PyBites username and password (`PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively). If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
-4. Create an environment variable for you local Pybites repo(`PYBITES_REPO`).
+1. Go through the directions on the PyBites website to connect your GitHub account to your PyBites account. You will find the necessary steps under `Settings` in the navigation sidebar.
+2. Make sure you have Chrome and chromedriver installed and on `$PATH`. Pay attention that the chromedriver must match the version of your Chrome browser, see [here](https://chromedriver.chromium.org/downloads). 
+3. Create the following environment variables:
+   - `PYBITES_USERNAME` for your PyBites username
+   - `PYBITES_PASSWORD` for your PyBites password
+   - `PYBITES_REPO` for your local PyBites repo 
+  If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
 
 ### Install Chrome and Chromedriver
 
@@ -152,9 +161,11 @@ which chromedriver
 
 #### Windows
 
-If working in windows powershell you can use [chocolately](https://chocolatey.org/) to install chromedriver.
+If working in windows powershell you can use [chocolately](https://chocolatey.org/) to install both Chrome and chromedriver (with matching versions).
 
 I've found that in order to install packages I have to use an elevated administrative shell, with `choco install chromedriver`.
+
+![chromedriver in chocolatey](https://i.ibb.co/2cCShcd/chromedriver-via-chocolately.png)
 
 I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about) but there seems to be an issue with `google-chrome` itself. I could not get it to work.
 
