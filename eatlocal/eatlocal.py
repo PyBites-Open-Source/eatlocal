@@ -9,11 +9,10 @@ from typing import Union
 from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
-from getkey import getkey, keys
 from git import Repo
 from rich import print
+from rich.console import Console
 from rich.layout import Layout
-from rich.live import Live
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.traceback import install
@@ -263,5 +262,5 @@ def display_bite(
     layout["main"]["directions"].update(Panel(instructions, title="Directions"))
     layout["main"]["code"].update(Panel(code, title="Code"))
 
-    with Live(layout, screen=True):
-        quit_display()
+    console = Console()
+    console.print(layout)

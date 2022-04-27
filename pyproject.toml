@@ -19,7 +19,6 @@ python-dotenv = "^0.19.2"
 rich = "^11.1.0"
 beautifulsoup4 = "^4.10.0"
 GitPython = "^3.1.26"
-getkey = "^0.6.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
