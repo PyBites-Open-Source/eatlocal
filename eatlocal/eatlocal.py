@@ -66,6 +66,8 @@ def download_bite(
     :returns: None
     """
 
+    if BITE_REPO and not cache_path:
+        cache_path = Path(BITE_REPO / "cache")
     try:
         path = find_cached_archive(bite_number, path=cache_path)
         print(f"Bite {bite_number} found: @ {path}")
@@ -116,6 +118,8 @@ def extract_bite(
     :returns: None
     """
 
+    if BITE_REPO and not cache_path:
+        cache_path = BITE_REPO / "cache"
     try:
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
