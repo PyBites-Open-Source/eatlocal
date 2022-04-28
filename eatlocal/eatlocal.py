@@ -66,8 +66,6 @@ def download_bite(
     :returns: None
     """
 
-    if BITE_REPO and not cache_path:
-        cache_path = Path(BITE_REPO / "cache")
     try:
         path = find_cached_archive(bite_number, path=cache_path)
         print(f"Bite {bite_number} found: @ {path}")
@@ -118,8 +116,6 @@ def extract_bite(
     :returns: None
     """
 
-    if BITE_REPO and not cache_path:
-        cache_path = BITE_REPO / "cache"
     try:
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
@@ -224,7 +220,7 @@ def display_bite(
     path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
     if not path.is_dir():
         print(
-            f'[yellow]Unable to display bite {bite_number}. '
+            f"[yellow]Unable to display bite {bite_number}. "
             f'Try using "eatlocal download {bite_number}" first.[/yellow]'
         )
         return
