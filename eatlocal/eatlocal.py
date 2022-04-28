@@ -19,7 +19,7 @@ from rich.traceback import install
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-from .constants import BITE_REPO, BITE_URL, BITE_ZIPFILE, SUBMIT_URL
+from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL
 from .pydriver import driver_setup, pybites_login
 
 install(show_locals=True)
@@ -36,7 +36,7 @@ def find_cached_archive(bite_number: int, path: Union[str, Path] = None) -> Path
     - FileNotFoundError if archive not found in the target path.
     """
 
-    path = Path(path or Path.cwd())
+    path = Path(path or Path.cwd()).resolve()
 
     filename = BITE_ZIPFILE.format(bite_number=bite_number)
 
@@ -53,6 +53,7 @@ def download_bite(
     username: str,
     password: str,
     delay: float = 1.5,
+    dest_path: Path = None,
     cache_path: Path = None,
     verbose: bool = False,
 ) -> None:
@@ -62,18 +63,19 @@ def download_bite(
     :username: str
     :password: str
     :delay: float Time in seconds to pause between operations
-    :cache_path: Path for cached ZIP archive files, defaults to current directory
+    :cache_path: Path for cached ZIP archive files
     :returns: None
     """
 
     try:
+        cache_path = Path(dest_path / cache_path).resolve()
         path = find_cached_archive(bite_number, path=cache_path)
         print(f"Bite {bite_number} found: @ {path}")
         return
     except FileNotFoundError:
         pass
 
-    cache_path = Path(cache_path or Path.cwd()).resolve()
+    cache_path = Path(dest_path / cache_path).resolve()
     cache_path.mkdir(mode=0o755, parents=True, exist_ok=True)
 
     if verbose:
@@ -110,23 +112,26 @@ def extract_bite(
     named by the bite number.
 
     :bite_number: int The number of the bite you want to extract.
+    :dest_path: Path to extraction location.
     :cleanup: bool if False removes the downloaded zipfile.
-    :cache_path: Path to search for ZIp archive, defaults to current directory.
+    :cache_path: Path to search for ZIp archive.
     :force: bool if True overwrites the directory for the bite_number.
     :returns: None
     """
 
     try:
+        cache_path = Path(dest_path / cache_path).resolve()
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
         print(f"[yellow]Missing ZIP archive for bite {bite_number}: {error}[/yellow]")
         return
 
-    dest_path = Path(dest_path or Path.cwd()).resolve() / str(bite_number)
+    dest_path = Path(dest_path).resolve() / str(bite_number)
 
     if dest_path.is_dir() and not force:
         print(
-            f"[yellow]There already exists a directory for bite {bite_number}. Use the --force flag to overwite.[/yellow]"
+            f"[yellow]There already exists a directory for bite {bite_number}. "
+            "Use the --force flag to overwite.[/yellow]"
         )
         return
 
@@ -145,6 +150,7 @@ def submit_bite(
     bite_number: int,
     username: str,
     password: str,
+    bites_repo: Path,
     delay: float = 1.0,
     verbose: bool = False,
 ) -> None:
@@ -156,10 +162,9 @@ def submit_bite(
     :password: str
     :delay: float time in seconds to pause between operations.
     :returns: None
-
     """
 
-    repo = Repo(BITE_REPO)
+    repo = Repo(bites_repo)
 
     try:
         repo.index.add(str(bite_number))
@@ -175,11 +180,8 @@ def submit_bite(
         print(f"\nPushed bite {bite_number} to github")
 
     driver = driver_setup()
-
     pybites_login(driver, username, password, verbose=verbose)
-
     bite_url = SUBMIT_URL.format(bite_number=bite_number)
-
     driver.get(bite_url)
     sleep(delay)
 
@@ -207,7 +209,7 @@ def submit_bite(
 
 def display_bite(
     bite_number: int,
-    bite_path: Path = BITE_REPO,
+    bite_path: Path = None,
     theme: str = "material",
 ) -> None:
     """Display the instructions provided in bite.html and display source code.
@@ -217,7 +219,7 @@ def display_bite(
 
     """
 
-    path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
+    path = Path(bite_path).resolve() / str(bite_number)
     if not path.is_dir():
         print(
             f"[yellow]Unable to display bite {bite_number}. "
