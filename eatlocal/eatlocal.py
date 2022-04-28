@@ -205,15 +205,6 @@ def submit_bite(
     webbrowser.open(bite_url)
 
 
-def quit_display():
-    """Quit the display"""
-    quit_keys = ["q", "Q", keys.ESC]
-    while True:
-        key = getkey()
-        if key in quit_keys:
-            break
-
-
 def display_bite(
     bite_number: int,
     bite_path: Path = BITE_REPO,
@@ -227,9 +218,14 @@ def display_bite(
     """
 
     path = Path(bite_path or Path.cwd()).resolve() / str(bite_number)
+    if not path.is_dir():
+        print(
+            f'[yellow]Unable to display bite {bite_number}. '
+            f'Try using "eatlocal download {bite_number}" first.[/yellow]'
+        )
+        return
 
     html_file = path / list(path.glob("*.html"))[0]
-
     python_file = [
         file for file in list(path.glob("*.py")) if not file.name.startswith("test_")
     ][0]
