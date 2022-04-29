@@ -9,7 +9,7 @@ from typing import Union
 from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
-from git import Repo
+from git import Repo, InvalidGitRepositoryError
 from rich import print
 from rich.console import Console
 from rich.layout import Layout
@@ -52,9 +52,9 @@ def download_bite(
     bite_number: int,
     username: str,
     password: str,
+    dest_path: Path,
+    cache_path: Path,
     delay: float = 1.5,
-    dest_path: Path = None,
-    cache_path: Path = None,
     verbose: bool = False,
 ) -> None:
     """Download bite ZIP archive file from the platform to the current directory.
@@ -131,7 +131,7 @@ def extract_bite(
     if dest_path.is_dir() and not force:
         print(
             f"[yellow]There already exists a directory for bite {bite_number}. "
-            "Use the --force flag to overwite.[/yellow]"
+            "Use the --force option to overwite.[/yellow]"
         )
         return
 
@@ -164,13 +164,21 @@ def submit_bite(
     :returns: None
     """
 
-    repo = Repo(bites_repo)
+    try:
+        repo = Repo(bites_repo)
+    except InvalidGitRepositoryError:
+        print(
+            "[yellow]Did you mistype the path? "
+            f"Not a valid git repo: [/yellow]{bites_repo}"
+        )
+        return
 
     try:
         repo.index.add(str(bite_number))
     except FileNotFoundError:
         print(
-            f"[yellow]Seems like there is no bite {bite_number} to submit. Did you mean to submit a different bite?[/yellow]"
+            f"[yellow]Seems like there is no bite {bite_number} to submit. "
+            "Did you mean to submit a different bite?[/yellow]"
         )
         return
 
@@ -209,21 +217,20 @@ def submit_bite(
 
 def display_bite(
     bite_number: int,
-    bite_path: Path = None,
-    theme: str = "material",
+    bite_path: Path,
+    theme: str,
 ) -> None:
     """Display the instructions provided in bite.html and display source code.
 
     :bite_number: int The number of the bite you want to read
     :returns: None
-
     """
 
     path = Path(bite_path).resolve() / str(bite_number)
     if not path.is_dir():
         print(
             f"[yellow]Unable to display bite {bite_number}. "
-            f'Try using "eatlocal download {bite_number}" first.[/yellow]'
+            f"Please make sure that path is correct and bite {bite_number} has been downloaded[/yellow]"
         )
         return
 
