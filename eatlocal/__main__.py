@@ -7,11 +7,12 @@ from collections import namedtuple
 from pathlib import Path
 
 import typer
-from rich.status import Status
 from rich import print
+from rich.prompt import Confirm, Prompt
+from rich.status import Status
 
 from . import __version__
-from .constants import PASSWORD, USERNAME, BITE_REPO, REPO_WARNING
+from .constants import EATLOCAL_HOME, REPO_WARNING, config
 from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
 
 
@@ -19,7 +20,7 @@ def check_for_pybites_repo(bites_repo):
     if not bites_repo:
         print(REPO_WARNING)
         sys.exit()
-
+        
 
 cli = typer.Typer(add_completion=False)
 
@@ -48,11 +49,43 @@ def global_options(
 ):
     """Download, extract, display, and submit PyBites code challenges."""
 
-    ctx.obj = GlobalOptions((USERNAME, PASSWORD))
+    ctx.obj = GlobalOptions((config["PYBITES_USERNAME"], config["PYBITES_PASSWORD"]))
 
 
-@cli.command(name="download")
-def download_subcommand(
+@cli.command()
+def init(
+    ctx: typer.Context,
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-V",
+        is_flag=True,
+        help="Print each step as it happens.",
+    ),
+) -> None:
+    """Configure PyBites credentials."""
+    while True:
+        username = Prompt.ask("Enter your PyBites username")
+        password = Prompt.ask("Enter your PyBites user password", password=True)
+        repo = Prompt.ask("Enter the path to your local git repo for PyBites", default=Path().cwd(), show_default=True)
+
+        print(f"Your input - username: {username}, password: {password}, repo: {repo}.")
+        if Confirm.ask("Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"):
+            break
+    
+    if not EATLOCAL_HOME.is_dir():
+        EATLOCAL_HOME.mkdir()
+        
+    with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
+        fh.write(f"PYBITES_USERNAME={username}\n")
+        fh.write(f"PYBITES_PASSWORD={password}\n")
+        fh.write(f"PYBITES_REPO={repo}\n")
+    
+    print(f"[green]Successfully stored configuration variables under {EATLOCAL_HOME}.")
+
+
+@cli.command()
+def download(
     ctx: typer.Context,
     bite_number: int,
     cleanup: bool = typer.Option(
@@ -77,7 +110,7 @@ def download_subcommand(
         help="Overwrite bite directory with a fresh version.",
     ),
     bites_repo: Path = typer.Option(
-        BITE_REPO,
+        config["PYBITES_REPO"],
         "-R",
         "--repo",
         help="Path to PyBites repository.",
@@ -108,12 +141,12 @@ def download_subcommand(
         )
 
 
-@cli.command(name="submit")
-def submit_subcommand(
+@cli.command()
+def submit(
     ctx: typer.Context,
     bite_number: int,
     bites_repo: Path = typer.Option(
-        BITE_REPO,
+        config["PYBITES_REPO"],
         "--repo",
         "-R",
         help="Path to PyBites repo.",
@@ -132,12 +165,12 @@ def submit_subcommand(
         submit_bite(bite_number, *ctx.obj.creds, bites_repo=bites_repo, verbose=verbose)
 
 
-@cli.command(name="display")
-def display_subcommand(
+@cli.command()
+def display(
     ctx: typer.Context,
     bite_number: int,
     bites_repo: Path = typer.Option(
-        BITE_REPO,
+        config["PYBITES_REPO"],
         "--repo",
         "-R",
         help="Path to bite directory.",
