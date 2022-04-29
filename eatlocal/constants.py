@@ -12,4 +12,4 @@ LOGIN_URL = "https://codechalleng.es/login"
 SUBMIT_URL = "https://codechalleng.es/bites/{bite_number}"
 BITE_ZIPFILE = "pybites_bite{bite_number}.zip"
 
-TYPER_PROMPT = "To avoid this message you can either set $PYBITES_REPO or provide a path using the -R option.\nPlease enter the path to your PyBites repository"
+REPO_WARNING = "[yellow]It seems like you have not set the $PYBITES_REPO environment variable.\nPlease set it, or provide a destination path using the -R flag.[/yellow]"

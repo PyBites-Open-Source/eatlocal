@@ -11,8 +11,15 @@ from rich.status import Status
 from rich import print
 
 from . import __version__
-from .constants import PASSWORD, USERNAME, BITE_REPO, TYPER_PROMPT
+from .constants import PASSWORD, USERNAME, BITE_REPO, REPO_WARNING
 from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
+
+
+def check_for_pybites_repo(bites_repo):
+    if not bites_repo:
+        print(REPO_WARNING)
+        sys.exit()
+
 
 cli = typer.Typer(add_completion=False)
 
@@ -69,11 +76,10 @@ def download_subcommand(
         is_flag=True,
         help="Overwrite bite directory with a fresh version.",
     ),
-    dest_path: Path = typer.Option(
+    bites_repo: Path = typer.Option(
         BITE_REPO,
-        "--repo",
         "-R",
-        prompt=TYPER_PROMPT,
+        "--repo",
         help="Path to PyBites repository.",
     ),
 ) -> None:
@@ -83,10 +89,23 @@ def download_subcommand(
     in the path provided, defaults to $PYBITES_REPO. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
+    check_for_pybites_repo(bites_repo)
     with Status(f"Downloading Bite {bite_number}") as status:
-        download_bite(bite_number, *ctx.obj.creds, cache_path="cache", dest_path=dest_path, verbose=verbose)
+        download_bite(
+            bite_number,
+            *ctx.obj.creds,
+            cache_path="cache",
+            dest_path=bites_repo,
+            verbose=verbose,
+        )
         status.update(f"Extracting Bite {bite_number}")
-        extract_bite(bite_number, cleanup=cleanup, cache_path="cache", dest_path=dest_path, force=force)
+        extract_bite(
+            bite_number,
+            cleanup=cleanup,
+            cache_path="cache",
+            dest_path=bites_repo,
+            force=force,
+        )
 
 
 @cli.command(name="submit")
@@ -97,7 +116,6 @@ def submit_subcommand(
         BITE_REPO,
         "--repo",
         "-R",
-        prompt=TYPER_PROMPT,
         help="Path to PyBites repo.",
     ),
     verbose: bool = typer.Option(
@@ -109,6 +127,7 @@ def submit_subcommand(
     ),
 ) -> None:
     """Submit a bite back to Codechalleng.es."""
+    check_for_pybites_repo(bites_repo)
     with Status(f"Submitting Bite {bite_number}"):
         submit_bite(bite_number, *ctx.obj.creds, bites_repo=bites_repo, verbose=verbose)
 
@@ -121,7 +140,6 @@ def display_subcommand(
         BITE_REPO,
         "--repo",
         "-R",
-        prompt=TYPER_PROMPT,
         help="Path to bite directory.",
     ),
     theme: str = typer.Option(
@@ -132,6 +150,7 @@ def display_subcommand(
     ),
 ) -> None:
     """Read a bite directly in the terminal."""
+    check_for_pybites_repo(bites_repo)
     display_bite(bite_number, bite_path=bites_repo, theme=theme)
 
 
