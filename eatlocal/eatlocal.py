@@ -53,8 +53,8 @@ def download_bite(
     username: str,
     password: str,
     dest_path: Path,
-    cache_path: Path,
-    delay: float = 1.5,
+    cache_path: str,
+    delay: float = 1.0,
     verbose: bool = False,
 ) -> None:
     """Download bite ZIP archive file from the platform to the current directory.

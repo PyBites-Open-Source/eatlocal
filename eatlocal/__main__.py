@@ -39,7 +39,7 @@ def global_options(
         callback=report_version,
     ),
 ):
-    """Download, extract, and submit PyBites code challenges."""
+    """Download, extract, display, and submit PyBites code challenges."""
 
     ctx.obj = GlobalOptions((USERNAME, PASSWORD))
 
@@ -80,7 +80,7 @@ def download_subcommand(
     """Download and extract bite code from Codechalleng.es.
 
     The bites are downloaded in a zip archive file and unzipped
-    in the current directory. If the `cleanup` option is present
+    in the path provided, defaults to $PYBITES_REPO. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
     with Status(f"Downloading Bite {bite_number}") as status:
