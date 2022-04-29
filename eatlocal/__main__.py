@@ -67,8 +67,11 @@ def init(
     while True:
         username = Prompt.ask("Enter your PyBites username")
         password = Prompt.ask("Enter your PyBites user password", password=True)
-        repo = Prompt.ask("Enter the path to your local git repo for PyBites", default=Path().cwd(), show_default=True)
-
+        repo = Path(Prompt.ask("Enter the path to your local git repo for PyBites", default=Path().cwd(), show_default=True)).expanduser()
+        
+        if not repo.exists():
+            print(f"[yellow]:warning: The path {repo} could not be found!")
+        
         print(f"Your input - username: {username}, password: {password}, repo: {repo}.")
         if Confirm.ask("Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"):
             break
