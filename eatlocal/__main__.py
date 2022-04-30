@@ -42,6 +42,21 @@ def report_version(display: bool) -> None:
         raise typer.Exit()
 
 
+@cli.callback()
+def global_options(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-v",
+        is_flag=True,
+        is_eager=True,
+        callback=report_version,
+    ),
+):
+    """Download, extract, display, and submit PyBites code challenges."""
+
+
 @cli.command()
 def init(
     ctx: typer.Context,

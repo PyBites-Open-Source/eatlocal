@@ -83,7 +83,7 @@ def download_bite(
     sleep(delay)
 
     driver = driver_setup(cache_path)
-    pybites_login(driver, username, password, delay, verbose=verbose)
+    pybites_login(driver, username, password, verbose=verbose)
 
     driver.get(BITE_URL.format(bite_number=bite_number))
     sleep(delay)

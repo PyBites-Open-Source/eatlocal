@@ -2,11 +2,23 @@
 
 Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. You can display bite directions in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
 
+## Updates
+
+### version 0.8.0
+
++ Better warning messages
++ Faster downloads
++ New command: `eatlocal init`
+
+### Breaking Changes
+
++ With version `0.8.0` there is a new `eatlocal init` command. Use this to configure your credentials and local git repository. You no longer need to set environment variables manually.
+
 ## DEMOS
 
 ### Configure
 
-![gif of init command](./docs/demos/download.gif) 
+![gif of init command]() 
 
 ### Download Bites
 
@@ -23,6 +35,9 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 ## Table of Contents
 
 - [eatlocal](#eatlocal)
+  - [Updates](#updates)
+    - [Version](#version-0.8.0)
+    - [Breaking Changes](#breaking-changes)
   - [DEMOS](#demos)
     - [Download Bites](#download-bites)
     - [Display Bites](#display-bites)
