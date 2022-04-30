@@ -1,8 +1,12 @@
 # eatlocal
 
-Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
+Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. You can display bite directions in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
 
 ## DEMOS
+
+### Configure
+
+![gif of init command](./docs/demos/download.gif) 
 
 ### Download Bites
 
@@ -33,14 +37,15 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
       - [macOS](#macos)
       - [Linux](#linux)
       - [Windows](#windows-1)
-    - [PyBites Credentials and Local Repo](#pybites-credentials-and-local-repo)
-      - [macOS/Linux](#macoslinux-1)
-      - [Windows](#windows-2)
 
 
 ## Usage
 
-Navigate to your local PyBites repo.
+Set up your configuration file:
+
+```bash
+eatlocal init
+```
 
 Download and extract bites:
 
@@ -81,12 +86,10 @@ pip install eatlocal
 ## Setup
 
 1. Go through the directions on the PyBites website to connect your GitHub account to your PyBites account. You will find the necessary steps under `Settings` in the navigation sidebar.
-2. Make sure you have Chrome and chromedriver installed and on `$PATH`. Pay attention that the chromedriver must match the version of your Chrome browser, see [here](https://chromedriver.chromium.org/downloads). 
-3. Create the following environment variables:
-   - `PYBITES_USERNAME` for your PyBites username
-   - `PYBITES_PASSWORD` for your PyBites password
-   - `PYBITES_REPO` for your local PyBites repo 
-  If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
+2. Run `eatlocal init` to configure your PyBites username, PyBites password*, and local git repository.
+2. Make sure you have Chrome and chromedriver installed and on `$PATH`. The chromedriver version must match the version of your Chrome browser. [Chromedriver downloads](https://chromedriver.chromium.org/downloads).
+
+*Note:  If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
 
 ### Install Chrome and Chromedriver
 
@@ -106,7 +109,7 @@ Install chromedriver:
 brew install chromedriver
 ```
 
-Before you run chromedriver for the first time, you must explicitly give permission since the developer has not been verified. Running the following command in the terminal removes the warning put in place by Apple:
+Before you run chromedriver for the first time (and after you update versions), you must explicitly give permission since the developer has not been verified. Running the following command in the terminal removes the warning put in place by Apple:
 
 ```bash
 xattr -d com.apple.quarantine $(which chromedriver)
@@ -116,8 +119,6 @@ Homebrew automatically puts chromedriver on `$PATH` for you. And since homebrew 
 
 
 #### Linux
-
-Unfortunately, I did not find some fancy package manager for Linux, but I was able to install chrome and chromedriver manually for Linux Mint.
 
 Navigate to the download page for [google chrome](https://www.google.com/chrome/) and download the appropriate version for your system. Then, open up a terminal and navigate to where you downloaded the file. For me it was `~/Downloads`. I ran the following commands to install and check which version I have.
 
@@ -167,78 +168,4 @@ I've found that in order to install packages I have to use an elevated administr
 
 ![chromedriver in chocolatey](https://i.ibb.co/2cCShcd/chromedriver-via-chocolately.png)
 
-I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about) but there seems to be an issue with `google-chrome` itself. I could not get it to work.
-
-### PyBites Credentials and Local Repo
-
-You must have your PyBites username and password stored in the environment variables `PYBITES_USERNAME` and `PYBITES_PASSWORD` respectively. Your local PyBites Repo should be stored in the environment variable `PYBITES_REPO`.
-
-If you have cloned the repo, you can use the conveniently provided `.env-template` to store your credentials. Copy the template and save as `.env`. Then set your username and password on two separate lines. 
-
-```bash
-# set username and password
-PYBITES_USERNAME=<username>
-PYBITES_PASSWORD=<password>
-PYBITES_REPO=</path/to/local/repo>
-```
-
-#### macOS/Linux
-
-There are two methods to handle this in.
-
-**Virtual Environment Method**
-
-A note of warning: If you use this method make sure that your virtual environment is not being pushed to GitHub. If you accidentally push your virtual environment—clearly that has never happened to me—then you have exposed your password and should change it immediately.
-
-1. Create a virtual environment for your PyBites repo:
-
-```bash
-python3 -m venv .venv
-```
-
-2. Add the line `.venv` to your `.gitignore` file.
-
-```bash
-echo ".venv" >> .gitignore
-```
-
-3. With the environment deactivated, use your favorite text editor (I use nvim, btw) to open the activate file, e.g., `nvim .venv/bin/activate` and add the following lines:
-
-```bash
-export PYBITES_USERNAME=<username>
-export PYBITES_PASSWORD=<password>
-export PYBITES_REPO=</path/to/local/repo>
-```
-
-4. Activate the environment `source .venv/bin/activate`.
-
-**Shell RC Method**
-
-If you are not using a virtual environment, you can add the variables directly to your shell config. 
-
-1. I use zsh. So I would use my favorite text editor `nvim ~/.zshrc` and set the variables by adding the same three lines as above:
-
-```bash
-export PYBITES_USERNAME=<username>
-export PYBITES_PASSWORD=<password>
-export PYBITES_REPO=</path/to/local/repo>
-```
-
-2. Either exit your terminal completely and reopen, or source your config file with `source ~/.zshrc`.
-
-#### Windows
-
-I don't know of a way to do this other than graphically (Booo!). If you like pictures follow this [tutorial](https://windowsloop.com/add-environment-variable-in-windows-10).
-
-1. Open the Start menu by pressing the “Windows Key”.
-2. Type “Environment variables” and click on the “Edit the system environment variables” result.
-3. Click on the "Advanced" tab.
-4. Click "Environment Variables".
-5. Under "User variables" click "New".
-6. In the "Variable name" field enter: PYBITES_USERNAME
-7. In the "Variable value" field enter: <username>
-8. Repeat steps 5-7 for the password variable.
-9. Repeat steps 5-7 for the repo variable.
-10. Click "Ok"
-11. Click "Apply"
-12. Restart your computer.
+I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about) but there seems to be an issue with `google-chrome` and chromedriver not `eatlocal`. I could not get it to work.

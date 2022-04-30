@@ -9,7 +9,7 @@ from typing import Union
 from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
-from git import Repo, InvalidGitRepositoryError
+from git import InvalidGitRepositoryError, Repo
 from rich import print
 from rich.console import Console
 from rich.layout import Layout
@@ -83,18 +83,24 @@ def download_bite(
     sleep(delay)
 
     driver = driver_setup(cache_path)
-    pybites_login(driver, username, password, verbose=verbose)
+    pybites_login(driver, username, password, delay, verbose=verbose)
+
     driver.get(BITE_URL.format(bite_number=bite_number))
     sleep(delay)
 
     try:
         bite_ziparchive = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError:
-        print(f"[yellow]:warning: Bite {bite_number} was not downloaded.[/yellow]")
+        print(
+            f"[yellow]:warning: Bite {bite_number} was not downloaded. "
+            "Ensure you are connected to the internet and your PyBites credentials are valid."
+        )
         return
 
     if not is_zipfile(bite_ziparchive):
-        print(f"[yellow]:warning: Bite {bite_number} is not a valid archive file.[/yellow]")
+        print(
+            f"[yellow]:warning: Bite {bite_number} is not a valid archive file.[/yellow]"
+        )
         return
 
     if verbose:
@@ -123,7 +129,7 @@ def extract_bite(
         cache_path = Path(dest_path / cache_path).resolve()
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
-        print(f"[yellow]:warning: Missing ZIP archive for bite {bite_number}: {error}[/yellow]")
+        print(f"[yellow]:warning: Missing ZIP archive for bite {bite_number}: {error}")
         return
 
     dest_path = Path(dest_path).resolve() / str(bite_number)
@@ -131,7 +137,7 @@ def extract_bite(
     if dest_path.is_dir() and not force:
         print(
             f"[yellow]:warning: There already exists a directory for bite {bite_number}. "
-            "Use the --force option to overwite.[/yellow]"
+            "Use the --force option to overwite."
         )
         return
 
@@ -206,7 +212,9 @@ def submit_bite(
         try:
             button = driver.find_element(By.ID, button_name)
         except NoSuchElementException:
-            print("[yellow]:warning: Looks like you've already completed this bite![/yellow]")
+            print(
+                "[yellow]:warning: Looks like you've already completed this bite![/yellow]"
+            )
             break
 
         button.click()

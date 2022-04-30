@@ -59,10 +59,9 @@ def init(
         while True:
             password = Prompt.ask("Enter your PyBites user password", password=True)
             confirm_password = Prompt.ask("Confirm PyBites password", password=True)
-            if password != confirm_password:
-                print("[yellow]:warning: Password did not match.")
-                continue
-            break
+            if password == confirm_password:
+                break
+            print("[yellow]:warning: Password did not match.")
         repo = Path(
             Prompt.ask(
                 "Enter the path to your local git repo for PyBites, or press enter for the current directory",
@@ -120,7 +119,7 @@ def download(
     """Download and extract bite code from Codechalleng.es.
 
     The bites are downloaded in a zip archive file and unzipped
-    in the path provided, defaults to $PYBITES_REPO. If the `cleanup` option is present
+    in the local git repository for PyBites. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
     config = load_config(EATLOCAL_HOME / ".env")
