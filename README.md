@@ -18,7 +18,7 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 
 ### Configure
 
-![gif of init command]() 
+![gif of init command](./docs/demos/init.gif)
 
 ### Download Bites
 
