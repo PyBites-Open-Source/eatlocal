@@ -36,7 +36,7 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 
 - [eatlocal](#eatlocal)
   - [Updates](#updates)
-    - [Version](#version-0.8.0)
+    - [Version](#version-080)
     - [Breaking Changes](#breaking-changes)
   - [DEMOS](#demos)
     - [Download Bites](#download-bites)
