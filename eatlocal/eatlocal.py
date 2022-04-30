@@ -90,11 +90,11 @@ def download_bite(
     try:
         bite_ziparchive = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError:
-        print(f"[yellow]Bite {bite_number} was not downloaded.[/yellow]")
+        print(f"[yellow]:warning: Bite {bite_number} was not downloaded.[/yellow]")
         return
 
     if not is_zipfile(bite_ziparchive):
-        print(f"[yellow]Bite {bite_number} is not a valid archive file.[/yellow]")
+        print(f"[yellow]:warning: Bite {bite_number} is not a valid archive file.[/yellow]")
         return
 
     if verbose:
@@ -123,14 +123,14 @@ def extract_bite(
         cache_path = Path(dest_path / cache_path).resolve()
         bite = find_cached_archive(bite_number, path=cache_path)
     except FileNotFoundError as error:
-        print(f"[yellow]Missing ZIP archive for bite {bite_number}: {error}[/yellow]")
+        print(f"[yellow]:warning: Missing ZIP archive for bite {bite_number}: {error}[/yellow]")
         return
 
     dest_path = Path(dest_path).resolve() / str(bite_number)
 
     if dest_path.is_dir() and not force:
         print(
-            f"[yellow]There already exists a directory for bite {bite_number}. "
+            f"[yellow]:warning: There already exists a directory for bite {bite_number}. "
             "Use the --force option to overwite.[/yellow]"
         )
         return
@@ -168,7 +168,7 @@ def submit_bite(
         repo = Repo(bites_repo)
     except InvalidGitRepositoryError:
         print(
-            "[yellow]Did you mistype the path? "
+            "[yellow]:warning: Did you mistype the path? "
             f"Not a valid git repo: [/yellow]{bites_repo}"
         )
         return
@@ -177,7 +177,7 @@ def submit_bite(
         repo.index.add(str(bite_number))
     except FileNotFoundError:
         print(
-            f"[yellow]Seems like there is no bite {bite_number} to submit. "
+            f"[yellow]:warning: Seems like there is no bite {bite_number} to submit. "
             "Did you mean to submit a different bite?[/yellow]"
         )
         return
@@ -206,7 +206,7 @@ def submit_bite(
         try:
             button = driver.find_element(By.ID, button_name)
         except NoSuchElementException:
-            print("[yellow]Looks like you've already completed this bite![/yellow]")
+            print("[yellow]:warning: Looks like you've already completed this bite![/yellow]")
             break
 
         button.click()
@@ -229,7 +229,7 @@ def display_bite(
     path = Path(bite_path).resolve() / str(bite_number)
     if not path.is_dir():
         print(
-            f"[yellow]Unable to display bite {bite_number}. "
+            f"[yellow]:warning: Unable to display bite {bite_number}. "
             f"Please make sure that path is correct and bite {bite_number} has been downloaded[/yellow]"
         )
         return

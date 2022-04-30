@@ -3,24 +3,34 @@
 """
 
 import sys
-from collections import namedtuple
 from pathlib import Path
 
 import typer
+from dotenv import dotenv_values
 from rich import print
+from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
 from . import __version__
-from .constants import EATLOCAL_HOME, REPO_WARNING, config
+from .constants import EATLOCAL_HOME
 from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
 
+console = Console()
 
-def check_for_pybites_repo(bites_repo):
-    if not bites_repo:
-        print(REPO_WARNING)
+
+def load_config(env_path: Path):
+    config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
+    if not env_path.exists():
+        console.print(
+            "[red]:warning: Could not find or read .eatlocal/.env in your home directory."
+        )
+        console.print("[yellow]Please run [underline]eatlocal init[/underline] first.")
         sys.exit()
-        
+
+    config.update(dotenv_values(dotenv_path=env_path))
+    return config
+
 
 cli = typer.Typer(add_completion=False)
 
@@ -30,26 +40,6 @@ def report_version(display: bool) -> None:
     if display:
         print(f"{Path(sys.argv[0]).name} {__version__}")
         raise typer.Exit()
-
-
-GlobalOptions = namedtuple("GlobalOptions", "creds")
-
-
-@cli.callback()
-def global_options(
-    ctx: typer.Context,
-    version: bool = typer.Option(
-        False,
-        "--version",
-        "-v",
-        is_flag=True,
-        is_eager=True,
-        callback=report_version,
-    ),
-):
-    """Download, extract, display, and submit PyBites code challenges."""
-
-    ctx.obj = GlobalOptions((config["PYBITES_USERNAME"], config["PYBITES_PASSWORD"]))
 
 
 @cli.command()
@@ -63,27 +53,41 @@ def init(
         help="Print each step as it happens.",
     ),
 ) -> None:
-    """Configure PyBites credentials."""
+    """Configure PyBites credentials and repository."""
     while True:
         username = Prompt.ask("Enter your PyBites username")
-        password = Prompt.ask("Enter your PyBites user password", password=True)
-        repo = Path(Prompt.ask("Enter the path to your local git repo for PyBites", default=Path().cwd(), show_default=True)).expanduser()
-        
+        while True:
+            password = Prompt.ask("Enter your PyBites user password", password=True)
+            confirm_password = Prompt.ask("Confirm PyBites password", password=True)
+            if password != confirm_password:
+                print("[yellow]:warning: Password did not match.")
+                continue
+            break
+        repo = Path(
+            Prompt.ask(
+                "Enter the path to your local git repo for PyBites, or press enter for the current directory",
+                default=Path().cwd(),
+                show_default=True,
+            )
+        ).expanduser()
+
         if not repo.exists():
             print(f"[yellow]:warning: The path {repo} could not be found!")
-        
-        print(f"Your input - username: {username}, password: {password}, repo: {repo}.")
-        if Confirm.ask("Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"):
+
+        print(f"Your input - username: {username}, repo: {repo}.")
+        if Confirm.ask(
+            "Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"
+        ):
             break
-    
+
     if not EATLOCAL_HOME.is_dir():
         EATLOCAL_HOME.mkdir()
-        
+
     with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
         fh.write(f"PYBITES_USERNAME={username}\n")
         fh.write(f"PYBITES_PASSWORD={password}\n")
         fh.write(f"PYBITES_REPO={repo}\n")
-    
+
     print(f"[green]Successfully stored configuration variables under {EATLOCAL_HOME}.")
 
 
@@ -112,12 +116,6 @@ def download(
         is_flag=True,
         help="Overwrite bite directory with a fresh version.",
     ),
-    bites_repo: Path = typer.Option(
-        config["PYBITES_REPO"],
-        "-R",
-        "--repo",
-        help="Path to PyBites repository.",
-    ),
 ) -> None:
     """Download and extract bite code from Codechalleng.es.
 
@@ -125,13 +123,14 @@ def download(
     in the path provided, defaults to $PYBITES_REPO. If the `cleanup` option is present
     the archive is deleted after extraction.
     """
-    check_for_pybites_repo(bites_repo)
+    config = load_config(EATLOCAL_HOME / ".env")
     with Status(f"Downloading Bite {bite_number}") as status:
         download_bite(
             bite_number,
-            *ctx.obj.creds,
+            config["PYBITES_USERNAME"],
+            config["PYBITES_PASSWORD"],
             cache_path="cache",
-            dest_path=bites_repo,
+            dest_path=Path(config["PYBITES_REPO"]),
             verbose=verbose,
         )
         status.update(f"Extracting Bite {bite_number}")
@@ -139,7 +138,7 @@ def download(
             bite_number,
             cleanup=cleanup,
             cache_path="cache",
-            dest_path=bites_repo,
+            dest_path=Path(config["PYBITES_REPO"]),
             force=force,
         )
 
@@ -148,12 +147,6 @@ def download(
 def submit(
     ctx: typer.Context,
     bite_number: int,
-    bites_repo: Path = typer.Option(
-        config["PYBITES_REPO"],
-        "--repo",
-        "-R",
-        help="Path to PyBites repo.",
-    ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -163,21 +156,21 @@ def submit(
     ),
 ) -> None:
     """Submit a bite back to Codechalleng.es."""
-    check_for_pybites_repo(bites_repo)
+    config = load_config(EATLOCAL_HOME / ".env")
     with Status(f"Submitting Bite {bite_number}"):
-        submit_bite(bite_number, *ctx.obj.creds, bites_repo=bites_repo, verbose=verbose)
+        submit_bite(
+            bite_number,
+            config["PYBITES_USERNAME"],
+            config["PYBITES_PASSWORD"],
+            config["PYBITES_REPO"],
+            verbose=verbose,
+        )
 
 
 @cli.command()
 def display(
     ctx: typer.Context,
     bite_number: int,
-    bites_repo: Path = typer.Option(
-        config["PYBITES_REPO"],
-        "--repo",
-        "-R",
-        help="Path to bite directory.",
-    ),
     theme: str = typer.Option(
         "material",
         "--theme",
@@ -186,8 +179,8 @@ def display(
     ),
 ) -> None:
     """Read a bite directly in the terminal."""
-    check_for_pybites_repo(bites_repo)
-    display_bite(bite_number, bite_path=bites_repo, theme=theme)
+    config = load_config(EATLOCAL_HOME / ".env")
+    display_bite(bite_number, bite_path=config["PYBITES_REPO"], theme=theme)
 
 
 if __name__ == "__main__":
