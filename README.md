@@ -13,6 +13,7 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 ### Breaking Changes
 
 + With version `0.8.0` there is a new `eatlocal init` command. Use this to configure your credentials and local git repository. You no longer need to set environment variables manually.
++ When displaying a bite, there is no longer a live display. The directions and source code are printed to the console. This eliminated the need for the getkey library and made install eatlocal on windows easier.
 
 ## DEMOS
 
