@@ -7,10 +7,10 @@ from zipfile import is_zipfile
 
 import pytest
 
-from eatlocal.constants import USERNAME, PASSWORD
-from eatlocal.eatlocal import download_bite, extract_bite
+# from eatlocal.constants import USERNAME, PASSWORD
+from eatlocal.eatlocal import display_bite, download_bite, extract_bite
 
-TEST_BITES = [1, 241, 306]
+TEST_BITES = [241, 306]
 
 
 @pytest.mark.slow
@@ -23,11 +23,12 @@ TEST_BITES = [1, 241, 306]
 def test_eatlocal_cannot_download_premium_bite_wo_auth(
     bite_number: int,
     creds: Tuple[str, str],
+    bites_repo_dir,
     capfd,
 ) -> None:
     """Attempt to download a bite ZIP archive file with incorrect credentials."""
 
-    download_bite(bite_number, *creds)
+    download_bite(bite_number, *creds, dest_path=bites_repo_dir, cache_path="cache")
     output = capfd.readouterr()[0]
     assert "was not downloaded" in output
 
@@ -37,6 +38,7 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
 def test_eatlocal_downloads_correct_zipfile(
     bite_number: int,
     bites_repo_dir: Path,
+    testing_config,
 ) -> None:
     """Download a ZIP archive file for a specific bite with correct credentials.
 
@@ -45,9 +47,15 @@ def test_eatlocal_downloads_correct_zipfile(
 
     Checks for ZIP file existence before and after the download.
     """
-    expected = Path(f"pybites_bite{bite_number}.zip")
+    expected = Path(f"cache/pybites_bite{bite_number}.zip").resolve()
     assert not expected.exists()
-    download_bite(bite_number, USERNAME, PASSWORD)
+    download_bite(
+        bite_number,
+        testing_config["PYBITES_USERNAME"],
+        testing_config["PYBITES_PASSWORD"],
+        dest_path=bites_repo_dir,
+        cache_path="cache",
+    )
     assert expected.exists()
     assert is_zipfile(expected)
 
@@ -57,6 +65,7 @@ def test_eatlocal_downloads_correct_zipfile(
 def test_eatlocal_extract_download_zipfile(
     bite_number: int,
     bites_repo_dir: Path,
+    testing_config,
 ) -> None:
     """Download and extract a ZIP archive for a specific bite.
 
@@ -64,8 +73,62 @@ def test_eatlocal_extract_download_zipfile(
     """
 
     expected = Path(str(bite_number))
-    download_bite(bite_number, USERNAME, PASSWORD)
+    config = testing_config
+    download_bite(
+        bite_number,
+        config["PYBITES_USERNAME"],
+        config["PYBITES_PASSWORD"],
+        dest_path=bites_repo_dir,
+        cache_path="cache",
+    )
     assert not expected.exists()
-    extract_bite(bite_number)
+    extract_bite(
+        bite_number,
+        dest_path=bites_repo_dir,
+        cache_path="cache",
+    )
     assert expected.exists()
     assert expected.is_dir()
+
+
+@pytest.mark.parametrize("bite_number", TEST_BITES)
+def test_cannot_display_missing_bite(
+    bite_number: int,
+    bites_repo_dir: Path,
+    capfd,
+) -> None:
+    """Attempt to download a bite ZIP archive file with incorrect credentials."""
+
+    display_bite(bite_number, bite_path=bites_repo_dir, theme='material')
+    output = capfd.readouterr()[0]
+    assert "Unable to display bite" in output
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("bite_number", TEST_BITES)
+def test_display_bite(
+    bite_number: int,
+    bites_repo_dir: Path,
+    testing_config: dict,
+    capfd,
+) -> None:
+    """Attempt to download a bite ZIP archive file with incorrect credentials."""
+
+    config = testing_config
+    download_bite(
+        bite_number,
+        config["PYBITES_USERNAME"],
+        config["PYBITES_PASSWORD"],
+        dest_path=bites_repo_dir,
+        cache_path="cache",
+    )
+    extract_bite(
+        bite_number,
+        dest_path=bites_repo_dir,
+        cache_path="cache",
+    )
+    display_bite(bite_number, bite_path=bites_repo_dir, theme='material')
+    output = capfd.readouterr()[0]
+    assert f"Displaying Bite {bite_number} at" in output
+    assert "Code" in output
+    assert "Directions" in output

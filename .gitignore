@@ -7,3 +7,4 @@ __pycache__
 pybites_bite*.zip
 wily-report.html
 [0-9]*
+.coverage
