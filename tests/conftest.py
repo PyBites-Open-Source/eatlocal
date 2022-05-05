@@ -12,12 +12,13 @@ from dotenv import dotenv_values
 from eatlocal.constants import EATLOCAL_HOME
 
 
-@pytest.fixture
-def bites_repo_dir(tmp_path) -> Generator[Path, None, None]:
+@pytest.fixture(scope='session')
+def bites_repo_dir(tmp_path_factory) -> Generator[Path, None, None]:
     cwd = Path.cwd()
-    os.chdir(tmp_path)
+    testing = tmp_path_factory.mktemp('testing_repo')
+    os.chdir(testing)
 
-    yield tmp_path
+    yield testing
 
     os.chdir(cwd)
 
