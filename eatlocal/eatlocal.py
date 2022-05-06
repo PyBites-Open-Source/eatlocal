@@ -173,10 +173,7 @@ def submit_bite(
     try:
         repo = Repo(bites_repo)
     except InvalidGitRepositoryError:
-        print(
-            "[yellow]:warning: Did you mistype the path? "
-            f"Not a valid git repo: [/yellow]{bites_repo}"
-        )
+        print(f"[yellow]:warning: Not a valid git repo: [/yellow]{bites_repo}")
         return
 
     try:

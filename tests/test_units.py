@@ -1,10 +1,10 @@
-
 from pathlib import Path
 from shutil import rmtree
 
 import pytest
+from git import InvalidGitRepositoryError
 
-from eatlocal.eatlocal import display_bite, extract_bite
+from eatlocal.eatlocal import display_bite, extract_bite, submit_bite
 
 TESTING_REPO = Path("./tests/testing_repo/").resolve()
 NOT_DOWNLOADED = (3, 23)
@@ -16,8 +16,7 @@ LOCAL_TEST_BITES = (2, 241)
 def test_extract_zipfile(
     bite_number: int,
 ) -> None:
-    """Download and extract a ZIP archive for a specific bite.
-
+    """Extract a ZIP archive for a specific bite.
     Checks for bite directory existence before and after the extraction.
     """
 
@@ -34,14 +33,30 @@ def test_extract_zipfile(
 
 
 @pytest.mark.parametrize("bite_number", LOCAL_TEST_BITES)
+def test_cannot_extract_existing_bite(
+    bite_number: int,
+    capsys,
+) -> None:
+    """Checks that an existing bite can not be extracted unless forced."""
+
+    extract_bite(
+        bite_number,
+        dest_path=TESTING_REPO,
+        cache_path="cache",
+    )
+    output = capsys.readouterr().out
+    assert f"There already exists a directory for bite {bite_number}. " in output
+
+
+@pytest.mark.parametrize("bite_number", LOCAL_TEST_BITES)
 def test_display_bite(
     bite_number: int,
-    capfd,
+    capsys,
 ) -> None:
-    """Attempt to download a bite ZIP archive file with incorrect credentials."""
+    """Correctly display a bite that has been downloaded and extracted."""
 
     display_bite(bite_number, bite_path=TESTING_REPO, theme="material")
-    output = capfd.readouterr()[0]
+    output = capsys.readouterr().out
     assert f"Displaying Bite {bite_number} at" in output
     assert "Code" in output
     assert "Directions" in output
@@ -50,10 +65,28 @@ def test_display_bite(
 @pytest.mark.parametrize("bite_number", NOT_DOWNLOADED)
 def test_cannot_display_missing_bite(
     bite_number: int,
-    capfd,
+    capsys,
 ) -> None:
-    """Attempt to download a bite ZIP archive file with incorrect credentials."""
+    """Attempt to display a bite that has not been downloaded and extracted."""
 
     display_bite(bite_number, bite_path=TESTING_REPO, theme="material")
-    output = capfd.readouterr()[0]
+    output = capsys.readouterr().out
     assert "Unable to display bite" in output
+
+
+@pytest.mark.parametrize("bite_number", LOCAL_TEST_BITES)
+def test_submit_from_nongit_repo(
+    bite_number: int,
+    testing_config,
+    capsys,
+) -> None:
+    """Attempt to submit from an invalid git repository."""
+
+    submit_bite(
+        bite_number,
+        testing_config["PYBITES_USERNAME"],
+        testing_config["PYBITES_PASSWORD"],
+        TESTING_REPO,
+    )
+    output = capsys.readouterr().out
+    assert "Not a valid git repo:" in output
