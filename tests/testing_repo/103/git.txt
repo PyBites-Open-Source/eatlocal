@@ -1,0 +1,25 @@
+## Code submission instructions:
+
+git clone https://github.com/russell.helmstedter/pybites
+cd pybites
+mkdir 103
+cd 103
+
+# Move the exercise files from the downloaded zipfile into this directory
+# code your solution, make sure pytest is happy :)
+#
+# If so push your code to Github:
+git add .
+git commit -m "submission Bite 103 @ codechalleng.es"
+git push
+
+# In order to submit your code head over to https://codechalleng.es/bites/103
+# and click the "Offline Mode" dropdown button, then hit the "Download Code" button
+# to pull in your code,
+#
+# Make sure we got the Github path correct, if needed define your default branch
+# alongside your repo here: http://codechalleng.es/settings/#git
+#
+# Lastly save or submit your code as you usually do for a Bite exercise.
+
+# Keep calm and code in Python!

@@ -4,7 +4,7 @@ dist
 __pycache__
 .DS_Store
 .env
-pybites_bite*.zip
+/* pybites_bite*.zip */
 wily-report.html
-[0-9]*
+/* [0-9]* */
 .coverage
