@@ -1,3 +1,5 @@
+"""eatlocal unit tests"""
+
 from pathlib import Path
 from shutil import rmtree
 
