@@ -2,14 +2,13 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
-from git import InvalidGitRepositoryError
 
 from eatlocal.eatlocal import display_bite, extract_bite, submit_bite
 
 TESTING_REPO = Path("./tests/testing_repo/").resolve()
 NOT_DOWNLOADED = (3, 23)
-LOCAL_TEST_ZIPS = (5, 30)
-LOCAL_TEST_BITES = (2, 241)
+LOCAL_TEST_ZIPS = (101, 102)
+LOCAL_TEST_BITES = (103, 104)
 
 
 @pytest.mark.parametrize("bite_number", LOCAL_TEST_ZIPS)
