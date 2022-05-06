@@ -185,3 +185,5 @@ I've found that in order to install packages I have to use an elevated administr
 ![chromedriver in chocolatey](https://i.ibb.co/2cCShcd/chromedriver-via-chocolately.png)
 
 I attempted to use `eatlocal` from [WSL2](https://docs.microsoft.com/en-us/windows/wsl/about) but there seems to be an issue with `google-chrome` and chromedriver not `eatlocal`. I could not get it to work.
+
+**WSL workaround**: Follow instructions for Windows users except install eatlocal globally. Using PowerShell or Windows Terminal, navigate to your WSL distribution's directory that holds your repository and initialize eatlocal from there. Now just download and submit through your external powershell command line instead of your bash terminal. Everything should still behave the same, you just can't use bash or your integrated terminal in VS Code.
