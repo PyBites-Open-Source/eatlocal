@@ -194,7 +194,7 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    display_bite(bite_number, bite_path=config["PYBITES_REPO"], theme=theme)
+    display_bite(bite_number, bite_repo=config["PYBITES_REPO"], theme=theme)
 
 
 if __name__ == "__main__":

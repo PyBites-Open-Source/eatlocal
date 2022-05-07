@@ -57,7 +57,7 @@ def download_bite(
     delay: float = 1.0,
     verbose: bool = False,
 ) -> None:
-    """Download bite ZIP archive file from the platform to the current directory.
+    """Download bite ZIP archive file from the platform to the cache directory in the destination path.
 
     :bite_number: int The number of the bite to download.
     :username: str
@@ -166,7 +166,8 @@ def submit_bite(
     :bite_number: int The number of the bite to submit.
     :username: str
     :password: str
-    :delay: float time in seconds to pause between operations.
+    :bites_repo: Path Path to the github repository linked to PyBites.
+    :delay: float Time in seconds to pause between operations.
     :returns: None
     """
 
@@ -225,16 +226,18 @@ def submit_bite(
 
 def display_bite(
     bite_number: int,
-    bite_path: Path,
+    bite_repo: Path,
     theme: str,
 ) -> None:
     """Display the instructions provided in bite.html and display source code.
 
     :bite_number: int The number of the bite you want to read
+    :bites_repo: Path Path to the github repository linked to PyBites.
+    :theme: str
     :returns: None
     """
 
-    path = Path(bite_path).resolve() / str(bite_number)
+    path = Path(bite_repo).resolve() / str(bite_number)
     if not path.is_dir():
         print(
             f"[yellow]:warning: Unable to display bite {bite_number}. "
