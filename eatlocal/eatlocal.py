@@ -159,6 +159,7 @@ def submit_bite(
     bites_repo: Path,
     delay: float = 1.0,
     verbose: bool = False,
+    testing: bool = False,
 ) -> None:
     """Submits bite by pushing to GitHub and then opens a browser for the
        bite page.
@@ -172,12 +173,11 @@ def submit_bite(
 
     try:
         repo = Repo(bites_repo)
+        repo.index.add(str(bite_number))
+        repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
     except InvalidGitRepositoryError:
         print(f"[yellow]:warning: Not a valid git repo: [/yellow]{bites_repo}")
         return
-
-    try:
-        repo.index.add(str(bite_number))
     except FileNotFoundError:
         print(
             f"[yellow]:warning: Seems like there is no bite {bite_number} to submit. "
@@ -185,7 +185,6 @@ def submit_bite(
         )
         return
 
-    repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
     repo.remotes.origin.push().raise_if_error()
     if verbose:
         print(f"\nPushed bite {bite_number} to github")
@@ -217,7 +216,8 @@ def submit_bite(
         button.click()
         sleep(delay)
 
-    webbrowser.open(bite_url)
+    if not testing:
+        webbrowser.open(bite_url)
 
 
 def display_bite(

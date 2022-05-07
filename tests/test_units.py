@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from shutil import rmtree
+from unittest.mock import patch
 
 import pytest
 
