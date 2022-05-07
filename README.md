@@ -1,3 +1,5 @@
+[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
+
 # eatlocal
 
 Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. You can display bite directions in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
