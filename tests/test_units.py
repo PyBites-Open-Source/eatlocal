@@ -56,7 +56,7 @@ def test_display_bite(
 ) -> None:
     """Correctly display a bite that has been downloaded and extracted."""
 
-    display_bite(bite_number, bite_path=TESTING_REPO, theme="material")
+    display_bite(bite_number, bite_repo=TESTING_REPO, theme="material")
     output = capsys.readouterr().out
     assert f"Displaying Bite {bite_number} at" in output
     assert "Code" in output
@@ -70,7 +70,7 @@ def test_cannot_display_missing_bite(
 ) -> None:
     """Attempt to display a bite that has not been downloaded and extracted."""
 
-    display_bite(bite_number, bite_path=TESTING_REPO, theme="material")
+    display_bite(bite_number, bite_repo=TESTING_REPO, theme="material")
     output = capsys.readouterr().out
     assert "Unable to display bite" in output
 
