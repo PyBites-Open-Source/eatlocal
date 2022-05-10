@@ -83,6 +83,14 @@ urllib.request.urlretrieve(
 
 * known issues
   + [x] Erik mentioned that he needed to set up a pasword since he had authenticated pybites using github. need to add this caveat to the =readme.md=.
-  + [-] once Erik's pull requests are merged, I need to restructure the =readme.md=. perhaps have a quickstart documentation directly in the =readme.md= and then the full help documentation linked?
+  + [X] once Erik's pull requests are merged, I need to restructure the =readme.md=. perhaps have a quickstart documentation directly in the =readme.md= and then the full help documentation linked?
   + [ ] need tests that cover submitting a bite
-  + [ ] need tests that cover the display function
+  + [X] need tests that cover the display function
+
+* Testing Strategy
+** Download
+** Display
+** Submit
++ [X] submitting from non-git repo
++ [X] submitting bite that doesn't exist
++ [ ] end2end submit? Maybe have selenium unsubmit a bite and resumbit?
