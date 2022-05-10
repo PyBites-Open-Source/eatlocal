@@ -8,4 +8,4 @@ runner = CliRunner()
 def test_version():
     result = runner.invoke(cli, ["--version"])
     assert result.exit_code == 0
-    assert "0.8.0" in result.stdout
+    assert "0.8.1" in result.stdout

@@ -6,7 +6,7 @@ Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges
 
 ## Updates
 
-### version 0.8.0
+### version 0.8.1
 
 + Better warning messages
 + Faster downloads
