@@ -9,7 +9,7 @@ from typing import Union
 from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
-from git import InvalidGitRepositoryError, Repo
+from git import GitCommandError, InvalidGitRepositoryError, Repo
 from rich import print
 from rich.console import Console
 from rich.layout import Layout
@@ -186,7 +186,16 @@ def submit_bite(
         )
         return
 
-    repo.remotes.origin.push().raise_if_error()
+    try:
+        repo.remotes.origin.push().raise_if_error()
+    except GitCommandError:
+        print(
+            "[yellow]:warning: Unable to push to the remote PyBites repo.\n"
+            f'Try navigating to your local repo @ [/yellow]{bites_repo}[yellow] and running the command "git push".\n'
+            "Follow the advice from git.[/yellow]"
+        )
+        return
+
     if verbose:
         print(f"\nPushed bite {bite_number} to github")
 
