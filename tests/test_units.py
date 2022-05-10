@@ -2,13 +2,15 @@
 
 from pathlib import Path
 from shutil import rmtree
+from unittest import mock
 
 import pytest
+from git import GitCommandError
 
 from eatlocal.eatlocal import display_bite, extract_bite, submit_bite
 
 TESTING_REPO = Path("./tests/testing_repo/").resolve()
-NOT_DOWNLOADED = (426, 499)
+NOT_DOWNLOADED = (2, 332)
 LOCAL_TEST_ZIPS = (101, 102)
 LOCAL_TEST_BITES = (103, 104)
 
@@ -116,11 +118,13 @@ def test_submit_missing_bite(
     capsys,
 ) -> None:
     """Attempt to submit from an invalid git repository."""
-    submit_bite(
-        NOT_DOWNLOADED,
-        testing_config["PYBITES_USERNAME"],
-        testing_config["PYBITES_PASSWORD"],
-        testing_config["PYBITES_REPO"],
-    )
-    output = capsys.readouterr().out
-    assert "Did you mean" in output
+    with mock.patch("eatlocal.eatlocal.Repo") as mock_repo:
+        mock_repo.side_effect = FileNotFoundError
+        submit_bite(
+            NOT_DOWNLOADED,
+            testing_config["PYBITES_USERNAME"],
+            testing_config["PYBITES_PASSWORD"],
+            TESTING_REPO,
+        )
+        output = capsys.readouterr().out
+        assert "Did you mean" in output
