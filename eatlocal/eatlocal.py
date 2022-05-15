@@ -159,7 +159,6 @@ def submit_bite(
     bites_repo: Path,
     delay: float = 1.0,
     verbose: bool = False,
-    testing: bool = False,
 ) -> None:
     """Submits bite by pushing to GitHub and then opens a browser for the
        bite page.
@@ -226,8 +225,7 @@ def submit_bite(
         button.click()
         sleep(delay)
 
-    if not testing:
-        webbrowser.open(bite_url)
+    webbrowser.open(bite_url)
 
 
 def display_bite(
