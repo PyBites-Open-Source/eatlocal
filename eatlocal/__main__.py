@@ -4,6 +4,7 @@
 
 import sys
 from pathlib import Path
+from typing import Dict
 
 import typer
 from dotenv import dotenv_values
@@ -19,7 +20,7 @@ from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
 console = Console()
 
 
-def load_config(env_path: Path) -> dict[str, str]:
+def load_config(env_path: Path) -> Dict[str, str]:
     config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
     if not env_path.exists():
         console.print(

@@ -2,20 +2,18 @@
 
 # eatlocal
 
-Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from the directions on the PyBites website. You can display bite directions in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the correct location.
+Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download, unzip, and organize bites according to the expected structure from PyBites website. You can display bite directions directly in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the corresponding bite page.
 
 ## Updates
 
-### version 0.8.1
+### version 0.8.3
 
-+ Better warning messages
-+ Faster downloads
-+ New command: `eatlocal init`
+eatlocal is now compatible with Python 3.8. This matches the expected python version for the platform.
 
 ### Breaking Changes
 
 + With version `0.8.0` there is a new `eatlocal init` command. Use this to configure your credentials and local git repository. You no longer need to set environment variables manually.
-+ When displaying a bite, there is no longer a live display. The directions and source code are printed to the console. This eliminated the need for the getkey library and made install eatlocal on windows easier.
++ When displaying a bite, there is no longer a live display. The directions and source code are printed to the console. This eliminated the need for the getkey library and made installing eatlocal on windows easier.
 
 ## DEMOS
 
@@ -90,11 +88,21 @@ eatlocal submit <bite number>
 
 ## Installation
 
+There are a few options for install eatlocal.
+
+### Using pipx
+
+If you have [pipx](https://pypa.github.io/pipx/) installed:
+```bash
+pipx install eatlocal
+```
+
 ### macOS/Linux
 
 ```bash
 pip3 install eatlocal
 ```
+
 ### Windows
 
 ```bash

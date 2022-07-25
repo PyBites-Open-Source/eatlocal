@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Dict
 
 import pytest
 from dotenv import dotenv_values
@@ -24,7 +24,7 @@ def bites_repo_dir(tmp_path_factory) -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def testing_config() -> dict:
+def testing_config() -> Dict[str, str]:
     config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
     config.update(dotenv_values(dotenv_path=Path(EATLOCAL_HOME / ".env")))
     return config

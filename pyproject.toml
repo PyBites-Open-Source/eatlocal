@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eatlocal"
-version = "0.8.1"
+version = "0.8.3"
 description = "eatlocal helps the user solve PyBite code challenges on their local machine"
 authors = ["Russell Helmstedter <rhelmstedter@gmail.com>"]
 license = "LICENSE"
