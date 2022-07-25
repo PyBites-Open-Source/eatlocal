@@ -1,6 +1,8 @@
 """ A package to solve PyBites locally"""
-from importlib import metadata
 
-__version__ = metadata.version(__package__)
+import pkg_resources
 
-del metadata
+__version__ = pkg_resources.get_distribution('eatlocal').version
+
+if __name__ == "__main__":
+    print(__version__)
