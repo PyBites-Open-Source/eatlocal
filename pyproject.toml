@@ -23,8 +23,10 @@ GitPython = "^3.1.26"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 black = {version = "^22.3.0", allow-prereleases = true}
+pytest-xdist = "^2.5.0"
 
 [tool.pytest.ini_options]
+addopts = "-n=auto"
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 
 
