@@ -111,9 +111,10 @@ pip install eatlocal
 
 ## Setup
 
-1. Go through the directions on the PyBites website to connect your GitHub account to your PyBites account. You will find the necessary steps under `Settings` in the navigation sidebar.
+1. Go through the directions on the [PyBites website](https://codechalleng.es/settings/#git) to connect your GitHub account to your PyBites account. You will find the necessary steps under `Settings` in the navigation sidebar (There is a [video tutorial](https://youtu.be/eQseYbW3dvI) too).
 2. Run `eatlocal init` to configure your PyBites username, PyBites password*, and local git repository.
 2. Make sure you have Chrome and chromedriver installed and on `$PATH`. The chromedriver version must match the version of your Chrome browser. [Chromedriver downloads](https://chromedriver.chromium.org/downloads).
+
 
 *Note:  If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
 
