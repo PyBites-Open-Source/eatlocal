@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eatlocal"
-version = "0.8.3"
+version = "0.8.4"
 description = "eatlocal helps the user solve PyBite code challenges on their local machine"
 authors = ["Russell Helmstedter <rhelmstedter@gmail.com>"]
 license = "LICENSE"
@@ -12,7 +12,7 @@ keywords = ["cli", "pybites"]
 eatlocal = "eatlocal.__main__:cli"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 selenium = "^4.1.0"
 typer = "^0.4.0"
 python-dotenv = "^0.20.0"

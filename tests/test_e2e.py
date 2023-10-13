@@ -2,7 +2,6 @@
 """
 
 from pathlib import Path
-from typing import Tuple
 from zipfile import is_zipfile
 
 import pytest
@@ -21,7 +20,7 @@ TEST_BITES = [1, 243, 325]
 )
 def test_eatlocal_cannot_download_premium_bite_wo_auth(
     bite_number: int,
-    creds: Tuple[str, str],
+    creds: tuple[str, str],
     bites_repo_dir,
     capfd,
 ) -> None:
