@@ -75,7 +75,7 @@ def download_bite(
     verbose: bool = False,
     force: bool = False,
 ):
-    bite_dir = bite_page.split('/')[-2].replace("-", "_")
+    bite_dir = bite_page.split("/")[-2].replace("-", "_")
     dest_path = Path(dest_path).resolve() / bite_dir
     print(dest_path)
 
@@ -93,10 +93,9 @@ def download_bite(
     r = requests.get(bite_page)
     soup = BeautifulSoup(r.content, "html.parser")
     bite_description = soup.find(id="bite-description")
-    with open(dest_path / 'bite.html', "w") as bite_html:
-        bite_html.write(str(bite_description))
-        # for line in bite_description.find_all("p")[1:]:
-        #     bite_html.write(line.text.strip(" "))
+    with open(dest_path / "bite.html", "w") as bite_html:
+        for p in bite_description.find_all("p", {"class": "text-gray-700"})[-1]:
+            bite_html.write(str(p).strip(" "))
 
 
 def submit_bite(
