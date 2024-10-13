@@ -5,7 +5,7 @@ from shutil import rmtree
 from unittest import mock
 
 import pytest
-from git import GitCommandError
+# from git import GitCommandError
 
 from eatlocal.eatlocal import display_bite, extract_bite, submit_bite
 

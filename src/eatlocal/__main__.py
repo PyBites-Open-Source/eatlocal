@@ -1,6 +1,4 @@
-"""command-line interface for eatlocal
-
-"""
+"""command-line interface for eatlocal"""
 
 import sys
 from pathlib import Path
@@ -12,11 +10,12 @@ from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
-from . import __version__
+# from . import __version__
 from .constants import EATLOCAL_HOME
-from .eatlocal import display_bite, download_bite, extract_bite, submit_bite
+from .eatlocal import choose_bite, display_bite, download_bite, submit_bite
 
 console = Console()
+cli = typer.Typer(add_completion=False)
 
 
 def load_config(env_path: Path) -> dict[str, str]:
@@ -30,9 +29,6 @@ def load_config(env_path: Path) -> dict[str, str]:
 
     config.update(dotenv_values(dotenv_path=env_path))
     return config
-
-
-cli = typer.Typer(add_completion=False)
 
 
 def report_version(display: bool) -> None:
@@ -108,14 +104,6 @@ def init(
 @cli.command()
 def download(
     ctx: typer.Context,
-    bite_number: int,
-    cleanup: bool = typer.Option(
-        False,
-        "--cleanup",
-        "-C",
-        is_flag=True,
-        help="Remove downloaded bite archive file.",
-    ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -138,23 +126,8 @@ def download(
     the archive is deleted after extraction.
     """
     config = load_config(EATLOCAL_HOME / ".env")
-    with Status(f"Downloading Bite {bite_number}") as status:
-        download_bite(
-            bite_number,
-            config["PYBITES_USERNAME"],
-            config["PYBITES_PASSWORD"],
-            cache_path="cache",
-            dest_path=Path(config["PYBITES_REPO"]),
-            verbose=verbose,
-        )
-        status.update(f"Extracting Bite {bite_number}")
-        extract_bite(
-            bite_number,
-            cleanup=cleanup,
-            cache_path="cache",
-            dest_path=Path(config["PYBITES_REPO"]),
-            force=force,
-        )
+    bite, bite_page = choose_bite(verbose)
+    download_bite(bite, bite_page, config["PYBITES_REPO"], verbose, force)
 
 
 @cli.command()
@@ -184,7 +157,7 @@ def submit(
 @cli.command()
 def display(
     ctx: typer.Context,
-    bite_number: int,
+    bite: str,
     theme: str = typer.Option(
         "material",
         "--theme",
@@ -194,7 +167,7 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    display_bite(bite_number, bite_repo=config["PYBITES_REPO"], theme=theme)
+    display_bite(bite, bite_repo=config["PYBITES_REPO"], theme=theme)
 
 
 if __name__ == "__main__":

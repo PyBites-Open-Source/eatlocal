@@ -1,60 +1,41 @@
-""" download and submit bites
-"""
-
+"""download and submit bites"""
 
 import webbrowser
+import requests
+from os import environ, makedirs
 from pathlib import Path
 from time import sleep
-from typing import Union
-from zipfile import ZipFile, is_zipfile
 
 from bs4 import BeautifulSoup
 from git import GitCommandError, InvalidGitRepositoryError, Repo
+from playwright.sync_api import sync_playwright, Page
 from rich import print
 from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.traceback import install
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
+from iterfzf import iterfzf
 
-from .constants import BITE_URL, BITE_ZIPFILE, SUBMIT_URL
-from .pydriver import driver_setup, pybites_login
+from .constants import BITE_URL, LOGIN_URL, EXERCISES_URL, FZF_DEFAULT_OPTS
 
 install(show_locals=True)
 
 
-def find_cached_archive(bite_number: int, path: Union[str, Path] = None) -> Path:
-    """Return a Path for a PyBites bite zip archive in the given `path`.
+def login(browser, username, password) -> Page:
+    page: Page = browser.new_page()
+    # only shorten for debugging, some bites need in e2e test need longer
+    page.set_default_timeout(30000)
+    page.goto(LOGIN_URL)
 
-    :bite_number: int
-    :path: optional Path, resolved path defaults to current directory.
-    :return: Path
-
-    Raises:
-    - FileNotFoundError if archive not found in the target path.
-    """
-
-    path = Path(path or Path.cwd()).resolve()
-
-    filename = BITE_ZIPFILE.format(bite_number=bite_number)
-
-    try:
-        archive = list(path.rglob(filename))[0]
-    except IndexError:
-        raise FileNotFoundError(filename) from None
-
-    return archive.resolve()
+    page.click("#login-link")
+    page.fill('input[name="login"]', username)
+    page.fill('input[name="password"]', password)
+    page.click('button[type="submit"]')
+    return page
 
 
-def download_bite(
-    bite_number: int,
-    username: str,
-    password: str,
-    dest_path: Path,
-    cache_path: str,
-    delay: float = 1.0,
+def choose_bite(
     verbose: bool = False,
 ) -> None:
     """Download bite ZIP archive file from the platform to the cache directory in the destination path.
@@ -67,89 +48,55 @@ def download_bite(
     :returns: None
     """
 
-    try:
-        cache_path = Path(dest_path / cache_path).resolve()
-        path = find_cached_archive(bite_number, path=cache_path)
-        print(f"Bite {bite_number} found: @ {path}")
-        return
-    except FileNotFoundError:
-        pass
-
-    cache_path = Path(dest_path / cache_path).resolve()
-    cache_path.mkdir(mode=0o755, parents=True, exist_ok=True)
-
     if verbose:
-        print(f"Retrieving bite {bite_number}...")
-    sleep(delay)
-
-    driver = driver_setup(cache_path)
-    pybites_login(driver, username, password, verbose=verbose)
-
-    driver.get(BITE_URL.format(bite_number=bite_number))
-    sleep(delay)
-
-    try:
-        bite_ziparchive = find_cached_archive(bite_number, path=cache_path)
-    except FileNotFoundError:
-        print(
-            f"[yellow]:warning: Bite {bite_number} was not downloaded. "
-            "Ensure you are connected to the internet and your PyBites credentials are valid."
-        )
-        return
-
-    if not is_zipfile(bite_ziparchive):
-        print(
-            f"[yellow]:warning: Bite {bite_number} is not a valid archive file.[/yellow]"
-        )
-        return
-
-    if verbose:
-        print(f"Bite {bite_number} successully downloaded: {bite_ziparchive}")
+        print("Retrieving bites list...")
+    r = requests.get(EXERCISES_URL)
+    soup = BeautifulSoup(r.content, "html.parser")
+    rows = soup.table.find_all("tr")
+    bites = {}
+    for row in rows[1:]:
+        try:
+            bite = row.find_all("td")[1].a
+            bite_name = bite.text
+            bite_link = bite["href"]
+            bites[bite_name] = bite_link
+        except IndexError:
+            continue
+    environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
+    bite_to_download = iterfzf(bites, multi=False)
+    bite_page = BITE_URL.format(bite_name=bites[bite_to_download])
+    return bite_to_download, bite_page
 
 
-def extract_bite(
-    bite_number: int,
-    dest_path: Path = None,
-    cleanup: bool = False,
-    cache_path: Path = None,
+def download_bite(
+    bite: str,
+    bite_page: str,
+    dest_path: Path,
+    verbose: bool = False,
     force: bool = False,
-) -> None:
-    """Extracts all the required files into a new directory
-    named by the bite number.
-
-    :bite_number: int The number of the bite you want to extract.
-    :dest_path: Path to extraction location.
-    :cleanup: bool if False removes the downloaded zipfile.
-    :cache_path: Path to search for ZIp archive.
-    :force: bool if True overwrites the directory for the bite_number.
-    :returns: None
-    """
-
-    try:
-        cache_path = Path(dest_path / cache_path).resolve()
-        bite = find_cached_archive(bite_number, path=cache_path)
-    except FileNotFoundError as error:
-        print(f"[yellow]:warning: Missing ZIP archive for bite {bite_number}: {error}")
-        return
-
-    dest_path = Path(dest_path).resolve() / str(bite_number)
+):
+    bite_dir = bite_page.split('/')[-2].replace("-", "_")
+    dest_path = Path(dest_path).resolve() / bite_dir
+    print(dest_path)
 
     if dest_path.is_dir() and not force:
         print(
-            f"[yellow]:warning: There already exists a directory for bite {bite_number}. "
+            f"[yellow]:warning: There already exists a directory for {bite}. "
             "Use the --force option to overwite."
         )
         return
 
-    else:
-        with ZipFile(bite, "r") as zipfile:
-            zipfile.extractall(dest_path)
-
-        print(f"Extracted bite {bite_number} @ {dest_path}")
-
-        if cleanup:
-            print(f"Cleaning up bite {bite_number} archive: {bite}")
-            bite.unlink()
+    try:
+        makedirs(dest_path)
+    except FileExistsError:
+        pass
+    r = requests.get(bite_page)
+    soup = BeautifulSoup(r.content, "html.parser")
+    bite_description = soup.find(id="bite-description")
+    with open(dest_path / 'bite.html', "w") as bite_html:
+        bite_html.write(str(bite_description))
+        # for line in bite_description.find_all("p")[1:]:
+        #     bite_html.write(line.text.strip(" "))
 
 
 def submit_bite(
@@ -200,7 +147,7 @@ def submit_bite(
 
     driver = driver_setup()
     pybites_login(driver, username, password, verbose=verbose)
-    bite_url = SUBMIT_URL.format(bite_number=bite_number)
+    # bite_url = SUBMIT_URL.format(bite_number=bite_number)
     driver.get(bite_url)
     sleep(delay)
 
@@ -229,7 +176,7 @@ def submit_bite(
 
 
 def display_bite(
-    bite_number: int,
+    bite: str,
     bite_repo: Path,
     theme: str,
 ) -> None:
@@ -241,11 +188,11 @@ def display_bite(
     :returns: None
     """
 
-    path = Path(bite_repo).resolve() / str(bite_number)
+    path = Path(bite_repo).resolve() / bite
     if not path.is_dir():
         print(
-            f"[yellow]:warning: Unable to display bite {bite_number}. "
-            f"Please make sure that path is correct and bite {bite_number} has been downloaded[/yellow]"
+            f"[yellow]:warning: Unable to display bite {bite}. "
+            f"Please make sure that path is correct and {bite} has been downloaded[/yellow]"
         )
         return
 
@@ -277,7 +224,7 @@ def display_bite(
     )
 
     layout["header"].update(
-        Panel(f"Displaying Bite {bite_number} at {html_file}", title="eatlocal")
+        Panel(f"Displaying {bite} at {html_file}", title="eatlocal")
     )
     layout["main"]["directions"].update(Panel(instructions, title="Directions"))
     layout["main"]["code"].update(Panel(code, title="Code"))
