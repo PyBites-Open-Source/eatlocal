@@ -93,9 +93,18 @@ def download_bite(
     r = requests.get(bite_page)
     soup = BeautifulSoup(r.content, "html.parser")
     bite_description = soup.find(id="bite-description")
+    code = soup.find(id="python-editor").text
+    tests = soup.find(id="test-python-editor").text
+
     with open(dest_path / "bite.html", "w") as bite_html:
         for p in bite_description.find_all("p", {"class": "text-gray-700"})[-1]:
             bite_html.write(str(p).strip(" "))
+
+    with open(dest_path / f"{bite_dir}.py", "w") as py_file:
+        py_file.write(code)
+
+    with open(dest_path / f"test_{bite_dir}.py", "w") as test_file:
+        test_file.write(tests)
 
 
 def submit_bite(
