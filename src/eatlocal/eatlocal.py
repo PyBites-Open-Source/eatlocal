@@ -38,15 +38,7 @@ def login(browser, username, password) -> Page:
 def choose_bite(
     verbose: bool = False,
 ) -> None:
-    """Download bite ZIP archive file from the platform to the cache directory in the destination path.
-
-    :bite_number: int The number of the bite to download.
-    :username: str
-    :password: str
-    :delay: float Time in seconds to pause between operations
-    :cache_path: Path for cached ZIP archive files
-    :returns: None
-    """
+    """Choose which bite will be downloaded."""
 
     if verbose:
         print("Retrieving bites list...")
@@ -75,6 +67,7 @@ def download_bite(
     verbose: bool = False,
     force: bool = False,
 ):
+    """Scrapes bite from platform and save in a directory."""
     bite_dir = bite_page.split("/")[-2].replace("-", "_")
     dest_path = Path(dest_path).resolve() / bite_dir
     print(dest_path)
