@@ -4,20 +4,27 @@ import webbrowser
 import requests
 from os import environ, makedirs
 from pathlib import Path
-from time import sleep
 
 from bs4 import BeautifulSoup
 from git import GitCommandError, InvalidGitRepositoryError, Repo
-from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import Page
 from rich import print
-from rich.console import Console
 from rich.layout import Layout
+from rich.prompt import Confirm
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.traceback import install
 from iterfzf import iterfzf
 
-from .constants import BITE_URL, LOGIN_URL, EXERCISES_URL, FZF_DEFAULT_OPTS
+from .constants import (
+    BITE_URL,
+    LOGIN_URL,
+    EXERCISES_URL,
+    FZF_DEFAULT_OPTS,
+    WARNING,
+    SUGGESTION,
+)
+from .console import console
 
 install(show_locals=True)
 
@@ -39,7 +46,6 @@ def choose_bite(
     verbose: bool = False,
 ) -> None:
     """Choose which bite will be downloaded."""
-
     if verbose:
         print("Retrieving bites list...")
     r = requests.get(EXERCISES_URL)
@@ -60,18 +66,21 @@ def choose_bite(
     return bite_to_download, bite_url
 
 
+def _bite_url_to_dir(bite_url, pybites_repo):
+    bite_dir = bite_url.split("/")[-2].replace("-", "_")
+    bite_path = Path(pybites_repo).resolve() / bite_dir
+    return bite_path
+
+
 def download_bite(
     bite: str,
     bite_url: str,
     bite_content: str,
-    dest_path: Path,
+    pybites_repo: Path,
     verbose: bool = False,
     force: bool = False,
 ) -> None:
-    bite_dir = bite_url.split("/")[-2].replace("-", "_")
-    dest_path = Path(dest_path).resolve() / bite_dir
-    print(dest_path)
-
+    dest_path = _bite_url_to_dir(bite_url, pybites_repo)
     if dest_path.is_dir() and not force:
         print(
             f"[yellow]:warning: There already exists a directory for {bite}. "
@@ -83,6 +92,7 @@ def download_bite(
         makedirs(dest_path)
     except FileExistsError:
         pass
+
     soup = BeautifulSoup(bite_content, "html.parser")
     bite_description = soup.find(id="bite-description")
     code = soup.find(id="python-editor").text
@@ -101,34 +111,60 @@ def download_bite(
 
 
 def submit_bite(
-    bite_number: int,
-    username: str,
-    password: str,
-    bites_repo: Path,
-    delay: float = 1.0,
+    bite: str,
+    bite_url: str,
+    pybites_repo: Path,
+    page: Page,
     verbose: bool = False,
 ) -> None:
-    """Submits bite by pushing to GitHub and then opens a browser for the
-       bite page.
+    """Submits bite then opens a browser for the bite page."""
+    bite_dir = _bite_url_to_dir(bite_url, pybites_repo)
+    # get code from bite_dir
+    if not bite_dir.is_dir():
+        console.print(f":warning: Unable to submit: {bite}.", style=WARNING)
+        console.print(
+            "Please make sure that path is correct and bite has been downloaded.",
+            style=SUGGESTION,
+        )
+        return
+    python_file = [
+        file
+        for file in list(bite_dir.glob("*.py"))
+        if not file.name.startswith("test_")
+    ][0]
+    with open(python_file) as file:
+        code = file.read()
 
-    :bite_number: int The number of the bite to submit.
-    :username: str
-    :password: str
-    :bites_repo: Path Path to the github repository linked to PyBites.
-    :delay: float Time in seconds to pause between operations.
-    :returns: None
-    """
+    page.goto(bite_url)
+    page.wait_for_url(bite_url)
 
+    page.evaluate(
+        f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(code)})"""
+    )
+    page.click("#validate-button")
+    page.wait_for_selector("#feedback", state="visible")
+    page.wait_for_function(
+        "document.querySelector('#feedback').innerText.includes('Congrats, you passed this Bite')"
+    )
+
+    validate_result = page.text_content("#feedback")
+    if "Congrats, you passed this Bite" in validate_result:
+        print("Submission was successfull.")
+    if Confirm.ask(f"Would you like to open a browser to {bite}?"):
+        webbrowser.open(bite_url)
+
+
+def push_to_github(bite, bites_repo, verbose):
     try:
         repo = Repo(bites_repo)
-        repo.index.add(str(bite_number))
-        repo.index.commit(f"submission Bite {bite_number} @ codechalleng.es")
+        repo.index.add(str(bite))
+        repo.index.commit(f"Solved Bite: {bite}")
     except InvalidGitRepositoryError:
         print(f"[yellow]:warning: Not a valid git repo: [/yellow]{bites_repo}")
         return
     except FileNotFoundError:
         print(
-            f"[yellow]:warning: Seems like there is no bite {bite_number} to submit. "
+            f"[yellow]:warning: Seems like there is no bite {bite} to submit. "
             "Did you mean to submit a different bite?[/yellow]"
         )
         return
@@ -144,36 +180,7 @@ def submit_bite(
         return
 
     if verbose:
-        print(f"\nPushed bite {bite_number} to github")
-
-    driver = driver_setup()
-    pybites_login(driver, username, password, verbose=verbose)
-    # bite_url = SUBMIT_URL.format(bite_number=bite_number)
-    driver.get(bite_url)
-    sleep(delay)
-
-    buttons = {
-        "githubDropdown": "Downloading code from GitHub.",
-        "ghpull": "",
-        "save": f"Submitting bite {bite_number}.",
-    }
-
-    for button_name, message in buttons.items():
-        if message:
-            if verbose:
-                print(message)
-        try:
-            button = driver.find_element(By.ID, button_name)
-        except NoSuchElementException:
-            print(
-                "[yellow]:warning: Looks like you've already completed this bite![/yellow]"
-            )
-            break
-
-        button.click()
-        sleep(delay)
-
-    webbrowser.open(bite_url)
+        print(f"\nPushed bite {bite} to github")
 
 
 def display_bite(
@@ -230,5 +237,4 @@ def display_bite(
     layout["main"]["directions"].update(Panel(instructions, title="Directions"))
     layout["main"]["code"].update(Panel(code, title="Code"))
 
-    console = Console()
     console.print(layout)

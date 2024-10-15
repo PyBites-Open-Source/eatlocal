@@ -2,21 +2,19 @@
 
 import sys
 from pathlib import Path
-from time import sleep
 
 import typer
 from dotenv import dotenv_values
-from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import sync_playwright
 from rich import print
-from rich.console import Console
 from rich.prompt import Confirm, Prompt
-from rich.status import Status
+
+from .console import console
 
 # from . import __version__
-from .constants import EATLOCAL_HOME, EXERCISES_URL
-from .eatlocal import login, choose_bite, display_bite, download_bite, submit_bite
+from .constants import EATLOCAL_HOME, SUGGESTION, WARNING
+from .eatlocal import choose_bite, display_bite, download_bite, login, submit_bite
 
-console = Console()
 cli = typer.Typer(add_completion=False)
 
 
@@ -24,9 +22,12 @@ def load_config(env_path: Path) -> dict[str, str]:
     config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
     if not env_path.exists():
         console.print(
-            "[red]:warning: Could not find or read .eatlocal/.env in your home directory."
+            ":warning: Could not find or read .eatlocal/.env in your home directory.",
+            style=WARNING,
         )
-        console.print("[yellow]Please run [underline]eatlocal init[/underline] first.")
+        console.print(
+            "Please run [underline]eatlocal init[/underline] first.", style=WARNING
+        )
         sys.exit()
 
     config.update(dotenv_values(dotenv_path=env_path))
@@ -74,7 +75,7 @@ def init(
             confirm_password = Prompt.ask("Confirm PyBites password", password=True)
             if password == confirm_password:
                 break
-            print("[yellow]:warning: Password did not match.")
+            print(":warning: Password did not match.", style=WARNING)
         repo = Path(
             Prompt.ask(
                 "Enter the path to your local git repo for PyBites, or press enter for the current directory",
@@ -84,7 +85,10 @@ def init(
         ).expanduser()
 
         if not repo.exists():
-            print(f"[yellow]:warning: The path {repo} could not be found!")
+            print(f":warning: The path {repo} could not be found!", style=WARNING)
+            print(
+                "Make sure you have created a git repo for your bites", style=SUGGESTION
+            )
 
         print(f"Your input - username: {username}, repo: {repo}.")
         if Confirm.ask(
@@ -151,7 +155,6 @@ def download(
 @cli.command()
 def submit(
     ctx: typer.Context,
-    bite_number: int,
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -162,14 +165,21 @@ def submit(
 ) -> None:
     """Submit a bite back to Codechalleng.es."""
     config = load_config(EATLOCAL_HOME / ".env")
-    with Status(f"Submitting Bite {bite_number}"):
-        submit_bite(
-            bite_number,
-            config["PYBITES_USERNAME"],
-            config["PYBITES_PASSWORD"],
-            config["PYBITES_REPO"],
-            verbose=verbose,
-        )
+    bite, bite_url = choose_bite(verbose)
+    with sync_playwright() as p:
+        with p.chromium.launch(headless=False) as browser:
+            page = login(
+                browser,
+                config["PYBITES_USERNAME"],
+                config["PYBITES_PASSWORD"],
+            )
+            submit_bite(
+                bite,
+                bite_url,
+                config["PYBITES_REPO"],
+                page,
+                verbose=verbose,
+            )
 
 
 @cli.command()
