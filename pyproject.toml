@@ -16,7 +16,7 @@ dependencies = [
     "typer>=0.12.5",
 ]
 [project.scripts]
-example-packaged-app = "eatlocal.__main__:cli"
+eatlocal = "eatlocal.__main__:cli"
 
 [build-system]
 requires = ["hatchling"]
