@@ -94,3 +94,5 @@ urllib.request.urlretrieve(
 + [X] submitting from non-git repo
 + [X] submitting bite that doesn't exist
 + [ ] end2end submit? Maybe have selenium unsubmit a bite and resumbit?
+* v2
+  ** TODO need to deal with submitted bites that don't pass. Currently is times out and crashes.
