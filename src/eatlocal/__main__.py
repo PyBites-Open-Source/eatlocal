@@ -167,7 +167,7 @@ def submit(
     config = load_config(EATLOCAL_HOME / ".env")
     bite, bite_url = choose_bite(verbose)
     with sync_playwright() as p:
-        with p.chromium.launch(headless=False) as browser:
+        with p.chromium.launch() as browser:
             page = login(
                 browser,
                 config["PYBITES_USERNAME"],
