@@ -11,7 +11,7 @@ from rich.prompt import Confirm, Prompt
 
 from .console import console
 
-# from . import __version__
+from . import __version__
 from .constants import EATLOCAL_HOME, SUGGESTION, WARNING
 from .eatlocal import choose_bite, display_bite, download_bite, login, submit_bite
 
@@ -34,26 +34,26 @@ def load_config(env_path: Path) -> dict[str, str]:
     return config
 
 
-# def report_version(display: bool) -> None:
-#     """Print version and exit."""
-#     if display:
-#         print(f"{Path(sys.argv[0]).name} {__version__}")
-#         raise typer.Exit()
+def report_version(display: bool) -> None:
+    """Print version and exit."""
+    if display:
+        print(f"{Path(sys.argv[0]).name} {__version__}")
+        raise typer.Exit()
 
 
-# @cli.callback()
-# def global_options(
-#     ctx: typer.Context,
-#     version: bool = typer.Option(
-#         False,
-#         "--version",
-#         "-v",
-#         is_flag=True,
-#         is_eager=True,
-#         callback=report_version,
-#     ),
-# ):
-#     """Download, extract, display, and submit PyBites code challenges."""
+@cli.callback()
+def global_options(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-v",
+        is_flag=True,
+        is_eager=True,
+        callback=report_version,
+    ),
+):
+    """Download, extract, display, and submit PyBites code challenges."""
 
 
 @cli.command()
