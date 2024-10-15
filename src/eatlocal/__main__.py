@@ -2,17 +2,19 @@
 
 import sys
 from pathlib import Path
+from time import sleep
 
 import typer
 from dotenv import dotenv_values
+from playwright.sync_api import sync_playwright, Page
 from rich import print
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
 # from . import __version__
-from .constants import EATLOCAL_HOME
-from .eatlocal import choose_bite, display_bite, download_bite, submit_bite
+from .constants import EATLOCAL_HOME, EXERCISES_URL
+from .eatlocal import login, choose_bite, display_bite, download_bite, submit_bite
 
 console = Console()
 cli = typer.Typer(add_completion=False)
@@ -31,26 +33,26 @@ def load_config(env_path: Path) -> dict[str, str]:
     return config
 
 
-def report_version(display: bool) -> None:
-    """Print version and exit."""
-    if display:
-        print(f"{Path(sys.argv[0]).name} {__version__}")
-        raise typer.Exit()
+# def report_version(display: bool) -> None:
+#     """Print version and exit."""
+#     if display:
+#         print(f"{Path(sys.argv[0]).name} {__version__}")
+#         raise typer.Exit()
 
 
-@cli.callback()
-def global_options(
-    ctx: typer.Context,
-    version: bool = typer.Option(
-        False,
-        "--version",
-        "-v",
-        is_flag=True,
-        is_eager=True,
-        callback=report_version,
-    ),
-):
-    """Download, extract, display, and submit PyBites code challenges."""
+# @cli.callback()
+# def global_options(
+#     ctx: typer.Context,
+#     version: bool = typer.Option(
+#         False,
+#         "--version",
+#         "-v",
+#         is_flag=True,
+#         is_eager=True,
+#         callback=report_version,
+#     ),
+# ):
+#     """Download, extract, display, and submit PyBites code challenges."""
 
 
 @cli.command()
@@ -126,8 +128,24 @@ def download(
     the archive is deleted after extraction.
     """
     config = load_config(EATLOCAL_HOME / ".env")
-    bite, bite_page = choose_bite(verbose)
-    download_bite(bite, bite_page, config["PYBITES_REPO"], verbose, force)
+    bite, bite_url = choose_bite(verbose)
+    with sync_playwright() as p:
+        with p.chromium.launch() as browser:
+            page = login(
+                browser,
+                config["PYBITES_USERNAME"],
+                config["PYBITES_PASSWORD"],
+            )
+            page.goto(bite_url)
+            bite_content = page.content()
+            download_bite(
+                bite,
+                bite_url,
+                bite_content,
+                config["PYBITES_REPO"],
+                verbose,
+                force,
+            )
 
 
 @cli.command()

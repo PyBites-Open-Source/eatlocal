@@ -56,19 +56,19 @@ def choose_bite(
             continue
     environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
     bite_to_download = iterfzf(bites, multi=False)
-    bite_page = BITE_URL.format(bite_name=bites[bite_to_download])
-    return bite_to_download, bite_page
+    bite_url = BITE_URL.format(bite_name=bites[bite_to_download])
+    return bite_to_download, bite_url
 
 
 def download_bite(
     bite: str,
-    bite_page: str,
+    bite_url: str,
+    bite_content: str,
     dest_path: Path,
     verbose: bool = False,
     force: bool = False,
-):
-    """Scrapes bite from platform and save in a directory."""
-    bite_dir = bite_page.split("/")[-2].replace("-", "_")
+) -> None:
+    bite_dir = bite_url.split("/")[-2].replace("-", "_")
     dest_path = Path(dest_path).resolve() / bite_dir
     print(dest_path)
 
@@ -83,20 +83,20 @@ def download_bite(
         makedirs(dest_path)
     except FileExistsError:
         pass
-    r = requests.get(bite_page)
-    soup = BeautifulSoup(r.content, "html.parser")
+    soup = BeautifulSoup(bite_content, "html.parser")
     bite_description = soup.find(id="bite-description")
     code = soup.find(id="python-editor").text
     tests = soup.find(id="test-python-editor").text
+    file_name = soup.find(id="filename").text
 
     with open(dest_path / "bite.html", "w") as bite_html:
         for p in bite_description.find_all("p", {"class": "text-gray-700"})[-1]:
             bite_html.write(str(p).strip(" "))
 
-    with open(dest_path / f"{bite_dir}.py", "w") as py_file:
+    with open(dest_path / f"{file_name}.py", "w") as py_file:
         py_file.write(code)
 
-    with open(dest_path / f"test_{bite_dir}.py", "w") as test_file:
+    with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
 
 
