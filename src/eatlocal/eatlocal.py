@@ -23,6 +23,7 @@ from .constants import (
     FZF_DEFAULT_OPTS,
     WARNING,
     SUGGESTION,
+    SUCCESS,
 )
 from .console import console
 
@@ -93,6 +94,8 @@ def download_bite(
     except FileExistsError:
         pass
 
+    if verbose:
+        print("Parsing bite data...")
     soup = BeautifulSoup(bite_content, "html.parser")
     bite_description = soup.find(id="bite-description")
     code = soup.find(id="python-editor").text
@@ -108,6 +111,8 @@ def download_bite(
 
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
+    if verbose:
+        print(f"Wrote {bite} to: {dest_path}", style=SUCCESS)
 
 
 def submit_bite(
@@ -138,19 +143,24 @@ def submit_bite(
     page.goto(bite_url)
     page.wait_for_url(bite_url)
 
+    if verbose:
+        print("Submitting bite...")
     page.evaluate(
         f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(code)})"""
     )
     page.click("#validate-button")
     page.wait_for_selector("#feedback", state="visible")
-    page.wait_for_function(
-        "document.querySelector('#feedback').innerText.includes('Congrats, you passed this Bite')"
-    )
+    # page.wait_for_function(
+    #     "document.querySelector('#feedback').innerText.includes('Congrats, you passed this Bite')"
+    # )
 
     validate_result = page.text_content("#feedback")
     if "Congrats, you passed this Bite" in validate_result:
-        print("Submission was successfull.")
-    if Confirm.ask(f"Would you like to open a browser to {bite}?"):
+        print("Congrats, you passed this Bite!")
+    else:
+        print("Code did not pass the tests.")
+
+    if Confirm.ask(f"Would you like to open {bite} in your browser?"):
         webbrowser.open(bite_url)
 
 

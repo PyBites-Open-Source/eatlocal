@@ -8,3 +8,4 @@ FZF_DEFAULT_OPTS = "--height 13 --layout=reverse --border rounded --margin=2%,5%
 
 WARNING = "red"
 SUGGESTION = "yellow"
+SUCCESS = "green"
