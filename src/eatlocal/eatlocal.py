@@ -150,9 +150,9 @@ def submit_bite(
     )
     page.click("#validate-button")
     page.wait_for_selector("#feedback", state="visible")
-    # page.wait_for_function(
-    #     "document.querySelector('#feedback').innerText.includes('Congrats, you passed this Bite')"
-    # )
+    page.wait_for_function(
+        "document.querySelector('#feedback').innerText.includes('test session starts')"
+    )
 
     validate_result = page.text_content("#feedback")
     if "Congrats, you passed this Bite" in validate_result:

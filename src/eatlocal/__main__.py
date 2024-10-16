@@ -76,6 +76,7 @@ def init(
             if password == confirm_password:
                 break
             print(":warning: Password did not match.", style=WARNING)
+
         repo = Path(
             Prompt.ask(
                 "Enter the path to your local git repo for PyBites, or press enter for the current directory",
