@@ -50,6 +50,8 @@ def choose_bite(
     if verbose:
         print("Retrieving bites list...")
     r = requests.get(EXERCISES_URL)
+    if r.status_code == 200:
+        return
     soup = BeautifulSoup(r.content, "html.parser")
     rows = soup.table.find_all("tr")
     bites = {}
@@ -111,8 +113,9 @@ def download_bite(
 
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
+
     if verbose:
-        print(f"Wrote {bite} to: {dest_path}", style=SUCCESS)
+        console.print(f"Wrote {bite} to: {dest_path}", style=SUCCESS)
 
 
 def submit_bite(
@@ -124,7 +127,6 @@ def submit_bite(
 ) -> None:
     """Submits bite then opens a browser for the bite page."""
     bite_dir = _bite_url_to_dir(bite_url, pybites_repo)
-    # get code from bite_dir
     if not bite_dir.is_dir():
         console.print(f":warning: Unable to submit: {bite}.", style=WARNING)
         console.print(
@@ -132,19 +134,21 @@ def submit_bite(
             style=SUGGESTION,
         )
         return
+
     python_file = [
         file
         for file in list(bite_dir.glob("*.py"))
         if not file.name.startswith("test_")
     ][0]
+
     with open(python_file) as file:
         code = file.read()
 
-    page.goto(bite_url)
-    page.wait_for_url(bite_url)
-
     if verbose:
         print("Submitting bite...")
+
+    page.goto(bite_url)
+    page.wait_for_url(bite_url)
     page.evaluate(
         f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(code)})"""
     )
@@ -165,6 +169,8 @@ def submit_bite(
 
 
 def push_to_github(bite, bites_repo, verbose):
+    if verbose:
+        print("Tracking and commiting changes...")
     try:
         repo = Repo(bites_repo)
         repo.index.add(str(bite))
@@ -180,6 +186,8 @@ def push_to_github(bite, bites_repo, verbose):
         return
 
     try:
+        if verbose:
+            print("Pushing changes...")
         repo.remotes.origin.push().raise_if_error()
     except GitCommandError:
         print(
@@ -189,8 +197,7 @@ def push_to_github(bite, bites_repo, verbose):
         )
         return
 
-    if verbose:
-        print(f"\nPushed bite {bite} to github")
+    console.print(f"\nPushed bite {bite} to github", style=SUCCESS)
 
 
 def display_bite(

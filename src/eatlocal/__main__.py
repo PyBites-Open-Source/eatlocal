@@ -12,7 +12,7 @@ from rich.prompt import Confirm, Prompt
 from .console import console
 
 from . import __version__
-from .constants import EATLOCAL_HOME, SUGGESTION, WARNING
+from .constants import EATLOCAL_HOME, SUGGESTION, WARNING, SUCCESS
 from .eatlocal import choose_bite, display_bite, download_bite, login, submit_bite
 
 cli = typer.Typer(add_completion=False)
@@ -29,7 +29,6 @@ def load_config(env_path: Path) -> dict[str, str]:
             "Please run [underline]eatlocal init[/underline] first.", style=WARNING
         )
         sys.exit()
-
     config.update(dotenv_values(dotenv_path=env_path))
     return config
 
@@ -79,7 +78,7 @@ def init(
 
         repo = Path(
             Prompt.ask(
-                "Enter the path to your local git repo for PyBites, or press enter for the current directory",
+                "Enter the path to your local directory for PyBites, or press enter for the current directory",
                 default=Path().cwd(),
                 show_default=True,
             )
@@ -105,7 +104,7 @@ def init(
         fh.write(f"PYBITES_PASSWORD={password}\n")
         fh.write(f"PYBITES_REPO={repo}\n")
 
-    print(f"[green]Successfully stored configuration variables under {EATLOCAL_HOME}.")
+    print(f"Successfully stored configuration variables under {EATLOCAL_HOME}.", style=SUCCESS)
 
 
 @cli.command()
@@ -133,9 +132,16 @@ def download(
     the archive is deleted after extraction.
     """
     config = load_config(EATLOCAL_HOME / ".env")
-    bite, bite_url = choose_bite(verbose)
+    try:
+        bite, bite_url = choose_bite(verbose)
+    except TypeError:
+        console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
+        console.print("Ensure internet connect is good and platform is avaiable.", style=SUGGESTION)
+
     with sync_playwright() as p:
         with p.chromium.launch() as browser:
+            if verbose:
+                print("Logging in...")
             page = login(
                 browser,
                 config["PYBITES_USERNAME"],
@@ -166,7 +172,11 @@ def submit(
 ) -> None:
     """Submit a bite back to Codechalleng.es."""
     config = load_config(EATLOCAL_HOME / ".env")
-    bite, bite_url = choose_bite(verbose)
+    try:
+        bite, bite_url = choose_bite(verbose)
+    except TypeError:
+        console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
+        console.print("Ensure internet connect is good and platform is avaiable.", style=SUGGESTION)
     with sync_playwright() as p:
         with p.chromium.launch() as browser:
             page = login(
