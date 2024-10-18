@@ -11,11 +11,12 @@ from git import GitCommandError, InvalidGitRepositoryError, Repo
 from playwright.sync_api import sync_playwright, Page
 from rich import print
 from rich.layout import Layout
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.traceback import install
 from iterfzf import iterfzf
+import install_playwright
 
 from .constants import (
     BITE_URL,
@@ -59,6 +60,38 @@ class Bite:
 
         with open(python_file) as file:
             self.local_code = file.read()
+
+
+def get_credentials() -> None:
+    username = Prompt.ask("Enter your PyBites username")
+    while True:
+        password = Prompt.ask("Enter your PyBites user password", password=True)
+        confirm_password = Prompt.ask("Confirm PyBites password", password=True)
+        if password == confirm_password:
+            break
+        console.print(":warning: Password did not match.", style=WARNING)
+    return username, password
+
+
+def set_repo() -> None:
+    repo = Path(
+        Prompt.ask(
+            "Enter the path to your local directory for PyBites, or press enter for the current directory",
+            default=Path().cwd(),
+            show_default=True,
+        )
+    ).expanduser()
+    if not repo.exists():
+        console.print(f":warning: The path {repo} could not be found!", style=WARNING)
+        console.print("Make sure you have created a git repo for your bites", style=SUGGESTION)
+    return repo
+
+
+def install_browser(verbose: bool):
+    if verbose:
+        print("Installing browser...")
+    with sync_playwright() as p:
+        install_playwright.install(p.chromium)
 
 
 def login(browser, username, password) -> Page:
@@ -239,9 +272,7 @@ def display_bite(
 
     path = Path(config["PYBITES_REPO"]).resolve() / bite
     if not path.is_dir():
-        console.print(
-            f":warning: Unable to display bite {bite}.", style=WARNING
-        )
+        console.print(f":warning: Unable to display bite {bite}.", style=WARNING)
         console.print(
             "Please make sure that path is correct and the bite has been downloaded.",
             style=SUGGESTION,

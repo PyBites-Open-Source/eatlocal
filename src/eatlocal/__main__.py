@@ -6,19 +6,21 @@ from pathlib import Path
 import typer
 from dotenv import dotenv_values
 from rich import print
-from rich.prompt import Confirm, Prompt
-
-from .console import console
+from rich.prompt import Confirm
 
 from . import __version__
-from .constants import EATLOCAL_HOME, SUGGESTION, WARNING, SUCCESS
+from .console import console
+from .constants import EATLOCAL_HOME, SUCCESS, SUGGESTION, WARNING
 from .eatlocal import (
     Bite,
     choose_bite,
-    display_bite,
     create_bite_dir,
-    submit_bite,
+    display_bite,
     download_bite,
+    get_credentials,
+    install_browser,
+    set_repo,
+    submit_bite,
 )
 
 cli = typer.Typer(add_completion=False)
@@ -74,26 +76,8 @@ def init(
 ) -> None:
     """Configure PyBites credentials and repository."""
     while True:
-        username = Prompt.ask("Enter your PyBites username")
-        while True:
-            password = Prompt.ask("Enter your PyBites user password", password=True)
-            confirm_password = Prompt.ask("Confirm PyBites password", password=True)
-            if password == confirm_password:
-                break
-            print(":warning: Password did not match.", style=WARNING)
-
-        repo = Path(
-            Prompt.ask(
-                "Enter the path to your local directory for PyBites, or press enter for the current directory",
-                default=Path().cwd(),
-                show_default=True,
-            )
-        ).expanduser()
-        if not repo.exists():
-            print(f":warning: The path {repo} could not be found!", style=WARNING)
-            print(
-                "Make sure you have created a git repo for your bites", style=SUGGESTION
-            )
+        username, password = get_credentials()
+        repo = set_repo()
 
         print(f"Your input - username: {username}, repo: {repo}.")
         if Confirm.ask(
@@ -109,10 +93,12 @@ def init(
         fh.write(f"PYBITES_PASSWORD={password}\n")
         fh.write(f"PYBITES_REPO={repo}\n")
 
-    print(
-        f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
-        style=SUCCESS,
-    )
+    if verbose:
+        console.print(
+            f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
+            style=SUCCESS,
+        )
+    install_browser(verbose)
 
 
 @cli.command()
@@ -147,12 +133,7 @@ def download(
         return
 
     bite.platform_content = download_bite(config, bite, verbose)
-    create_bite_dir(
-        bite,
-        config,
-        verbose,
-        force,
-    )
+    create_bite_dir(bite, config, verbose, force)
 
 
 @cli.command()
