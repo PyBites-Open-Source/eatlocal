@@ -5,7 +5,6 @@ from pathlib import Path
 
 import typer
 from dotenv import dotenv_values
-from playwright.sync_api import sync_playwright
 from rich import print
 from rich.prompt import Confirm, Prompt
 
@@ -13,7 +12,14 @@ from .console import console
 
 from . import __version__
 from .constants import EATLOCAL_HOME, SUGGESTION, WARNING, SUCCESS
-from .eatlocal import choose_bite, display_bite, download_bite, login, submit_bite
+from .eatlocal import (
+    Bite,
+    choose_bite,
+    display_bite,
+    create_bite_dir,
+    submit_bite,
+    download_bite,
+)
 
 cli = typer.Typer(add_completion=False)
 
@@ -26,7 +32,7 @@ def load_config(env_path: Path) -> dict[str, str]:
             style=WARNING,
         )
         console.print(
-            "Please run [underline]eatlocal init[/underline] first.", style=WARNING
+            "Please run [underline]eatlocal init[/underline] first.", style=SUGGESTION
         )
         sys.exit()
     config.update(dotenv_values(dotenv_path=env_path))
@@ -83,7 +89,6 @@ def init(
                 show_default=True,
             )
         ).expanduser()
-
         if not repo.exists():
             print(f":warning: The path {repo} could not be found!", style=WARNING)
             print(
@@ -104,7 +109,10 @@ def init(
         fh.write(f"PYBITES_PASSWORD={password}\n")
         fh.write(f"PYBITES_REPO={repo}\n")
 
-    print(f"Successfully stored configuration variables under {EATLOCAL_HOME}.", style=SUCCESS)
+    print(
+        f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
+        style=SUCCESS,
+    )
 
 
 @cli.command()
@@ -125,38 +133,26 @@ def download(
         help="Overwrite bite directory with a fresh version.",
     ),
 ) -> None:
-    """Download and extract bite code from Codechalleng.es.
-
-    The bites are downloaded in a zip archive file and unzipped
-    in the local git repository for PyBites. If the `cleanup` option is present
-    the archive is deleted after extraction.
-    """
+    """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
     try:
-        bite, bite_url = choose_bite(verbose)
+        title, url = choose_bite(verbose)
+        bite = Bite(title, url)
     except TypeError:
         console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
-        console.print("Ensure internet connect is good and platform is avaiable.", style=SUGGESTION)
+        console.print(
+            "Ensure internet connect is good and platform is avaiable.",
+            style=SUGGESTION,
+        )
+        return
 
-    with sync_playwright() as p:
-        with p.chromium.launch() as browser:
-            if verbose:
-                print("Logging in...")
-            page = login(
-                browser,
-                config["PYBITES_USERNAME"],
-                config["PYBITES_PASSWORD"],
-            )
-            page.goto(bite_url)
-            bite_content = page.content()
-            download_bite(
-                bite,
-                bite_url,
-                bite_content,
-                config["PYBITES_REPO"],
-                verbose,
-                force,
-            )
+    bite.platform_content = download_bite(config, bite, verbose)
+    create_bite_dir(
+        bite,
+        config["PYBITES_REPO"],
+        verbose,
+        force,
+    )
 
 
 @cli.command()
@@ -173,24 +169,19 @@ def submit(
     """Submit a bite back to Codechalleng.es."""
     config = load_config(EATLOCAL_HOME / ".env")
     try:
-        bite, bite_url = choose_bite(verbose)
+        title, url = choose_bite(verbose)
+        bite = Bite(title, url)
     except TypeError:
         console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
-        console.print("Ensure internet connect is good and platform is avaiable.", style=SUGGESTION)
-    with sync_playwright() as p:
-        with p.chromium.launch() as browser:
-            page = login(
-                browser,
-                config["PYBITES_USERNAME"],
-                config["PYBITES_PASSWORD"],
-            )
-            submit_bite(
-                bite,
-                bite_url,
-                config["PYBITES_REPO"],
-                page,
-                verbose=verbose,
-            )
+        console.print(
+            "Ensure internet connect is good and platform is avaliable.",
+            style=SUGGESTION,
+        )
+    submit_bite(
+        bite,
+        config,
+        verbose,
+    )
 
 
 @cli.command()
@@ -206,7 +197,7 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    display_bite(bite, bite_repo=config["PYBITES_REPO"], theme=theme)
+    display_bite(bite, config, theme=theme)
 
 
 if __name__ == "__main__":
