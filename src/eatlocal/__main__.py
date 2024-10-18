@@ -149,7 +149,7 @@ def download(
     bite.platform_content = download_bite(config, bite, verbose)
     create_bite_dir(
         bite,
-        config["PYBITES_REPO"],
+        config,
         verbose,
         force,
     )
