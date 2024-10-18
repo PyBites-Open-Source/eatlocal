@@ -2,12 +2,13 @@
 
 import webbrowser
 import requests
+from dataclasses import dataclass
 from os import environ, makedirs
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 from git import GitCommandError, InvalidGitRepositoryError, Repo
-from playwright.sync_api import Page
+from playwright.sync_api import sync_playwright, Page
 from rich import print
 from rich.layout import Layout
 from rich.prompt import Confirm
@@ -30,6 +31,36 @@ from .console import console
 install(show_locals=True)
 
 
+@dataclass
+class Bite:
+    title: str = None
+    url: str = None
+    platform_content: str = None
+
+    def bite_url_to_dir(self, pybites_repo: Path) -> Path:
+        bite_dir = self.url.split("/")[-2].replace("-", "_")
+        return Path(pybites_repo).resolve() / bite_dir
+
+    def fetch_local_code(self, config: dict) -> None:
+        bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
+        if not bite_dir.is_dir():
+            console.print(f":warning: Unable to submit: {self.title}.", style=WARNING)
+            console.print(
+                "Please make sure that path is correct and bite has been downloaded.",
+                style=SUGGESTION,
+            )
+            return
+
+        python_file = [
+            file
+            for file in list(bite_dir.glob("*.py"))
+            if not file.name.startswith("test_")
+        ][0]
+
+        with open(python_file) as file:
+            self.local_code = file.read()
+
+
 def login(browser, username, password) -> Page:
     page: Page = browser.new_page()
     # only shorten for debugging, some bites need in e2e test need longer
@@ -50,7 +81,7 @@ def choose_bite(
     if verbose:
         print("Retrieving bites list...")
     r = requests.get(EXERCISES_URL)
-    if r.status_code == 200:
+    if r.status_code != 200:
         return
     soup = BeautifulSoup(r.content, "html.parser")
     rows = soup.table.find_all("tr")
@@ -69,24 +100,34 @@ def choose_bite(
     return bite_to_download, bite_url
 
 
-def _bite_url_to_dir(bite_url, pybites_repo):
-    bite_dir = bite_url.split("/")[-2].replace("-", "_")
-    bite_path = Path(pybites_repo).resolve() / bite_dir
-    return bite_path
-
-
 def download_bite(
-    bite: str,
-    bite_url: str,
-    bite_content: str,
-    pybites_repo: Path,
+    config: dict,
+    bite: Bite,
+    verbose: bool,
+) -> str:
+    with sync_playwright() as p:
+        with p.chromium.launch() as browser:
+            if verbose:
+                print("Logging in...")
+            page = login(
+                browser,
+                config["PYBITES_USERNAME"],
+                config["PYBITES_PASSWORD"],
+            )
+            page.goto(bite.url)
+            return page.content()
+
+
+def create_bite_dir(
+    bite: Bite,
+    config: dict,
     verbose: bool = False,
     force: bool = False,
 ) -> None:
-    dest_path = _bite_url_to_dir(bite_url, pybites_repo)
+    dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
         print(
-            f"[yellow]:warning: There already exists a directory for {bite}. "
+            f"[yellow]:warning: There already exists a directory for {bite.title}. "
             "Use the --force option to overwite."
         )
         return
@@ -98,7 +139,7 @@ def download_bite(
 
     if verbose:
         print("Parsing bite data...")
-    soup = BeautifulSoup(bite_content, "html.parser")
+    soup = BeautifulSoup(bite.platform_content, "html.parser")
     bite_description = soup.find(id="bite-description")
     code = soup.find(id="python-editor").text
     tests = soup.find(id="test-python-editor").text
@@ -114,58 +155,47 @@ def download_bite(
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
 
-    if verbose:
-        console.print(f"Wrote {bite} to: {dest_path}", style=SUCCESS)
+    console.print(f"Wrote {bite.title} to: {dest_path}", style=SUCCESS)
 
 
 def submit_bite(
     bite: str,
-    bite_url: str,
-    pybites_repo: Path,
-    page: Page,
+    config: dict,
     verbose: bool = False,
 ) -> None:
     """Submits bite then opens a browser for the bite page."""
-    bite_dir = _bite_url_to_dir(bite_url, pybites_repo)
-    if not bite_dir.is_dir():
-        console.print(f":warning: Unable to submit: {bite}.", style=WARNING)
-        console.print(
-            "Please make sure that path is correct and bite has been downloaded.",
-            style=SUGGESTION,
-        )
+    bite.fetch_local_code(config)
+    if bite.local_code is None:
         return
-
-    python_file = [
-        file
-        for file in list(bite_dir.glob("*.py"))
-        if not file.name.startswith("test_")
-    ][0]
-
-    with open(python_file) as file:
-        code = file.read()
 
     if verbose:
         print("Submitting bite...")
+    with sync_playwright() as p:
+        with p.chromium.launch() as browser:
+            page = login(
+                browser,
+                config["PYBITES_USERNAME"],
+                config["PYBITES_PASSWORD"],
+            )
+            page.goto(bite.url)
+            page.wait_for_url(bite.url)
+            page.evaluate(
+                f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(bite.local_code)})"""
+            )
+            page.click("#validate-button")
+            page.wait_for_selector("#feedback", state="visible")
+            page.wait_for_function(
+                "document.querySelector('#feedback').innerText.includes('test session starts')"
+            )
 
-    page.goto(bite_url)
-    page.wait_for_url(bite_url)
-    page.evaluate(
-        f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(code)})"""
-    )
-    page.click("#validate-button")
-    page.wait_for_selector("#feedback", state="visible")
-    page.wait_for_function(
-        "document.querySelector('#feedback').innerText.includes('test session starts')"
-    )
-
-    validate_result = page.text_content("#feedback")
+            validate_result = page.text_content("#feedback")
     if "Congrats, you passed this Bite" in validate_result:
-        print("Congrats, you passed this Bite!")
+        console.print("Congrats, you passed this Bite!", style=SUCCESS)
     else:
-        print("Code did not pass the tests.")
+        console.print(":warning:Code did not pass the tests.", style=WARNING)
 
-    if Confirm.ask(f"Would you like to open {bite} in your browser?"):
-        webbrowser.open(bite_url)
+    if Confirm.ask(f"Would you like to open {bite.title} in your browser?"):
+        webbrowser.open(bite.url)
 
 
 def push_to_github(bite, bites_repo, verbose):
@@ -202,22 +232,19 @@ def push_to_github(bite, bites_repo, verbose):
 
 def display_bite(
     bite: str,
-    bite_repo: Path,
+    config: dict,
     theme: str,
 ) -> None:
-    """Display the instructions provided in bite.html and display source code.
+    """Display the instructions provided in bite.html and display source code."""
 
-    :bite_number: int The number of the bite you want to read
-    :bites_repo: Path Path to the github repository linked to PyBites.
-    :theme: str
-    :returns: None
-    """
-
-    path = Path(bite_repo).resolve() / bite
+    path = Path(config["PYBITES_REPO"]).resolve() / bite
     if not path.is_dir():
-        print(
-            f"[yellow]:warning: Unable to display bite {bite}. "
-            f"Please make sure that path is correct and {bite} has been downloaded[/yellow]"
+        console.print(
+            f":warning: Unable to display bite {bite}.", style=WARNING
+        )
+        console.print(
+            "Please make sure that path is correct and the bite has been downloaded.",
+            style=SUGGESTION,
         )
         return
 
