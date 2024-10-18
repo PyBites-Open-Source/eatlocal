@@ -2,15 +2,18 @@
 
 # eatlocal
 
-Eatlocal helps the user solve [PyBites](https://codechalleng.es) code challenges locally. This cli tool allows you to download bites from the new platform. You can display bite directions directly in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the corresponding bite page. Finally, you can add, commit, and push your solution to github with a single command.
+Eatlocal helps the user solve [PyBites](https://pybitesplatform.com) code challenges locally. This cli tool allows you to download bites from the platform. You can display bite directions directly in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the corresponding bite page.
 
 ## Updates
+
+eatlocal has been updated to work with version 2.0 of the PyBites platform.
 
 ### Breaking Changes
 
 + eatlocal version `0.9.0` only works on the new platform (v2).
 + submitting a bite no longer pushes it to github.
 + bite directories are now names by the bites instead of the number.
++ no need to download chrome and chrome driver.
 
 ## Table of Contents
 
@@ -66,6 +69,7 @@ There are a few options for install eatlocal.
 ### Using pipx
 
 If you have [pipx](https://pypa.github.io/pipx/) installed:
+
 ```bash
 pipx install eatlocal
 ```
