@@ -6,7 +6,7 @@ from zipfile import is_zipfile
 
 import pytest
 
-from eatlocal.eatlocal import download_bite
+from eatlocal.__main__ import download
 
 TEST_BITES = [1, 243, 325]
 
@@ -19,13 +19,13 @@ TEST_BITES = [1, 243, 325]
     ],
 )
 def test_eatlocal_cannot_download_premium_bite_wo_auth(
-    bite_number: int,
+    bite: int,
     creds: tuple[str, str],
     bites_repo_dir,
     capfd,
 ) -> None:
     """Attempt to download a bite ZIP archive file with incorrect credentials."""
 
-    download_bite(bite_number, *creds, dest_path=bites_repo_dir, cache_path="cache")
+    create_bite_dir(bite_number, *creds, dest_path=bites_repo_dir, cache_path="cache")
     output = capfd.readouterr()[0]
     assert "was not downloaded" in output
