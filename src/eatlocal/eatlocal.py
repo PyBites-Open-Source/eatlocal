@@ -34,6 +34,14 @@ install(show_locals=True)
 
 @dataclass
 class Bite:
+    """Dataclass for a PyBites bite.
+
+    Attributes:
+        title: The title of the bite.
+        url: The url of the bite.
+        platform_content: The content of the bite downloaded from the platform.
+
+    """
     title: str = None
     url: str = None
     platform_content: str = None
@@ -62,7 +70,13 @@ class Bite:
             self.local_code = file.read()
 
 
-def get_credentials() -> None:
+def get_credentials() -> tuple[str, str]:
+    """Prompt the user for their PyBites credentials.
+
+    Returns:
+        A tuple containing the user's PyBites username and password.
+
+    """
     username = Prompt.ask("Enter your PyBites username")
     while True:
         password = Prompt.ask("Enter your PyBites user password", password=True)
@@ -73,7 +87,13 @@ def get_credentials() -> None:
     return username, password
 
 
-def set_repo() -> None:
+def set_repo() -> str:
+    """Set the local directory for PyBites.
+
+    Returns:
+        The path to the local directory where user's bites will be stored.
+
+    """
     repo = Path(
         Prompt.ask(
             "Enter the path to your local directory for PyBites, or press enter for the current directory",
@@ -83,18 +103,39 @@ def set_repo() -> None:
     ).expanduser()
     if not repo.exists():
         console.print(f":warning: The path {repo} could not be found!", style=WARNING)
-        console.print("Make sure you have created a git repo for your bites", style=SUGGESTION)
+        console.print(
+            "Make sure you have created a git repo for your bites", style=SUGGESTION
+        )
     return repo
 
 
-def install_browser(verbose: bool):
+def install_browser(verbose: bool) -> None:
+    """Install the browser for the Playwright library.
+
+    Args:
+        verbose: Whether to print additional information.
+
+    Returns:
+        None
+    """
     if verbose:
         print("Installing browser...")
     with sync_playwright() as p:
         install_playwright.install(p.chromium)
 
 
-def login(browser, username, password) -> Page:
+def login(browser, username: str, password: str) -> Page:
+    """Login to the PyBites platform.
+
+    Args:
+        browser: Playwright browser object.
+        username: PyBites username.
+        password: PyBites password.
+
+    Returns:
+        An authenticated page object for the PyBites platform.
+
+    """
     page: Page = browser.new_page()
     # only shorten for debugging, some bites need in e2e test need longer
     page.set_default_timeout(30000)
@@ -109,8 +150,16 @@ def login(browser, username, password) -> Page:
 
 def choose_bite(
     verbose: bool = False,
-) -> None:
-    """Choose which bite will be downloaded."""
+) -> tuple[str, str]:
+    """Choose which bite will be downloaded.
+
+    Args:
+        verbose: Whether to print additional information.
+
+    Returns:
+        The name and url of the chosen bite.
+
+    """
     if verbose:
         print("Retrieving bites list...")
     r = requests.get(EXERCISES_URL)
@@ -138,6 +187,17 @@ def download_bite(
     bite: Bite,
     verbose: bool,
 ) -> str:
+    """Download the bite content from the PyBites platform.
+
+    Args:
+        config: Dictionary containing the user's PyBites credentials.
+        bite: Bite object containing the title and url of the bite.
+        verbose: Whether to print additional information.
+
+    Returns:
+        The content of the bite from the platform.
+
+    """
     with sync_playwright() as p:
         with p.chromium.launch() as browser:
             if verbose:
@@ -157,6 +217,18 @@ def create_bite_dir(
     verbose: bool = False,
     force: bool = False,
 ) -> None:
+    """Create a directory for the bite and write the bite content to it.
+
+    Args:
+        bite: Bite object.
+        config: Dictionary containing the user's PyBites credentials.
+        verbose: Whether to print additional information.
+        force: Whether to overwrite the directory if it already exists.
+
+    Returns:
+        None
+
+    """
     dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
         print(
@@ -196,7 +268,17 @@ def submit_bite(
     config: dict,
     verbose: bool = False,
 ) -> None:
-    """Submits bite then opens a browser for the bite page."""
+    """Submit the bite to the PyBites platform.
+
+    Args:
+        bite: The name of the bite to submit.
+        config: Dictionary containing the user's PyBites credentials.
+        verbose: Whether to print additional information.
+
+    Returns:
+        None
+
+    """
     bite.fetch_local_code(config)
     if bite.local_code is None:
         return
@@ -231,7 +313,18 @@ def submit_bite(
         webbrowser.open(bite.url)
 
 
-def push_to_github(bite, bites_repo, verbose):
+def push_to_github(bite: str, bites_repo: str, verbose: bool = False) -> None:
+    """Track, commit, and push changes to the PyBites repo.
+
+    Args:
+        bite: The name of the bite to push.
+        bites_repo: The path to the PyBites repo.
+        verbose: Whether to print additional information.
+
+    Returns:
+        None
+
+    """
     if verbose:
         print("Tracking and commiting changes...")
     try:
@@ -268,8 +361,17 @@ def display_bite(
     config: dict,
     theme: str,
 ) -> None:
-    """Display the instructions provided in bite.html and display source code."""
+    """Display the instructions and source code for a bite.
 
+    Args:
+        bite: The name of the bite to display.
+        config: Dictionary containing the user's PyBites credentials.
+        theme: The color theme for the code.
+
+    Returns:
+        None
+
+    """
     path = Path(config["PYBITES_REPO"]).resolve() / bite
     if not path.is_dir():
         console.print(f":warning: Unable to display bite {bite}.", style=WARNING)

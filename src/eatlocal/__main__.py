@@ -27,6 +27,15 @@ cli = typer.Typer(add_completion=False)
 
 
 def load_config(env_path: Path) -> dict[str, str]:
+    """Load configuration from .env file.
+
+    Args:
+        env_path: Path to .env file.
+
+    Returns:
+        dict: Configuration variables.
+
+    """
     config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
     if not env_path.exists():
         console.print(
@@ -147,7 +156,7 @@ def submit(
         help="Print each step as it happens.",
     ),
 ) -> None:
-    """Submit a bite back to Codechalleng.es."""
+    """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
     try:
         title, url = choose_bite(verbose)
