@@ -26,6 +26,7 @@ from .constants import (
     WARNING,
     SUGGESTION,
     SUCCESS,
+    PROFILE_URL,
 )
 from .console import console
 
@@ -42,6 +43,7 @@ class Bite:
         platform_content: The content of the bite downloaded from the platform.
 
     """
+
     title: str = None
     url: str = None
     platform_content: str = None
@@ -207,8 +209,35 @@ def download_bite(
                 config["PYBITES_USERNAME"],
                 config["PYBITES_PASSWORD"],
             )
+            if page.url != PROFILE_URL:
+                console.print(":warning: Unable to login to PyBites.", style=WARNING)
+                console.print("Ensure your credentials are valid.", style=SUGGESTION)
+                return
             page.goto(bite.url)
             return page.content()
+
+
+def parse_bite_description(soup: BeautifulSoup) -> str:
+    """Parse the bite description from the soup object.
+
+    Args:
+        soup: BeautifulSoup object containing the bite content.
+
+    Returns:
+        The bite description html as a string.
+
+    """
+    bite_description = soup.find(id="bite-description")
+    write = False
+    bite_description_str = ""
+    for line in str(bite_description).splitlines():
+        if 'id="filename"' in line:
+            continue
+        if write:
+            bite_description_str += line + "\n"
+        if """end author and learning paths""" in line:
+            write = True
+    return bite_description_str
 
 
 def create_bite_dir(
@@ -245,14 +274,14 @@ def create_bite_dir(
     if verbose:
         print("Parsing bite data...")
     soup = BeautifulSoup(bite.platform_content, "html.parser")
-    bite_description = soup.find(id="bite-description")
+
+    bite_description = parse_bite_description(soup)
     code = soup.find(id="python-editor").text
     tests = soup.find(id="test-python-editor").text
     file_name = soup.find(id="filename").text
 
     with open(dest_path / "bite.html", "w") as bite_html:
-        for p in bite_description.find_all("p", {"class": "text-gray-700"})[-1]:
-            bite_html.write(str(p).strip(" "))
+        bite_html.write(bite_description)
 
     with open(dest_path / f"{file_name}.py", "w") as py_file:
         py_file.write(code)
@@ -292,6 +321,10 @@ def submit_bite(
                 config["PYBITES_USERNAME"],
                 config["PYBITES_PASSWORD"],
             )
+            if page.url != PROFILE_URL:
+                console.print(":warning: Unable to login to PyBites.", style=WARNING)
+                console.print("Ensure your credentials are valid.", style=SUGGESTION)
+                return
             page.goto(bite.url)
             page.wait_for_url(bite.url)
             page.evaluate(
@@ -307,7 +340,7 @@ def submit_bite(
     if "Congrats, you passed this Bite" in validate_result:
         console.print("Congrats, you passed this Bite!", style=SUCCESS)
     else:
-        console.print(":warning:Code did not pass the tests.", style=WARNING)
+        console.print(":warning: Code did not pass the tests.", style=WARNING)
 
     if Confirm.ask(f"Would you like to open {bite.title} in your browser?"):
         webbrowser.open(bite.url)
@@ -357,7 +390,7 @@ def push_to_github(bite: str, bites_repo: str, verbose: bool = False) -> None:
 
 
 def display_bite(
-    bite: str,
+    bite: Bite,
     config: dict,
     theme: str,
 ) -> None:
@@ -372,9 +405,9 @@ def display_bite(
         None
 
     """
-    path = Path(config["PYBITES_REPO"]).resolve() / bite
+    path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if not path.is_dir():
-        console.print(f":warning: Unable to display bite {bite}.", style=WARNING)
+        console.print(f":warning: Unable to display bite {bite.title}.", style=WARNING)
         console.print(
             "Please make sure that path is correct and the bite has been downloaded.",
             style=SUGGESTION,
@@ -409,7 +442,7 @@ def display_bite(
     )
 
     layout["header"].update(
-        Panel(f"Displaying {bite} at {html_file}", title="eatlocal")
+        Panel(f"Displaying {bite.title} at {html_file}", title="eatlocal")
     )
     layout["main"]["directions"].update(Panel(instructions, title="Directions"))
     layout["main"]["code"].update(Panel(code, title="Code"))
