@@ -1,11 +1,9 @@
 """eatlocal unit tests"""
 
 from pathlib import Path
-from shutil import rmtree
 from unittest import mock
 
 import pytest
-# from git import GitCommandError
 
 from eatlocal.eatlocal import display_bite, submit_bite
 
