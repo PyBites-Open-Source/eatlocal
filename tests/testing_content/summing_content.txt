@@ -1,0 +1,657 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pybites Platform</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+  <link rel="stylesheet" href="/static/css/output.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
+
+
+  <link rel="icon" href="/static/img/favicon.ico">
+<style>      .htmx-indicator{opacity:0}      .htmx-request .htmx-indicator{opacity:1; transition: opacity 200ms ease-in;}      .htmx-request.htmx-indicator{opacity:1; transition: opacity 200ms ease-in;}      </style></head>
+<body class="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+
+  <header class="sticky top-0 shadow p-4 z-10 bg-white dark:bg-gray-800 dark:text-white">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center">
+        <a href="/" title="Pybites Platform Home">
+          <img src="/static/img/pybites-logo.png" alt="Pybites Logo" class="h-8 w-8 inline-block">
+        </a>
+        <a href="/" class="text-gray-700 dark:text-white hover:text-gray-900 mx-2 hidden sm:inline-block">Pybites Platform</a>
+      </h1>
+
+      <nav class="flex items-center space-x-4 hover:text-gray-900 dark:text-white">
+        <div class="relative hidden md:block">
+          <input type="text" id="search" name="search" placeholder="Search exercises ..." class="w-64 p-2 appearance-none outline-none border-b border-gray-200 dark:border-gray-900 rounded-none focus:border-indigo-500 focus:ring-0 dark:bg-gray-800 dark:text-white" hx-get="/bites/autocomplete/" hx-trigger="keyup changed delay:300ms" hx-target="#suggestions" autocomplete="off">
+          <div id="suggestions" class="absolute left-0 mt-1 w-full rounded-md shadow-lg z-10">
+          </div>
+        </div>
+
+        <div class="relative inline-block text-left">
+          <button id="exerciseDropdownButton" class="hover:bg-gray-100 dark:hover:bg-gray-900 hover:underline hover:decoration-gray-300 mx-2 inline-flex justify-center text-base focus:outline-none focus:ring-0">
+            Exercises
+            <svg class="w-2.5 h-2.5 ml-3 mt-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+            </svg>
+          </button>
+
+          <div id="exerciseDropdownMenu" class="hidden absolute right-0 mt-2 rounded-md shadow-lg min-w-max bg-white dark:bg-gray-800 dark:text-white">
+            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="exerciseDropdownButton">
+              <li>
+                <a href="/bites/newbie/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Newbie Python Exercises</a>
+              </li>
+              <li>
+                <a href="/bites/intro/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Intro Python Exercises</a>
+              </li>
+              <li>
+                <a href="/bites/regular/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Regular Python Exercises</a>
+              </li>
+              <li>
+                <a href="/bites/paths/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Learning Paths</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <a href="/pricing/" class="mx-2 hover:bg-gray-100 dark:hover:bg-gray-900">Pricing</a>
+
+        
+          <a href="/accounts/profile/" class="mx-2 hover:bg-gray-100 dark:hover:bg-gray-900">Profile</a>
+        
+
+        <div class="hidden lg:block">
+          <div class="relative inline-block text-left bg-white dark:bg-gray-800 dark:text-white">
+            <button id="helpDropdownButton" class="hover:bg-gray-100 dark:hover:bg-gray-900 hover:underline hover:decoration-gray-300 mx-2 inline-flex justify-center text-base focus:outline-none focus:ring-0">
+              Help
+              <svg class="w-2.5 h-2.5 ml-3 mt-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+              </svg>
+            </button>
+            <div id="helpDropdownMenu" class="hidden origin-top-right absolute right-0 mt-2 rounded-md shadow-lg min-w-max bg-white dark:bg-gray-800 dark:text-white">
+              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="helpDropdownButton">
+                <a href="/faq/" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">FAQ</a>
+                <a href="/contacts/" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">Contact</a>
+                <a href="/about/" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">About</a>
+                <a href="/roadmap/" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">Roadmap</a>
+                <a href="https://pybites.circle.so" target="_blank" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">Community</a>
+                <a href="https://pybit.es" target="_blank" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white whitespace-nowrap" role="menuitem">Coaching</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+          <a href="/auth/logout/" class="mx-2 hover:bg-gray-100 dark:hover:bg-gray-900">Logout</a>
+        
+
+        
+
+        <button id="theme-toggle" class="ml-4 text-gray-900 dark:bg-gray-300 px-4 py-2 rounded" data-light-img="/static/img/light.png" data-dark-img="/static/img/dark.png">
+          <img id="theme-icon" src="/static/img/dark.png" alt="Toggle Dark Mode" class="h-6 w-6">
+        </button>
+
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="dark:bg-gray-800 dark:text-white">
+    <div class="container mx-auto flex-grow p-6 flex" id="messages">
+      
+    </div>
+
+    <div class="container mx-auto flex-grow p-6 flex bg-white dark:bg-gray-800 dark:text-white" id="content">
+      
+  <div class="flex space-x-4 w-full dark:bg-gray-800">
+
+    <div class="flex-grow space-y-4 relative w-4/5">
+
+      
+        <div class="float-right text-base p-2">
+          <a href="/bites/regular/" class="hover:text-gray-700 border-r-2 border-gray-300 dark:border-gray-900 pr-1 dark:text-blue-200 dark:hover:text-blue-500">Back</a>
+
+          
+
+          
+            <a href="/bites/parse-a-list-of-names/" class="hover:text-gray-700 dark:text-blue-200 dark:hover:text-blue-500">Next →</a>
+          
+        </div>
+      
+
+      <div class="shadow rounded-lg p-6 clear-both">
+        <div class="flex flex-col lg:flex-row space-x-4">
+
+          <div class="w-full lg:w-2/5" id="bite-description">
+
+            <h2 class="text-2xl font-bold mb-4">
+              Sum n numbers
+            </h2>
+
+            <div class="text-sm font-semibold text-gray-800 dark:text-white mb-3 pb-2 border-b border-gray-300 dark:border-gray-900">
+              <a href="/bites/author/Pybites" class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Pybites</a>
+
+              <div class="float-right mr-2" id="relatedPathOrDemoLevel">
+
+                
+                  <div id="learningPathDropDown" class="relative inline-block text-left ml-2">
+                    <a href="#" id="dropdownButton" class="text-blue-500 hover:underline dark:text-blue-300">
+                      View Learning Paths
+                      <svg class="inline-block h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                      </svg>
+                    </a>
+
+                    <div id="dropdownPanel" class="hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-white">
+                      <div class="py-1">
+                        
+                          <a href="/bites/paths/python-beginner/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600">
+                            Python Beginner
+                          </a>
+                        
+                      </div>
+                    </div><!-- end dropdownPanel -->
+
+                  </div><!-- end learningPathDropDown -->
+
+                <!-- end demo_bite -->
+
+              </div><!-- end relatedPathOrDemoLevel -->
+
+            </div><!-- end author and learning paths -->
+
+            <p class="text-sm italic text-gray-700 dark:text-white mb-4">
+              Level: Beginner (score: 2)
+            </p>
+
+            
+
+            <p class="text-gray-700"></p><p>Write a Python function that calculates the sum of a list of (int) numbers:</p>
+<ul>
+<li>The function should accept a list of numbers and return the sum of those numbers.</li>
+<li>If no argument is provided (that is, <code>numbers</code> is <code>None</code>), return the sum of the numbers 1 to 100 (<strong>Note</strong> that this&nbsp;is not the same as an empty list of numbers being passed in. In that case the sum returned will be 0).</li>
+</ul>
+<p>Have fun!</p><p></p>
+
+            
+
+              
+
+              <hr class="my-4 dark:border-gray-900">
+
+              <p class="text-gray-700"></p>
+
+              <p class="hidden" id="filename">summing</p>
+
+            
+
+          </div>
+
+          
+            <div class="w-full lg:w-3/5" id="code-editor">
+              <div class="shadow p-4 rounded-lg">
+                <ul class="flex border-b dark:border-gray-900" id="tabs">
+                  <li class="mr-1">
+                    <a id="tab-main-editor" href="#" class="inline-block border-l border-t border-r dark:border-gray-900 rounded-t py-2 px-4 text-blue-700 hover:text-blue-500 dark:text-white dark:hover:text-blue-500 active">Code</a>
+                  </li>
+                  <li class="mr-1">
+                    <a id="tab-secondary-editor" href="#" class="inline-block border-l border-t border-r dark:border-gray-900 rounded-t py-2 px-4 text-blue-700 hover:text-blue-500 dark:text-white dark:hover:text-blue-500">Tests</a>
+                  </li>
+                  
+                    <li class="mr-1">
+                      <a id="tab-solution-editor" href="#" class="inline-block border-l border-t border-r dark:border-gray-900 rounded-t py-2 px-4 text-blue-700 hover:text-blue-500 dark:text-white dark:hover:text-blue-500">Solution &amp; Forum</a>
+                    </li>
+                  
+                </ul>
+
+                <div id="main-editor" class="p-4 editor-div">
+                  <textarea name="user_code" id="python-editor" style="display: none;">def sum_numbers(numbers=None):
+    # Hello
+    return 5050 if numbers is None else sum(numbers)
+</textarea><div class="CodeMirror cm-s-default CodeMirror-wrap" translate="no" style="clip-path: inset(0px); height: 400px;"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 4px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true" style="width: 18px; visibility: hidden;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true" style="height: 18px;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 50px; min-height: 86px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>4</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 19.5px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">def</span> <span class="cm-def">sum_numbers</span>(<span class="cm-variable">numbers</span><span class="cm-operator">=</span><span class="cm-keyword">None</span>):</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-comment"># Hello</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-keyword">return</span> <span class="cm-number">5050</span> <span class="cm-keyword">if</span> <span class="cm-variable">numbers</span> <span class="cm-keyword">is</span> <span class="cm-keyword">None</span> <span class="cm-keyword">else</span> <span class="cm-builtin">sum</span>(<span class="cm-variable">numbers</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" aria-hidden="true" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 50px; width: 1px; border-bottom: 0px solid transparent; top: 86px;"></div><div class="CodeMirror-gutters" style="height: 136px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div>
+                  <button id="copy-main-editor" class="absolute top-2 right-2 mr-4 p-1 text-gray-500 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7h8"></path>
+                    </svg>
+                  </button>
+                  <input type="hidden" name="bite_id" value="1">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="WB0JrKAk3NEC59uPENyozca3n4kddykSKW5DprI6L46X9ioyFMFhUCOf2RatKyMY">
+
+                </div>
+
+                <div id="secondary-editor" class="p-4 hidden editor-div">
+                  <textarea id="test-python-editor">from summing import sum_numbers
+
+
+def test_sum_numbers_default_args():
+    assert sum_numbers() == 5050
+    assert sum_numbers(numbers=None) == 5050
+
+
+def test_sum_numbers_various_inputs():
+    assert sum_numbers(range(1, 11)) == 55
+    assert sum_numbers([1, 2, 3]) == 6
+    assert sum_numbers((1, 2, 3)) == 6
+    assert sum_numbers([]) == 0  # !! [] not the same as None</textarea>
+                  <button id="copy-secondary-editor" class="absolute top-2 right-2 mr-4 p-1 text-gray-500 hover:text-blue-500 hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7h8"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                
+                  <div id="solution-editor" class="p-4 hidden editor-div">
+                    <textarea id="solution-python-editor">def sum_numbers(numbers=None):
+    if numbers is None:
+        numbers = range(1, 101)
+    return sum(numbers)</textarea>
+                  </div>
+                
+
+                <div class="flex justify-start mt-4 items-center sticky top-0 z-10" id="code-editor-buttons">
+                  <div id="loader" class="hidden mr-4">
+                    <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                  </div>
+
+                  
+                    <div class="flex items-center">
+                      <button class="text-base bg-blue-500 text-white px-3 py-1.5 rounded-md font-semibold shadow" hx-post="/bites/validate/" hx-include="#python-editor, [name='csrfmiddlewaretoken'], [name='bite_id']" hx-target="#feedback" hx-swap="innerHTML" id="validate-button" hx-trigger="click">Run Tests</button>
+                    </div>
+
+                    <div class="flex items-center ml-auto">
+                      <button class="text-sm bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 border border-gray-300" hx-post="/bites/validate/?run_code=true" hx-include="#python-editor, [name='csrfmiddlewaretoken'], [name='bite_id']" hx-target="#feedback" hx-swap="innerHTML" id="run-code-button" hx-trigger="click">Run Code</button>
+
+                      <div class="relative group">
+                        <button class="text-sm bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 border border-gray-300" hx-post="/bites/validate/?lint=true" hx-include="#python-editor, [name='csrfmiddlewaretoken'], [name='bite_id']" hx-target="#feedback" hx-swap="innerHTML" id="lint-button" hx-trigger="click">Lint</button>
+                          <div class="absolute right-0 bottom-full mb-2 hidden group-hover:block w-64 bg-gray-800 text-white text-sm rounded-lg px-4 py-2">
+                            Automatically format your code and check for style violations (PEP 8, flake8) using ruff.
+                          </div>
+                      </div>
+                    </div>
+
+                  
+
+                  <div class="relative">
+                    <select id="submissions" class="appearance-none text-sm bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600" hx-get="/bites/sum-n-numbers/submissions" hx-target="#code-editor-div" hx-trigger="change" hx-include="[name=submission_hash]" name="submission_hash">
+                      <option disabled="" selected="">Your submissions / reset</option>
+                      
+                        <option value="4089f3c426554ec89d69c523365a355b">2024-10-18 22:40
+                          
+                            (OK)
+                          
+                        </option>
+                      
+                        <option value="1944e33ab95843dda6e00a2b2a8a6bc2">2024-10-18 03:32
+                          
+                            (OK)
+                          
+                        </option>
+                      
+                        <option value="857a25ddadd748b5a8dbf99c5185076d">2024-10-18 03:22
+                          
+                            (OK)
+                          
+                        </option>
+                      
+                        <option value="1b9ecc7da9c14291945c4481cb491e7f">2024-10-18 01:20
+                          
+                            (OK)
+                          
+                        </option>
+                      
+                        <option value="7c0401813bd04b29a766b27070270cbb">2024-10-16 01:17
+                          
+                            (OK)
+                          
+                        </option>
+                      
+                        <option value="0fbbf618058a41f3a36b1904a21e3c94">2024-10-16 01:16
+                          
+                            (Failed)
+                          
+                        </option>
+                      
+                        <option value="7a7b5753e6a44bd9b560e796d48eec53">2024-10-15 03:18
+                          
+                            (Failed)
+                          
+                        </option>
+                      
+                        <option value="dacdf9b915924becafafe0bd67738b22">2024-10-15 03:18
+                          
+                            (Failed)
+                          
+                        </option>
+                      
+                        <option value="cc982efe0e0e41f7bf5ce5c8bbb2be34">2024-10-15 03:18
+                          
+                            (Failed)
+                          
+                        </option>
+                      
+                        <option value="aedf33ca83b34c8f9d033a1b6968fbb5">2024-10-15 03:16
+                          
+                            (Failed)
+                          
+                        </option>
+                      
+                      <option value="reset">Reset Bite</option>
+                    </select>
+                    <div id="code-editor-div" style="display: none;"></div>
+                  </div>
+
+                </div>
+                <div class="flex justify-start mt-4 items-center sticky top-0 z-10 hidden" id="forum-div">
+                    <a class="text-base bg-blue-500 text-white px-3 py-1.5 rounded-md font-semibold shadow" id="show-forum" href="/bites/forum/sum-n-numbers/">
+                      Go to Bite Forum
+                    </a>
+                </div>
+              </div>
+            </div>
+
+          
+
+        </div>
+      </div>
+
+      <div id="feedback" class="mt-4 p-4 rounded-lg"></div>
+
+    </div>
+
+  </div>
+
+    </div>
+
+  </main>
+
+  <footer class="shadow p-4 mt-auto">
+    <div class="container mx-auto text-center text-sm">
+      © Created with ♥ by <a href="https://pybit.es" target="_blank" class="text-blue-500 hover:underline dark:text-blue-200 dark:hover:text-blue-500">@pybites</a> | <a href="/privacy/" class="text-blue-500 hover:underline dark:text-blue-200 dark:hover:text-blue-500">Privacy Policy</a> | <a href="/terms/" class="text-blue-500 hover:underline dark:text-blue-200 dark:hover:text-blue-500">Terms of Service</a> | <a href="https://pybites.circle.so" target="_blank" class="text-blue-500 hover:underline dark:text-blue-200 dark:hover:text-blue-500">Pybites Community</a> | <a href="https://rustplatform.com" target="_blank" class="text-blue-500 hover:underline dark:text-blue-200 dark:hover:text-blue-500">Rust Platform</a>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="/static/js/script.js"></script>
+  
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
+    <script src="/static/js/python-hint.js"></script>
+    <script>
+      let editor;
+      let testEditor;
+      let solutionEditor;
+
+      // handle dark mode theme for editors
+      let isDarkMode = false;
+      const savedTheme = localStorage.getItem('theme');
+
+      if (savedTheme) {
+          isDarkMode = (savedTheme === 'dark');
+      } else {
+          // Fallback: Check the system preference for dark mode
+          isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      const editorTheme = isDarkMode ? 'material-darker' : 'default'; // Choose themes based on dark mode
+
+      function initializeEditor() {
+        editor = CodeMirror.fromTextArea(document.getElementById('python-editor'), {
+          mode: 'python',
+          lineNumbers: true,
+          theme: editorTheme,
+          viewportMargin: Infinity,
+          indentUnit: 4,
+          tabSize: 4,
+          indentWithTabs: false,
+          lineWrapping: true,
+          smartIndent: true
+        });
+
+        editor.setSize(null, "400px");
+
+        editor.setOption("extraKeys", {
+          Tab: function(cm) {
+            cm.replaceSelection("    ", "end");  // Insert 4 spaces
+          }
+        });
+
+        // replace tabs with spaces and save the code
+        editor.on('change', function () {
+          let doc = editor.getValue();
+          let updatedDoc = doc.replace(/\t/g, "    ");
+          if (doc !== updatedDoc) {
+            editor.setValue(updatedDoc);
+          }
+          editor.save();
+        });
+
+        // auto-complete https://stackoverflow.com/a/54234016/1128469
+        editor.on('inputRead', function onChange(editor, input) {
+            if (input.text[0] === ';' || input.text[0] === ' ' || input.text[0] === ":") {
+                return;
+            }
+            editor.showHint({
+                hint: CodeMirror.pythonHint
+            });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeEditor();
+
+        function initializeSecondaryEditor() {
+          if (!testEditor) {
+            testEditor = CodeMirror.fromTextArea(document.getElementById('test-python-editor'), {
+              mode: 'python',
+              lineNumbers: true,
+              theme: editorTheme,
+              viewportMargin: Infinity,
+              indentUnit: 4,
+              tabSize: 4,
+              indentWithTabs: false,
+              lineWrapping: true,
+              readOnly: true
+            });
+            testEditor.setSize(null, "400px");
+          }
+        }
+
+        function initializeSolutionEditor() {
+          if (!solutionEditor) {
+            solutionEditor = CodeMirror.fromTextArea(document.getElementById('solution-python-editor'), {
+              mode: 'python',
+              lineNumbers: true,
+              theme: editorTheme,
+              viewportMargin: Infinity,
+              indentUnit: 4,
+              tabSize: 4,
+              indentWithTabs: false,
+              lineWrapping: true,
+              readOnly: true
+            });
+            solutionEditor.setSize(null, "400px");
+          }
+        }
+
+        document.getElementById('tab-main-editor').addEventListener('click', function (event) {
+          event.preventDefault();
+          document.getElementById('main-editor').classList.remove('hidden');
+          document.getElementById('code-editor-buttons').classList.remove('hidden');
+          document.getElementById('forum-div').classList.add('hidden');
+          document.getElementById('secondary-editor').classList.add('hidden');
+          
+            document.getElementById('solution-editor').classList.add('hidden');
+          
+          this.classList.add('active');
+          document.getElementById('tab-secondary-editor').classList.remove('active');
+          
+            document.getElementById('tab-solution-editor').classList.remove('active');
+          
+        });
+
+        document.getElementById('tab-secondary-editor').addEventListener('click', function (event) {
+          event.preventDefault();
+          document.getElementById('main-editor').classList.add('hidden');
+          document.getElementById('code-editor-buttons').classList.add('hidden');
+          document.getElementById('forum-div').classList.add('hidden');
+          document.getElementById('secondary-editor').classList.remove('hidden');
+          
+            document.getElementById('solution-editor').classList.add('hidden');
+          
+          this.classList.add('active');
+          document.getElementById('tab-main-editor').classList.remove('active');
+          
+            document.getElementById('tab-solution-editor').classList.remove('active');
+          
+          initializeSecondaryEditor();
+        });
+
+        
+          document.getElementById('tab-solution-editor').addEventListener('click', function (event) {
+            event.preventDefault();
+            document.getElementById('main-editor').classList.add('hidden');
+            document.getElementById('code-editor-buttons').classList.add('hidden');
+            document.getElementById('forum-div').classList.remove('hidden');
+            document.getElementById('secondary-editor').classList.add('hidden');
+            document.getElementById('solution-editor').classList.remove('hidden');
+            this.classList.add('active');
+            document.getElementById('tab-main-editor').classList.remove('active');
+            document.getElementById('tab-secondary-editor').classList.remove('active');
+            initializeSolutionEditor();
+          });
+        
+
+        const copyMainButton = document.getElementById('copy-main-editor');
+        const copySecondaryButton = document.getElementById('copy-secondary-editor');
+
+        copyMainButton.addEventListener('click', function () {
+          copyToClipboard(editor);
+        });
+
+        copySecondaryButton.addEventListener('click', function () {
+          copyToClipboard(testEditor);
+        });
+
+        function copyToClipboard(editorInstance) {
+          const code = editorInstance.getValue();
+          navigator.clipboard.writeText(code).then(() => {
+            alert('Code copied to clipboard!');
+          }).catch(err => {
+            console.error('Failed to copy: ', err);
+          });
+        }
+
+        // Show/hide the copy button based on active tab
+        document.getElementById('tab-main-editor').addEventListener('click', function () {
+          copyMainButton.classList.remove('hidden');
+          copySecondaryButton.classList.add('hidden');
+        });
+
+        document.getElementById('tab-secondary-editor').addEventListener('click', function () {
+          copyMainButton.classList.add('hidden');
+          copySecondaryButton.classList.remove('hidden');
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedTab = urlParams.get('tab');
+        if (selectedTab === 'solution') {
+          const solutionTab = document.getElementById('tab-solution-editor');
+          if (solutionTab) {
+            solutionTab.click();
+          }
+        }
+
+      });
+
+      document.addEventListener("htmx:configRequest", function (event) {
+        const validTriggers = ['validate-button', 'run-code-button', 'lint-button'];
+        if (validTriggers.includes(event.target.id)) {
+          document.getElementById('loader').classList.remove('hidden');
+        }
+      });
+
+      document.addEventListener("htmx:afterRequest", function (event) {
+        const validTriggers = ['validate-button', 'run-code-button', 'lint-button'];
+        if (validTriggers.includes(event.target.id)) {
+          document.getElementById('loader').classList.add('hidden');
+        }
+        // if new submission is loaded, put it into the editor
+        if (event.detail.requestConfig.target.id === 'code-editor-div') {
+          const response = event.detail.xhr.response;
+          const data = JSON.parse(response);
+          if(editor) {
+            editor.setValue(data.code);
+          }
+        }
+      });
+
+      document.addEventListener("htmx:afterSwap", function (event) {
+        // put the reformatted code back into the editor
+        const editorData = document.getElementById("editor-data");
+        if (editorData) {
+          const reformattedCode = editorData.getAttribute("data-reformatted-code");
+          if (editor) {
+            editor.setValue(reformattedCode);
+          } else {
+            console.warn("Editor not found or no reformatted code.");
+          }
+        }
+      });
+
+      // make sure the editor listens to the theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      themeToggle.addEventListener('click', function () {
+        // TODO: this still needs a page refresh to kick in
+        const newTheme = document.documentElement.getAttribute('data-theme');
+        const editorTheme = newTheme === 'dark' ? 'material-darker' : 'default';
+
+        if(editor) {
+          editor.setOption('theme', editorTheme);
+          editor.refresh();
+        }
+        if(testEditor) {
+          testEditor.setOption('theme', editorTheme);
+          testEditor.refresh();
+        }
+        if(solutionEditor) {
+          solutionEditor.setOption('theme', editorTheme);
+          solutionEditor.refresh();
+        }
+      });
+    </script>
+  
+
+  <script>
+    
+      const dropdownButton = document.getElementById('dropdownButton');
+      const dropdownPanel = document.getElementById('dropdownPanel');
+
+      dropdownButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        dropdownPanel.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', function(event) {
+        if (!dropdownButton.contains(event.target) && !dropdownPanel.contains(event.target)) {
+          dropdownPanel.classList.add('hidden');
+        }
+      });
+    
+  </script>
+
+
+  <script src="/static/js/theme.js"></script>
+
+
+
+</body></html>

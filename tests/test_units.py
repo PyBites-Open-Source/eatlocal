@@ -5,72 +5,60 @@ from unittest import mock
 
 import pytest
 
-from eatlocal.eatlocal import display_bite, submit_bite
+from eatlocal.eatlocal import display_bite, submit_bite, Bite, create_bite_dir
+
+NOT_DOWNLOADED = (
+    Bite(
+        "Parsing a list of names",
+        "https://pybitesplatform.com/bites/parse-a-list-of-names/",
+    ),
+    Bite("Write a property", "https://pybitesplatform.com/bites/write-a-property/"),
+)
+LOCAL_TEST_BITES = (
+    Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/"),
+)
 
 TESTING_REPO = Path("./tests/testing_repo/").resolve()
-NOT_DOWNLOADED = (2, 332)
-LOCAL_TEST_ZIPS = (101, 102)
-LOCAL_TEST_BITES = (103, 104)
 
-
-@pytest.mark.parametrize("bite_number", LOCAL_TEST_BITES)
+@pytest.mark.parametrize("bite", LOCAL_TEST_BITES)
 def test_display_bite(
-    bite_number: int,
+    bite,
+    testing_config,
     capsys,
 ) -> None:
     """Correctly display a bite that has been downloaded and extracted."""
-
-    display_bite(bite_number, bite_repo=TESTING_REPO, theme="material")
+    testing_config["PYBITES_REPO"] = Path("./tests/testing_content/")
+    display_bite(bite, testing_config, theme="material")
     output = capsys.readouterr().out
-    assert f"Displaying Bite {bite_number} at" in output
+    assert f"Displaying {bite.title} at" in output
     assert "Code" in output
     assert "Directions" in output
 
 
-@pytest.mark.parametrize("bite_number", NOT_DOWNLOADED)
+@pytest.mark.parametrize("bite", NOT_DOWNLOADED)
 def test_cannot_display_missing_bite(
-    bite_number: int,
+    bite,
+    testing_config,
     capsys,
 ) -> None:
     """Attempt to display a bite that has not been downloaded and extracted."""
 
-    display_bite(bite_number, bite_repo=TESTING_REPO, theme="material")
+    display_bite(bite, testing_config, theme="material")
     output = capsys.readouterr().out
     assert "Unable to display bite" in output
 
 
-@pytest.mark.parametrize("bite_number", LOCAL_TEST_BITES)
-def test_submit_from_nongit_repo(
-    bite_number: int,
+def test_create_bite_dir(
     testing_config,
-    capsys,
+    tmp_path,
 ) -> None:
-    """Attempt to submit from an invalid git repository."""
-
-    submit_bite(
-        bite_number,
-        testing_config["PYBITES_USERNAME"],
-        testing_config["PYBITES_PASSWORD"],
-        TESTING_REPO,
-    )
-    output = capsys.readouterr().out
-    assert "Not a valid git repo:" in output
-
-
-@pytest.mark.parametrize("bite_number", NOT_DOWNLOADED)
-def test_submit_missing_bite(
-    bite_number: int,
-    testing_config,
-    capsys,
-) -> None:
-    """Attempt to submit from an invalid git repository."""
-    with mock.patch("eatlocal.eatlocal.Repo") as mock_repo:
-        mock_repo.side_effect = FileNotFoundError
-        submit_bite(
-            NOT_DOWNLOADED,
-            testing_config["PYBITES_USERNAME"],
-            testing_config["PYBITES_PASSWORD"],
-            TESTING_REPO,
-        )
-        output = capsys.readouterr().out
-        assert "Did you mean" in output
+    """Create a directory for a bite."""
+    with open("./tests/testing_content/summing_content.txt", "r") as f:
+        platform_content = f.read()
+    bite = Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/")
+    bite.platform_content = platform_content
+    bite_dir = tmp_path / "sum_n_numbers"
+    create_bite_dir(bite, testing_config, tmp_path)
+    assert bite_dir.exists()
+    assert bite_dir.is_dir()
+    assert bite_dir.name == "sum_n_numbers"
