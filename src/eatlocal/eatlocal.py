@@ -1,5 +1,6 @@
 """download and submit bites"""
 
+import json
 import webbrowser
 import requests
 from dataclasses import dataclass
@@ -55,7 +56,11 @@ class Bite:
     def fetch_local_code(self, config: dict) -> None:
         bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
         if not bite_dir.is_dir():
-            console.print(f":warning: Unable to submit: {self.title}.", style=WARNING)
+            console.print(
+                f":warning: Unable to submit: {
+                    self.title}.",
+                style=WARNING,
+            )
             console.print(
                 "Please make sure that path is correct and bite has been downloaded.",
                 style=SUGGESTION,
@@ -104,7 +109,11 @@ def set_repo() -> str:
         )
     ).expanduser()
     if not repo.exists():
-        console.print(f":warning: The path {repo} could not be found!", style=WARNING)
+        console.print(
+            f":warning: The path {
+                repo} could not be found!",
+            style=WARNING,
+        )
         console.print(
             "Make sure you have created a git repo for your bites", style=SUGGESTION
         )
@@ -148,6 +157,39 @@ def login(browser, username: str, password: str) -> Page:
     page.fill('input[name="password"]', password)
     page.click('button[type="submit"]')
     return page
+
+
+def track_local_bites(bite: Bite, config: dict) -> None:
+    """Track the bites that have been downloaded locally.
+
+    Args:
+        bite: Bite object containing the title and url of the bite.
+        config: Dictionary containing the user's PyBites credentials.
+
+    Returns:
+        None
+    """
+    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "r") as local_bites:
+        bites = json.load(local_bites)
+    bites[bite.title] = bite.url
+    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "w") as local_bites:
+        json.dump(bites, local_bites)
+
+
+def choose_local_bite(config: dict) -> tuple[str, str]:
+    """Choose a local bite to submit.
+
+    Args:
+        config: Dictionary containing the user's PyBites credentials.
+
+    Returns:
+        The name and url of the chosen bite.
+    """
+    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "r") as local_bites:
+        bites = json.load(local_bites)
+    environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
+    bite = iterfzf(bites, multi=False)
+    return bite, bites[bite]
 
 
 def choose_bite(
@@ -261,7 +303,8 @@ def create_bite_dir(
     dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
         print(
-            f"[yellow]:warning: There already exists a directory for {bite.title}. "
+            f"[yellow]:warning: There already exists a directory for {
+                bite.title}. "
             "Use the --force option to overwite."
         )
         return
@@ -328,7 +371,8 @@ def submit_bite(
             page.goto(bite.url)
             page.wait_for_url(bite.url)
             page.evaluate(
-                f"""document.querySelector('.CodeMirror').CodeMirror.setValue({repr(bite.local_code)})"""
+                f"""document.querySelector('.CodeMirror').CodeMirror.setValue({
+                    repr(bite.local_code)})"""
             )
             page.click("#validate-button")
             page.wait_for_selector("#feedback", state="visible")
@@ -381,7 +425,8 @@ def push_to_github(bite: str, bites_repo: str, verbose: bool = False) -> None:
     except GitCommandError:
         print(
             "[yellow]:warning: Unable to push to the remote PyBites repo.\n"
-            f'Try navigating to your local repo @ [/yellow]{bites_repo}[yellow] and running the command "git push".\n'
+            f'Try navigating to your local repo @ [/yellow]{
+                bites_repo}[yellow] and running the command "git push".\n'
             "Follow the advice from git.[/yellow]"
         )
         return
@@ -407,7 +452,11 @@ def display_bite(
     """
     path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if not path.is_dir():
-        console.print(f":warning: Unable to display bite {bite.title}.", style=WARNING)
+        console.print(
+            f":warning: Unable to display bite {
+                bite.title}.",
+            style=WARNING,
+        )
         console.print(
             "Please make sure that path is correct and the bite has been downloaded.",
             style=SUGGESTION,

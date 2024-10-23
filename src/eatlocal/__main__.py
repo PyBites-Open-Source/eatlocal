@@ -21,6 +21,8 @@ from .eatlocal import (
     install_browser,
     set_repo,
     submit_bite,
+    track_local_bites,
+    choose_local_bite,
 )
 
 cli = typer.Typer(add_completion=False)
@@ -107,6 +109,8 @@ def init(
             f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
             style=SUCCESS,
         )
+    with open(repo / "local_bites.json", "w", encoding="utf-8") as fh:
+        fh.write("{}")
     install_browser(verbose)
 
 
@@ -142,7 +146,10 @@ def download(
         return
 
     bite.platform_content = download_bite(config, bite, verbose)
+    if bite.platform_content is None:
+        return
     create_bite_dir(bite, config, verbose, force)
+    track_local_bites(bite, config)
 
 
 @cli.command()
@@ -158,15 +165,8 @@ def submit(
 ) -> None:
     """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
-    try:
-        title, url = choose_bite(verbose)
-        bite = Bite(title, url)
-    except TypeError:
-        console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
-        console.print(
-            "Ensure internet connection is good and platform is avaliable.",
-            style=SUGGESTION,
-        )
+    title, url = choose_local_bite(config)
+    bite = Bite(title, url)
     submit_bite(
         bite,
         config,
