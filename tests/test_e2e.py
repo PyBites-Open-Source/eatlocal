@@ -2,10 +2,11 @@
 
 
 from typer.testing import CliRunner
-from eatlocal.eatlocal import download_bite, Bite
+from eatlocal.eatlocal import download_bite, Bite, iterfzf
 from eatlocal.__main__ import cli, EATLOCAL_HOME
 from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
+import shutil
 
 runner = CliRunner()
 
@@ -41,10 +42,10 @@ def test_init_command(
     mock_get_credentials,
     mock_open,
 ):
+    """Test the init command."""
     mock_get_credentials.return_value = ("test_user", "test_password")
     mock_set_repo.return_value = Path("/mock/repo")
     mock_confirm_ask.return_value = True
-    # EATLOCAL_HOME.is_dir.return_value = True
 
     result = runner.invoke(cli, ["init", "--verbose"])
     assert Path(EATLOCAL_HOME).is_dir()
@@ -53,3 +54,20 @@ def test_init_command(
     assert "Successfully stored configuration variables" in result.output
 
     mock_install_browser.assert_called_once_with(True)
+
+
+@patch("eatlocal.__main__.load_config")
+@patch("eatlocal.eatlocal.iterfzf")
+def test_download_command(mock_iter_fzf, mock_load_config, testing_config):
+    """Test the download command."""
+    mock_load_config.return_value = testing_config
+    mock_iter_fzf.return_value = "Parse a list of names"
+
+
+    result = runner.invoke(cli, ["download"])
+
+    # assert result.exit_code == 0
+    assert (Path(testing_config["PYBITES_REPO"]) / "parse_a_list_of_names").resolve().is_dir()
+
+    shutil.rmtree(testing_config["PYBITES_REPO"] / "parse_a_list_of_names")
+

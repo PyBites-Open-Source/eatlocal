@@ -123,7 +123,7 @@ def download(
         )
         return
 
-    bite.platform_content = download_bite(config, bite, verbose)
+    bite.platform_content = download_bite(bite, config, verbose)
     if bite.platform_content is None:
         return
     create_bite_dir(bite, config, verbose, force)

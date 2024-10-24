@@ -347,7 +347,7 @@ def create_bite_dir(
     bite_description = parse_bite_description(soup)
     code = soup.find(id="python-editor").text
     tests = soup.find(id="test-python-editor").text
-    file_name = soup.find(id="filename").text
+    file_name = soup.find(id="filename").text.strip(".py")
 
     with open(dest_path / "bite.html", "w") as bite_html:
         bite_html.write(bite_description)

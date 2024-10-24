@@ -19,8 +19,8 @@ from eatlocal.eatlocal import (
 
 NOT_DOWNLOADED = (
     Bite(
-        "Parsing a list of names",
-        "https://pybitesplatform.com/bites/parse-a-list-of-names/",
+        "Made up Bite",
+        "https://pybitesplatform.com/bites/made-up-bite/",
     ),
     Bite("Write a property", "https://pybitesplatform.com/bites/write-a-property/"),
 )
@@ -93,8 +93,14 @@ def test_create_bite_dir(
     bite = Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/")
     bite.platform_content = platform_content
     bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum_n_numbers"
+
     create_bite_dir(bite, testing_config)
-    assert bite_dir.exists()
+    html_file = bite_dir/"bite.html"
+    python_file = bite_dir / "summing.py"
+    test_file = bite_dir / "test_summing.py"
+    assert html_file.exists()
+    assert python_file.exists()
+    assert test_file.exists()
     assert bite_dir.is_dir()
     assert bite_dir.name == "sum_n_numbers"
     shutil.rmtree(bite_dir)
@@ -106,3 +112,4 @@ def test_load_config(
     expected = {"PYBITES_USERNAME": "test_username", "PYBITES_PASSWORD": "test_password", "PYBITES_REPO": "test_repo"}
     actual = load_config(Path("./tests/testing_content/.env").resolve())
     assert actual == expected
+
