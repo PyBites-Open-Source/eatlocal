@@ -5,13 +5,14 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
+from eatlocal.constants import PROFILE_URL
 from eatlocal.eatlocal import (
     Bite,
     choose_bite,
     create_bite_dir,
     display_bite,
     download_bite,
+    load_config,
     set_repo,
     submit_bite,
 )
@@ -97,3 +98,11 @@ def test_create_bite_dir(
     assert bite_dir.is_dir()
     assert bite_dir.name == "sum_n_numbers"
     shutil.rmtree(bite_dir)
+
+
+def test_load_config(
+) -> None:
+    """Load the configuration file."""
+    expected = {"PYBITES_USERNAME": "test_username", "PYBITES_PASSWORD": "test_password", "PYBITES_REPO": "test_repo"}
+    actual = load_config(Path("./tests/testing_content/.env").resolve())
+    assert actual == expected
