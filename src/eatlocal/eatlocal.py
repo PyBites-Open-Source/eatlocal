@@ -3,10 +3,12 @@
 import json
 import webbrowser
 import requests
+import sys
 from dataclasses import dataclass
 from os import environ, makedirs
 from pathlib import Path
 
+from dotenv import dotenv_values
 from bs4 import BeautifulSoup
 from git import GitCommandError, InvalidGitRepositoryError, Repo
 from playwright.sync_api import sync_playwright, Page
@@ -75,6 +77,30 @@ class Bite:
 
         with open(python_file) as file:
             self.local_code = file.read()
+
+
+def load_config(env_path: Path) -> dict[str, str]:
+    """Load configuration from .env file.
+
+    Args:
+        env_path: Path to .env file.
+
+    Returns:
+        dict: Configuration variables.
+
+    """
+    config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
+    if not env_path.exists():
+        console.print(
+            ":warning: Could not find or read .eatlocal/.env in your home directory.",
+            style=WARNING,
+        )
+        console.print(
+            "Please run [underline]eatlocal init[/underline] first.", style=SUGGESTION
+        )
+        sys.exit()
+    config.update(dotenv_values(dotenv_path=env_path))
+    return config
 
 
 def get_credentials() -> tuple[str, str]:

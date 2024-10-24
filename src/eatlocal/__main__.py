@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import typer
-from dotenv import dotenv_values
 from rich import print
 from rich.prompt import Confirm
 
@@ -19,6 +18,7 @@ from .eatlocal import (
     download_bite,
     get_credentials,
     install_browser,
+    load_config,
     set_repo,
     submit_bite,
     track_local_bites,
@@ -28,28 +28,6 @@ from .eatlocal import (
 cli = typer.Typer(add_completion=False)
 
 
-def load_config(env_path: Path) -> dict[str, str]:
-    """Load configuration from .env file.
-
-    Args:
-        env_path: Path to .env file.
-
-    Returns:
-        dict: Configuration variables.
-
-    """
-    config = {"PYBITES_USERNAME": "", "PYBITES_PASSWORD": "", "PYBITES_REPO": ""}
-    if not env_path.exists():
-        console.print(
-            ":warning: Could not find or read .eatlocal/.env in your home directory.",
-            style=WARNING,
-        )
-        console.print(
-            "Please run [underline]eatlocal init[/underline] first.", style=SUGGESTION
-        )
-        sys.exit()
-    config.update(dotenv_values(dotenv_path=env_path))
-    return config
 
 
 def report_version(display: bool) -> None:
