@@ -109,7 +109,7 @@ def init(
             f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
             style=SUCCESS,
         )
-    with open(repo / "local_bites.json", "w", encoding="utf-8") as fh:
+    with open(repo / ".local_bites.json", "w", encoding="utf-8") as fh:
         fh.write("{}")
     install_browser(verbose)
 
@@ -186,15 +186,8 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    try:
-        title, url = choose_bite()
-        bite = Bite(title, url)
-    except TypeError:
-        console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
-        console.print(
-            "Ensure internet connection is good and platform is avaliable.",
-            style=SUGGESTION,
-        )
+    title, url = choose_local_bite(config)
+    bite = Bite(title, url)
     display_bite(bite, config, theme=theme)
 
 

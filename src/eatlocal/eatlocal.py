@@ -169,10 +169,10 @@ def track_local_bites(bite: Bite, config: dict) -> None:
     Returns:
         None
     """
-    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "r") as local_bites:
+    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
     bites[bite.title] = bite.url
-    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "w") as local_bites:
+    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "w") as local_bites:
         json.dump(bites, local_bites)
 
 
@@ -227,8 +227,8 @@ def choose_bite(
 
 
 def download_bite(
-    config: dict,
     bite: Bite,
+    config: dict,
     verbose: bool,
 ) -> str:
     """Download the bite content from the PyBites platform.

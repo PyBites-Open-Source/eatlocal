@@ -13,6 +13,6 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
 ) -> None:
     """Test that a premium bite cannot be downloaded without credentials."""
 
-    download_bite(BAD_CONFIG, bite=TEST_BITE, verbose=True)
+    download_bite(TEST_BITE, BAD_CONFIG, verbose=True)
     output = capfd.readouterr()[0]
     assert "Unable to login to PyBites." in output
