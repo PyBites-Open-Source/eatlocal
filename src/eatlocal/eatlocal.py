@@ -59,12 +59,11 @@ class Bite:
         bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
         if not bite_dir.is_dir():
             console.print(
-                f":warning: Unable to submit: {
-                    self.title}.",
+                f":warning: Unable to find bite {self.title} locally.",
                 style=WARNING,
             )
             console.print(
-                "Please make sure that path is correct and bite has been downloaded.",
+                "Please make sure that pybites repo is correct and bite has been downloaded.",
                 style=SUGGESTION,
             )
             return
@@ -211,7 +210,7 @@ def choose_local_bite(config: dict) -> tuple[str, str]:
     Returns:
         The name and url of the chosen bite.
     """
-    with open(Path(config["PYBITES_REPO"]) / "local_bites.json", "r") as local_bites:
+    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
     environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
     bite = iterfzf(bites, multi=False)

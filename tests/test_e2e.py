@@ -1,8 +1,7 @@
 """eatlocal End to End Tests"""
 
-
 from typer.testing import CliRunner
-from eatlocal.eatlocal import download_bite, Bite, iterfzf
+from eatlocal.eatlocal import download_bite, Bite
 from eatlocal.__main__ import cli, EATLOCAL_HOME
 from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
@@ -58,16 +57,28 @@ def test_init_command(
 
 @patch("eatlocal.__main__.load_config")
 @patch("eatlocal.eatlocal.iterfzf")
-def test_download_command(mock_iter_fzf, mock_load_config, testing_config):
+def test_download_command(mock_iterfzf, mock_load_config, testing_config):
     """Test the download command."""
     mock_load_config.return_value = testing_config
-    mock_iter_fzf.return_value = "Parse a list of names"
+    mock_iterfzf.return_value = "Parse a list of names"
 
+    runner.invoke(cli, ["download"])
 
-    result = runner.invoke(cli, ["download"])
-
-    # assert result.exit_code == 0
-    assert (Path(testing_config["PYBITES_REPO"]) / "parse_a_list_of_names").resolve().is_dir()
+    assert (
+        (Path(testing_config["PYBITES_REPO"]) / "parse_a_list_of_names")
+        .resolve()
+        .is_dir()
+    )
 
     shutil.rmtree(testing_config["PYBITES_REPO"] / "parse_a_list_of_names")
 
+
+@patch("eatlocal.__main__.load_config")
+@patch("eatlocal.eatlocal.iterfzf")
+def test_submit_command(mock_iterfzf, mock_load_config, testing_config):
+    """Test the submit command."""
+    mock_load_config.return_value = testing_config
+    mock_iterfzf.return_value = "Rotate string characters"
+    result = runner.invoke(cli, ["submit"])
+
+    assert "Code did not pass the tests." in result.output

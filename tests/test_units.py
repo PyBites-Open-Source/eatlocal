@@ -8,12 +8,11 @@ import pytest
 from eatlocal.eatlocal import (
     Bite,
     choose_bite,
+    choose_local_bite,
     create_bite_dir,
     display_bite,
-    download_bite,
     load_config,
     set_repo,
-    submit_bite,
 )
 
 NOT_DOWNLOADED = (
@@ -23,12 +22,48 @@ NOT_DOWNLOADED = (
     ),
     Bite("Write a property", "https://pybitesplatform.com/bites/write-a-property/"),
 )
-LOCAL_TEST_BITES = (
-    Bite(
+LOCAL_TEST_BITE = Bite(
+    "Rotate string characters",
+    "https://pybitesplatform.com/bites/rotate-string-characters/",
+)
+
+
+def test_bite_implementation():
+    """Test Bite class implementation."""
+    bite = Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/")
+    assert bite.title == "Sum n Numbers"
+    assert bite.url == "https://pybitesplatform.com/bites/sum-n-numbers/"
+    assert bite.platform_content is None
+
+
+def test_bite_fetch_local_code(testing_config) -> None:
+    """Test fetching local code."""
+    bite = Bite(
         "Rotate string characters",
         "https://pybitesplatform.com/bites/rotate-string-characters/",
-    ),
-)
+    )
+    bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate_string_characters"
+    with open(bite_dir / "rotate.py", "r") as f:
+        local_code = f.read()
+    bite.fetch_local_code(testing_config)
+    assert bite.local_code == local_code
+
+
+def test_bite_fetch_local_code_no_file(capsys, testing_config) -> None:
+    """Test fetching local code when file does not exist."""
+    bite = NOT_DOWNLOADED[0]
+    bite.fetch_local_code(testing_config)
+    output = capsys.readouterr()
+    assert "Unable to find bite" in output.out
+
+
+@patch("eatlocal.eatlocal.iterfzf")
+def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
+    """Test choosing a local bite."""
+    mock_iterfzf.return_value = LOCAL_TEST_BITE.title
+    bite = choose_local_bite(testing_config)
+    assert bite[0] == LOCAL_TEST_BITE.title
+    assert bite[1] == LOCAL_TEST_BITE.url
 
 
 @patch("eatlocal.eatlocal.Prompt.ask")
@@ -56,16 +91,14 @@ def test_choose_bite(mock_iterfzf, mock_requests):
     assert bite_url == "https://pybitesplatform.com/bites/sum-n-numbers/"
 
 
-@pytest.mark.parametrize("bite", LOCAL_TEST_BITES)
 def test_display_bite(
-    bite,
     testing_config,
     capsys,
 ) -> None:
     """Correctly display a bite that has been downloaded and extracted."""
-    display_bite(bite, testing_config, theme="material")
+    display_bite(LOCAL_TEST_BITE, testing_config, theme="material")
     output = capsys.readouterr().out
-    assert f"Displaying {bite.title} at" in output
+    assert f"Displaying {LOCAL_TEST_BITE.title} at" in output
     assert "Code" in output
     assert "Directions" in output
 
@@ -114,3 +147,11 @@ def test_load_config() -> None:
     }
     actual = load_config(Path("./tests/testing_content/testing_env").resolve())
     assert actual == expected
+
+
+def test_load_config_file_not_found(capsys) -> None:
+    """Test loading a config file that does not exist."""
+    with pytest.raises(SystemExit):
+        load_config(Path("./tests/testing_content/non_existent_file").resolve())
+    output = capsys.readouterr().out
+    assert "Could not find or read .eatlocal/.env in your home directory." in output
