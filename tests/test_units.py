@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from eatlocal.constants import PROFILE_URL
 from eatlocal.eatlocal import (
     Bite,
     choose_bite,
@@ -95,7 +94,7 @@ def test_create_bite_dir(
     bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum_n_numbers"
 
     create_bite_dir(bite, testing_config)
-    html_file = bite_dir/"bite.html"
+    html_file = bite_dir / "bite.html"
     python_file = bite_dir / "summing.py"
     test_file = bite_dir / "test_summing.py"
     assert html_file.exists()
@@ -106,10 +105,12 @@ def test_create_bite_dir(
     shutil.rmtree(bite_dir)
 
 
-def test_load_config(
-) -> None:
+def test_load_config() -> None:
     """Load the configuration file."""
-    expected = {"PYBITES_USERNAME": "test_username", "PYBITES_PASSWORD": "test_password", "PYBITES_REPO": "test_repo"}
-    actual = load_config(Path("./tests/testing_content/.env").resolve())
+    expected = {
+        "PYBITES_USERNAME": "test_username",
+        "PYBITES_PASSWORD": "test_password",
+        "PYBITES_REPO": "test_repo",
+    }
+    actual = load_config(Path("./tests/testing_content/testing_env").resolve())
     assert actual == expected
-
