@@ -1,7 +1,7 @@
 [project]
 name = "eatlocal"
 version = "0.9.1"
-description = "solve pybites locally"
+description = "Tool to solve Pybites Platform exercices locally."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

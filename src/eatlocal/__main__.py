@@ -13,21 +13,19 @@ from .constants import EATLOCAL_HOME, SUCCESS, SUGGESTION, WARNING
 from .eatlocal import (
     Bite,
     choose_bite,
+    choose_local_bite,
     create_bite_dir,
     display_bite,
     download_bite,
     get_credentials,
     install_browser,
     load_config,
-    set_repo,
+    set_local_dir,
     submit_bite,
     track_local_bites,
-    choose_local_bite,
 )
 
 cli = typer.Typer(add_completion=False)
-
-
 
 
 def report_version(display: bool) -> None:
@@ -66,9 +64,9 @@ def init(
     """Configure PyBites credentials and repository."""
     while True:
         username, password = get_credentials()
-        repo = set_repo()
+        local_dir = set_local_dir()
 
-        print(f"Your input - username: {username}, repo: {repo}.")
+        print(f"Your input - username: {username}, repo: {local_dir}.")
         if Confirm.ask(
             "Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"
         ):
@@ -80,14 +78,14 @@ def init(
     with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
         fh.write(f"PYBITES_USERNAME={username}\n")
         fh.write(f"PYBITES_PASSWORD={password}\n")
-        fh.write(f"PYBITES_REPO={repo}\n")
+        fh.write(f"PYBITES_REPO={local_dir}\n")
 
     if verbose:
         console.print(
             f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
             style=SUCCESS,
         )
-    with open(repo / ".local_bites.json", "w", encoding="utf-8") as fh:
+    with open(local_dir / ".local_bites.json", "w", encoding="utf-8") as fh:
         fh.write("{}")
     install_browser(verbose)
 

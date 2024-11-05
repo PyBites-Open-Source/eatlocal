@@ -12,7 +12,7 @@ from eatlocal.eatlocal import (
     create_bite_dir,
     display_bite,
     load_config,
-    set_repo,
+    set_local_dir,
 )
 
 NOT_DOWNLOADED = (
@@ -68,11 +68,11 @@ def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
 
 @patch("eatlocal.eatlocal.Prompt.ask")
 @patch("eatlocal.eatlocal.Path.exists")
-def test_set_repo(mock_exists, mock_prompt):
+def test_set_local_dir(mock_exists, mock_prompt):
     mock_prompt.return_value = "/some/path"
     mock_exists.return_value = True
-    repo = set_repo()
-    assert repo == Path("/some/path")
+    local_dir = set_local_dir()
+    assert local_dir == Path("/some/path")
     mock_exists.assert_called_once()
 
 

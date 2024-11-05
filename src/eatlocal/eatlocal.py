@@ -1,39 +1,40 @@
 """download and submit bites"""
 
 import json
-import webbrowser
-import requests
 import sys
+import webbrowser
 from dataclasses import dataclass
 from os import environ, makedirs
 from pathlib import Path
 
-from dotenv import dotenv_values
+import install_playwright
+import requests
 from bs4 import BeautifulSoup
-from git import GitCommandError, InvalidGitRepositoryError, Repo
-from playwright.sync_api import sync_playwright, Page
+from dotenv import dotenv_values
+from iterfzf import iterfzf
+from playwright.sync_api import Page, sync_playwright
 from rich import print
 from rich.layout import Layout
-from rich.prompt import Confirm, Prompt
 from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
 from rich.syntax import Syntax
 from rich.traceback import install
-from iterfzf import iterfzf
-import install_playwright
 
+from .console import console
 from .constants import (
     BITE_URL,
-    LOGIN_URL,
     EXERCISES_URL,
     FZF_DEFAULT_OPTS,
-    WARNING,
-    SUGGESTION,
-    SUCCESS,
+    LOGIN_URL,
     PROFILE_URL,
+    SUCCESS,
+    SUGGESTION,
+    TIMEOUT_LENGTH,
+    WARNING,
 )
-from .console import console
 
 install(show_locals=True)
+environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
 
 
 @dataclass
@@ -63,7 +64,7 @@ class Bite:
                 style=WARNING,
             )
             console.print(
-                "Please make sure that pybites repo is correct and bite has been downloaded.",
+                "Please make sure that your local pybites directory is correct and bite has been downloaded.",
                 style=SUGGESTION,
             )
             return
@@ -119,30 +120,30 @@ def get_credentials() -> tuple[str, str]:
     return username, password
 
 
-def set_repo() -> str:
+def set_local_dir() -> str:
     """Set the local directory for PyBites.
 
     Returns:
         The path to the local directory where user's bites will be stored.
 
     """
-    repo = Path(
+    local_dir = Path(
         Prompt.ask(
             "Enter the path to your local directory for PyBites, or press enter for the current directory",
             default=Path().cwd(),
             show_default=True,
         )
     ).expanduser()
-    if not repo.exists():
+    if not local_dir.exists():
         console.print(
             f":warning: The path {
-                repo} could not be found!",
+                local_dir} could not be found!",
             style=WARNING,
         )
         console.print(
-            "Make sure you have created a git repo for your bites", style=SUGGESTION
+            "Make sure you have created a local directory for your bites", style=SUGGESTION
         )
-    return repo
+    return local_dir
 
 
 def install_browser(verbose: bool) -> None:
@@ -174,7 +175,7 @@ def login(browser, username: str, password: str) -> Page:
     """
     page: Page = browser.new_page()
     # only shorten for debugging, some bites need in e2e test need longer
-    page.set_default_timeout(30000)
+    page.set_default_timeout(TIMEOUT_LENGTH)
     page.goto(LOGIN_URL)
 
     page.click("#login-link")
@@ -212,7 +213,6 @@ def choose_local_bite(config: dict) -> tuple[str, str]:
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
-    environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
     bite = iterfzf(bites, multi=False)
     return bite, bites[bite]
 
@@ -245,7 +245,6 @@ def choose_bite(
             bites[bite_name] = bite_link
         except IndexError:
             continue
-    environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
     bite_to_download = iterfzf(bites, multi=False)
     bite_url = BITE_URL.format(bite_name=bites[bite_to_download])
     return bite_to_download, bite_url
@@ -413,50 +412,6 @@ def submit_bite(
 
     if Confirm.ask(f"Would you like to open {bite.title} in your browser?"):
         webbrowser.open(bite.url)
-
-
-def push_to_github(bite: str, bites_repo: str, verbose: bool = False) -> None:
-    """Track, commit, and push changes to the PyBites repo.
-
-    Args:
-        bite: The name of the bite to push.
-        bites_repo: The path to the PyBites repo.
-        verbose: Whether to print additional information.
-
-    Returns:
-        None
-
-    """
-    if verbose:
-        print("Tracking and commiting changes...")
-    try:
-        repo = Repo(bites_repo)
-        repo.index.add(str(bite))
-        repo.index.commit(f"Solved Bite: {bite}")
-    except InvalidGitRepositoryError:
-        print(f"[yellow]:warning: Not a valid git repo: [/yellow]{bites_repo}")
-        return
-    except FileNotFoundError:
-        print(
-            f"[yellow]:warning: Seems like there is no bite {bite} to submit. "
-            "Did you mean to submit a different bite?[/yellow]"
-        )
-        return
-
-    try:
-        if verbose:
-            print("Pushing changes...")
-        repo.remotes.origin.push().raise_if_error()
-    except GitCommandError:
-        print(
-            "[yellow]:warning: Unable to push to the remote PyBites repo.\n"
-            f'Try navigating to your local repo @ [/yellow]{
-                bites_repo}[yellow] and running the command "git push".\n'
-            "Follow the advice from git.[/yellow]"
-        )
-        return
-
-    console.print(f"\nPushed bite {bite} to github", style=SUCCESS)
 
 
 def display_bite(

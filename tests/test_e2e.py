@@ -31,19 +31,19 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
 @patch("builtins.open", new_callable=mock_open)
 @patch("eatlocal.__main__.EATLOCAL_HOME", new=MagicMock())
 @patch("eatlocal.__main__.get_credentials")
-@patch("eatlocal.__main__.set_repo")
+@patch("eatlocal.__main__.set_local_dir")
 @patch("eatlocal.__main__.Confirm.ask")
 @patch("eatlocal.__main__.install_browser")
 def test_init_command(
     mock_install_browser,
     mock_confirm_ask,
-    mock_set_repo,
+    mock_set_local_dir,
     mock_get_credentials,
     mock_open,
 ):
     """Test the init command."""
     mock_get_credentials.return_value = ("test_user", "test_password")
-    mock_set_repo.return_value = Path("/mock/repo")
+    mock_set_local_dir.return_value = Path("/mock/local_dir")
     mock_confirm_ask.return_value = True
 
     result = runner.invoke(cli, ["init", "--verbose"])
