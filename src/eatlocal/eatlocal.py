@@ -141,7 +141,8 @@ def set_local_dir() -> str:
             style=WARNING,
         )
         console.print(
-            "Make sure you have created a local directory for your bites", style=SUGGESTION
+            "Make sure you have created a local directory for your bites",
+            style=SUGGESTION,
         )
     return local_dir
 
