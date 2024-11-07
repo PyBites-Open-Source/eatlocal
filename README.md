@@ -2,7 +2,20 @@
 
 # eatlocal
 
-Eatlocal helps the user solve [PyBites](https://pybitesplatform.com) code challenges locally. This cli tool allows you to download bites from the platform. You can display bite directions directly in the terminal. Once you have solved the bite you can use eatlocal to submit and it will open a bowser tab at the corresponding bite page.
+Eatlocal helps users solve [Pybites](https://pybitesplatform.com) code challenges locally. This cli tool allows you to download bites from the platform. You can display bite directions directly in the terminal. Once you have solved the bite you can use eatlocal to submit and it offers to open your default browser the corresponding bite page.
+
+## Table of Contents
+
+- [eatlocal](#eatlocal)
+  - [Updates](#updates)
+    - [Version](#version-080)
+    - [Breaking Changes](#breaking-changes)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+  - [Installation](#installation)
+    - [macOS/Linux](#macoslinux)
+    - [Windows](#windows)
+  - [Setup](#setup)
 
 ## Updates
 
@@ -18,23 +31,6 @@ eatlocal has been updated to work with version 2.0 of the PyBites platform.
 + no more verbose mode
 + eatlocal does not work with google / github logins yet.
 
-## Table of Contents
-
-- [eatlocal](#eatlocal)
-  - [Updates](#updates)
-    - [Version](#version-080)
-    - [Breaking Changes](#breaking-changes)
-  - [Table of Contents](#table-of-contents)
-  - [Usage](#usage)
-  - [Installation](#installation)
-    - [macOS/Linux](#macoslinux)
-    - [Windows](#windows)
-  - [Setup](#setup)
-    - [Install Chrome and Chromedriver](#install-chrome-and-chromedriver)
-      - [macOS](#macos)
-      - [Linux](#linux)
-      - [Windows](#windows-1)
-
 
 ## Usage
 
@@ -44,7 +40,7 @@ Set up your configuration file:
 eatlocal init
 ```
 
-Download and extract bites:
+Download bites:
 
 ```bash
 eatlocal download
