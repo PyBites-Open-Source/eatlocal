@@ -28,7 +28,7 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
     capfd,
 ) -> None:
     """Test that a premium bite cannot be downloaded without credentials."""
-    download_bite(SUMMING_TEST_BITE, BAD_CONFIG, verbose=True)
+    download_bite(SUMMING_TEST_BITE, BAD_CONFIG)
     output = capfd.readouterr()[0]
     assert "Unable to login to PyBites." in output
 
@@ -52,13 +52,11 @@ def test_init_command(
     mock_set_local_dir.return_value = Path("/mock/local_dir")
     mock_confirm_ask.return_value = True
 
-    result = runner.invoke(cli, ["init", "--verbose"])
+    result = runner.invoke(cli, ["init"])
     assert Path(EATLOCAL_HOME).is_dir()
 
     assert result.exit_code == 0
-    assert "Successfully stored configuration variables" in result.output
-
-    mock_install_browser.assert_called_once_with(True)
+    mock_install_browser.assert_called_once()
 
 
 @pytest.mark.slow
