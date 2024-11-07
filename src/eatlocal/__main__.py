@@ -6,6 +6,7 @@ from pathlib import Path
 import typer
 from rich import print
 from rich.prompt import Confirm
+from rich.status import Status
 
 from . import __version__
 from .console import console
@@ -53,13 +54,6 @@ def global_options(
 @cli.command()
 def init(
     ctx: typer.Context,
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-V",
-        is_flag=True,
-        help="Print each step as it happens.",
-    ),
 ) -> None:
     """Configure PyBites credentials and repository."""
     while True:
@@ -72,34 +66,24 @@ def init(
         ):
             break
 
-    if not EATLOCAL_HOME.is_dir():
-        EATLOCAL_HOME.mkdir()
+    with Status("Initializing eatlocal..."):
+        if not EATLOCAL_HOME.is_dir():
+            EATLOCAL_HOME.mkdir()
 
-    with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
-        fh.write(f"PYBITES_USERNAME={username}\n")
-        fh.write(f"PYBITES_PASSWORD={password}\n")
-        fh.write(f"PYBITES_REPO={local_dir}\n")
+        with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
+            fh.write(f"PYBITES_USERNAME={username}\n")
+            fh.write(f"PYBITES_PASSWORD={password}\n")
+            fh.write(f"PYBITES_REPO={local_dir}\n")
+        with open(local_dir / ".local_bites.json", "w", encoding="utf-8") as fh:
+            fh.write("{}")
 
-    if verbose:
-        console.print(
-            f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
-            style=ConsoleStyle.SUCCESS.value,
-        )
-    with open(local_dir / ".local_bites.json", "w", encoding="utf-8") as fh:
-        fh.write("{}")
-    install_browser(verbose)
+    with Status("Installing browser..."):
+        install_browser()
 
 
 @cli.command()
 def download(
     ctx: typer.Context,
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-V",
-        is_flag=True,
-        help="Print each step as it happens.",
-    ),
     force: bool = typer.Option(
         False,
         "--force",
@@ -111,8 +95,9 @@ def download(
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
     try:
-        title, url = choose_bite(verbose)
-        bite = Bite(title, url)
+        with Status("Retrievng bites..."):
+            title, url = choose_bite()
+            bite = Bite(title, url)
     except TypeError:
         console.print(
             ":warning: Unable to reach Pybites Platform.",
@@ -124,23 +109,17 @@ def download(
         )
         return
 
-    bite.platform_content = download_bite(bite, config, verbose)
-    if bite.platform_content is None:
-        return
-    create_bite_dir(bite, config, verbose, force)
-    track_local_bites(bite, config)
+    with Status("Downloading bite..."):
+        bite.platform_content = download_bite(bite, config)
+        if bite.platform_content is None:
+            return
+        create_bite_dir(bite, config, force)
+        track_local_bites(bite, config)
 
 
 @cli.command()
 def submit(
     ctx: typer.Context,
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-V",
-        is_flag=True,
-        help="Print each step as it happens.",
-    ),
 ) -> None:
     """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
@@ -149,7 +128,6 @@ def submit(
     submit_bite(
         bite,
         config,
-        verbose,
     )
 
 

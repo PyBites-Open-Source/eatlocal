@@ -13,22 +13,22 @@ from bs4 import BeautifulSoup
 from dotenv import dotenv_values
 from iterfzf import iterfzf
 from playwright.sync_api import Page, sync_playwright
-from rich import print
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
+from rich.status import Status
 from rich.syntax import Syntax
 from rich.traceback import install
 
 from .console import console
 from .constants import (
     BITE_URL,
-    ConsoleStyle,
     EXERCISES_URL,
     FZF_DEFAULT_OPTS,
     LOGIN_URL,
     PROFILE_URL,
     TIMEOUT_LENGTH,
+    ConsoleStyle,
 )
 
 install(show_locals=True)
@@ -65,16 +65,16 @@ class Bite:
                 "Please make sure that your local pybites directory is correct and bite has been downloaded.",
                 style=ConsoleStyle.SUGGESTION.value,
             )
-            return
+            self.local_code = None
+        else:
+            python_file = [
+                file
+                for file in list(bite_dir.glob("*.py"))
+                if not file.name.startswith("test_")
+            ][0]
 
-        python_file = [
-            file
-            for file in list(bite_dir.glob("*.py"))
-            if not file.name.startswith("test_")
-        ][0]
-
-        with open(python_file) as file:
-            self.local_code = file.read()
+            with open(python_file) as file:
+                self.local_code = file.read()
 
 
 def load_config(env_path: Path) -> dict[str, str]:
@@ -137,17 +137,12 @@ def set_local_dir() -> str:
     ).expanduser()
 
 
-def install_browser(verbose: bool) -> None:
+def install_browser() -> None:
     """Install the browser for the Playwright library.
-
-    Args:
-        verbose: Whether to print additional information.
 
     Returns:
         None
     """
-    if verbose:
-        print("Installing browser...")
     with sync_playwright() as p:
         install_playwright.install(p.chromium)
 
@@ -208,20 +203,13 @@ def choose_local_bite(config: dict) -> tuple[str, str]:
     return bite, bites[bite]
 
 
-def choose_bite(
-    verbose: bool = False,
-) -> tuple[str, str]:
+def choose_bite() -> tuple[str, str]:
     """Choose which bite will be downloaded.
-
-    Args:
-        verbose: Whether to print additional information.
 
     Returns:
         The name and url of the chosen bite.
 
     """
-    if verbose:
-        print("Retrieving bites list...")
     r = requests.get(EXERCISES_URL)
     if r.status_code != 200:
         return
@@ -244,14 +232,12 @@ def choose_bite(
 def download_bite(
     bite: Bite,
     config: dict,
-    verbose: bool,
 ) -> str:
     """Download the bite content from the PyBites platform.
 
     Args:
         config: Dictionary containing the user's PyBites credentials.
         bite: Bite object containing the title and url of the bite.
-        verbose: Whether to print additional information.
 
     Returns:
         The content of the bite from the platform.
@@ -259,8 +245,6 @@ def download_bite(
     """
     with sync_playwright() as p:
         with p.chromium.launch() as browser:
-            if verbose:
-                print("Logging in...")
             page = login(
                 browser,
                 config["PYBITES_USERNAME"],
@@ -306,7 +290,6 @@ def parse_bite_description(soup: BeautifulSoup) -> str:
 def create_bite_dir(
     bite: Bite,
     config: dict,
-    verbose: bool = False,
     force: bool = False,
 ) -> None:
     """Create a directory for the bite and write the bite content to it.
@@ -314,7 +297,6 @@ def create_bite_dir(
     Args:
         bite: Bite object.
         config: Dictionary containing the user's PyBites credentials.
-        verbose: Whether to print additional information.
         force: Whether to overwrite the directory if it already exists.
 
     Returns:
@@ -338,8 +320,6 @@ def create_bite_dir(
     except FileExistsError:
         pass
 
-    if verbose:
-        print("Parsing bite data...")
     soup = BeautifulSoup(bite.platform_content, "html.parser")
 
     bite_description = parse_bite_description(soup)
@@ -364,55 +344,52 @@ def create_bite_dir(
 def submit_bite(
     bite: str,
     config: dict,
-    verbose: bool = False,
 ) -> None:
     """Submit the bite to the PyBites platform.
 
     Args:
         bite: The name of the bite to submit.
         config: Dictionary containing the user's PyBites credentials.
-        verbose: Whether to print additional information.
 
     Returns:
         None
 
     """
-    bite.fetch_local_code(config)
-    if bite.local_code is None:
-        return
+    with Status("Submitting bite..."):
+        bite.fetch_local_code(config)
+        if bite.local_code is None:
+            return
 
-    if verbose:
-        print("Submitting bite...")
-    with sync_playwright() as p:
-        with p.chromium.launch() as browser:
-            page = login(
-                browser,
-                config["PYBITES_USERNAME"],
-                config["PYBITES_PASSWORD"],
-            )
-            if page.url != PROFILE_URL:
-                console.print(
-                    ":warning: Unable to login to PyBites.",
-                    style=ConsoleStyle.WARNING.value,
+        with sync_playwright() as p:
+            with p.chromium.launch() as browser:
+                page = login(
+                    browser,
+                    config["PYBITES_USERNAME"],
+                    config["PYBITES_PASSWORD"],
                 )
-                console.print(
-                    "Ensure your credentials are valid.",
-                    style=ConsoleStyle.SUGGESTION.value,
+                if page.url != PROFILE_URL:
+                    console.print(
+                        ":warning: Unable to login to PyBites.",
+                        style=ConsoleStyle.WARNING.value,
+                    )
+                    console.print(
+                        "Ensure your credentials are valid.",
+                        style=ConsoleStyle.SUGGESTION.value,
+                    )
+                    return
+                page.goto(bite.url)
+                page.wait_for_url(bite.url)
+                page.evaluate(
+                    f"""document.querySelector('.CodeMirror').CodeMirror.setValue({
+                        repr(bite.local_code)})"""
                 )
-                return
-            page.goto(bite.url)
-            page.wait_for_url(bite.url)
-            page.evaluate(
-                f"""document.querySelector('.CodeMirror').CodeMirror.setValue({
-                    repr(bite.local_code)})"""
-            )
-            page.click("#validate-button")
-            page.wait_for_selector("#feedback", state="visible")
-            page.wait_for_function(
-                "document.querySelector('#feedback').innerText.includes('test session starts')"
-            )
+                page.click("#validate-button")
+                page.wait_for_selector("#feedback", state="visible")
+                page.wait_for_function(
+                    "document.querySelector('#feedback').innerText.includes('test session starts')"
+                )
 
-            validate_result = page.text_content("#feedback")
+                validate_result = page.text_content("#feedback")
     if "Congrats, you passed this Bite" in validate_result:
         console.print(
             "Congrats, you passed this Bite!", style=ConsoleStyle.SUCCESS.value
