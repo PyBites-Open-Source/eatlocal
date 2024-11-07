@@ -33,11 +33,6 @@ SUMMING_TEST_BITE = Bite(
     "https://pybitesplatform.com/bites/sum-n-numbers/",
 )
 
-ROTATE_TEST_BITE = Bite(
-    "Rotate string characters",
-    "https://pybitesplatform.com/bites/rotate-string-characters/",
-)
-
 
 def test_bite_implementation():
     """Test Bite class implementation."""
@@ -49,7 +44,7 @@ def test_bite_implementation():
 
 def test_bite_fetch_local_code(testing_config) -> None:
     """Test fetching local code."""
-    bite = ROTATE_TEST_BITE
+    bite = LOCAL_TEST_BITE
     bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate_string_characters"
     with open(bite_dir / "rotate.py", "r") as f:
         local_code = f.read()
@@ -81,7 +76,6 @@ def test_set_local_dir(mock_exists, mock_prompt):
     mock_exists.return_value = True
     local_dir = set_local_dir()
     assert local_dir == Path("/some/path")
-    mock_exists.assert_called_once()
 
 
 @patch("eatlocal.eatlocal.requests.get")
@@ -144,6 +138,13 @@ def test_create_bite_dir(
     assert bite_dir.is_dir()
     assert bite_dir.name == "sum_n_numbers"
     shutil.rmtree(bite_dir)
+
+
+def test_create_bite_dir_without_force(testing_config, capsys):
+    create_bite_dir(LOCAL_TEST_BITE, testing_config)
+    output = capsys.readouterr().out
+    assert "There already exists a directory for" in output
+    assert "Use the --force option" in output
 
 
 def test_load_config() -> None:

@@ -128,24 +128,13 @@ def set_local_dir() -> str:
         The path to the local directory where user's bites will be stored.
 
     """
-    local_dir = Path(
+    return Path(
         Prompt.ask(
             "Enter the path to your local directory for PyBites, or press enter for the current directory",
             default=Path().cwd(),
             show_default=True,
         )
     ).expanduser()
-    if not local_dir.exists():
-        console.print(
-            f":warning: The path {
-                local_dir} could not be found!",
-            style=ConsoleStyle.WARNING.value,
-        )
-        console.print(
-            "Make sure you have created a local directory for your bites",
-            style=ConsoleStyle.SUGGESTION.value,
-        )
-    return local_dir
 
 
 def install_browser(verbose: bool) -> None:
@@ -334,10 +323,13 @@ def create_bite_dir(
     """
     dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
-        print(
-            f"[yellow]:warning: There already exists a directory for {
-                bite.title}. "
-            "Use the --force option to overwite."
+        console.print(
+            f":warning: There already exists a directory for {
+                bite.title}.",
+            style=ConsoleStyle.WARNING.value,
+        )
+        console.print(
+            "Use the --force option to overwite.", style=ConsoleStyle.SUGGESTION.value
         )
         return
 
