@@ -5,12 +5,14 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from eatlocal.eatlocal import (
     Bite,
     choose_bite,
     choose_local_bite,
     create_bite_dir,
     display_bite,
+    get_credentials,
     load_config,
     set_local_dir,
 )
@@ -161,3 +163,12 @@ def test_load_config_file_not_found(capsys) -> None:
         load_config(Path("./tests/testing_content/non_existent_file").resolve())
     output = capsys.readouterr().out
     assert "Could not find or read .eatlocal/.env in your home directory." in output
+
+
+@patch("eatlocal.eatlocal.Prompt.ask")
+def test_get_credentials(mock_prompt) -> None:
+    """Test getting credentials from the config file."""
+    expected = ("test_username", "test_password")
+    mock_prompt.side_effect = ["test_username", "test_password", "test_password"]
+    actual = get_credentials()
+    assert actual == expected
