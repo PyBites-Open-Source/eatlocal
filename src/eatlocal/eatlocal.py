@@ -23,14 +23,12 @@ from rich.traceback import install
 from .console import console
 from .constants import (
     BITE_URL,
+    ConsoleStyle,
     EXERCISES_URL,
     FZF_DEFAULT_OPTS,
     LOGIN_URL,
     PROFILE_URL,
-    SUCCESS,
-    SUGGESTION,
     TIMEOUT_LENGTH,
-    WARNING,
 )
 
 install(show_locals=True)
@@ -61,11 +59,11 @@ class Bite:
         if not bite_dir.is_dir():
             console.print(
                 f":warning: Unable to find bite {self.title} locally.",
-                style=WARNING,
+                style=ConsoleStyle.WARNING.value,
             )
             console.print(
                 "Please make sure that your local pybites directory is correct and bite has been downloaded.",
-                style=SUGGESTION,
+                style=ConsoleStyle.SUGGESTION.value,
             )
             return
 
@@ -93,10 +91,11 @@ def load_config(env_path: Path) -> dict[str, str]:
     if not env_path.exists():
         console.print(
             ":warning: Could not find or read .eatlocal/.env in your home directory.",
-            style=WARNING,
+            style=ConsoleStyle.WARNING.value,
         )
         console.print(
-            "Please run [underline]eatlocal init[/underline] first.", style=SUGGESTION
+            "Please run [underline]eatlocal init[/underline] first.",
+            style=ConsoleStyle.SUGGESTION.value,
         )
         sys.exit()
     config.update(dotenv_values(dotenv_path=env_path))
@@ -116,7 +115,9 @@ def get_credentials() -> tuple[str, str]:
         confirm_password = Prompt.ask("Confirm PyBites password", password=True)
         if password == confirm_password:
             break
-        console.print(":warning: Password did not match.", style=WARNING)
+        console.print(
+            ":warning: Password did not match.", style=ConsoleStyle.WARNING.value
+        )
     return username, password
 
 
@@ -138,11 +139,11 @@ def set_local_dir() -> str:
         console.print(
             f":warning: The path {
                 local_dir} could not be found!",
-            style=WARNING,
+            style=ConsoleStyle.WARNING.value,
         )
         console.print(
             "Make sure you have created a local directory for your bites",
-            style=SUGGESTION,
+            style=ConsoleStyle.SUGGESTION.value,
         )
     return local_dir
 
@@ -277,8 +278,14 @@ def download_bite(
                 config["PYBITES_PASSWORD"],
             )
             if page.url != PROFILE_URL:
-                console.print(":warning: Unable to login to PyBites.", style=WARNING)
-                console.print("Ensure your credentials are valid.", style=SUGGESTION)
+                console.print(
+                    ":warning: Unable to login to PyBites.",
+                    style=ConsoleStyle.WARNING.value,
+                )
+                console.print(
+                    "Ensure your credentials are valid.",
+                    style=ConsoleStyle.SUGGESTION.value,
+                )
                 return
             page.goto(bite.url)
             return page.content()
@@ -357,7 +364,9 @@ def create_bite_dir(
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
 
-    console.print(f"Wrote {bite.title} to: {dest_path}", style=SUCCESS)
+    console.print(
+        f"Wrote {bite.title} to: {dest_path}", style=ConsoleStyle.SUCCESS.value
+    )
 
 
 def submit_bite(
@@ -390,8 +399,14 @@ def submit_bite(
                 config["PYBITES_PASSWORD"],
             )
             if page.url != PROFILE_URL:
-                console.print(":warning: Unable to login to PyBites.", style=WARNING)
-                console.print("Ensure your credentials are valid.", style=SUGGESTION)
+                console.print(
+                    ":warning: Unable to login to PyBites.",
+                    style=ConsoleStyle.WARNING.value,
+                )
+                console.print(
+                    "Ensure your credentials are valid.",
+                    style=ConsoleStyle.SUGGESTION.value,
+                )
                 return
             page.goto(bite.url)
             page.wait_for_url(bite.url)
@@ -407,9 +422,13 @@ def submit_bite(
 
             validate_result = page.text_content("#feedback")
     if "Congrats, you passed this Bite" in validate_result:
-        console.print("Congrats, you passed this Bite!", style=SUCCESS)
+        console.print(
+            "Congrats, you passed this Bite!", style=ConsoleStyle.SUCCESS.value
+        )
     else:
-        console.print(":warning: Code did not pass the tests.", style=WARNING)
+        console.print(
+            ":warning: Code did not pass the tests.", style=ConsoleStyle.WARNING.value
+        )
 
     if Confirm.ask(f"Would you like to open {bite.title} in your browser?"):
         webbrowser.open(bite.url)
@@ -436,11 +455,11 @@ def display_bite(
         console.print(
             f":warning: Unable to display bite {
                 bite.title}.",
-            style=WARNING,
+            style=ConsoleStyle.WARNING.value,
         )
         console.print(
             "Please make sure that path is correct and the bite has been downloaded.",
-            style=SUGGESTION,
+            style=ConsoleStyle.SUGGESTION.value,
         )
         return
 

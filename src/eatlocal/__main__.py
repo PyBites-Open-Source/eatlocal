@@ -9,7 +9,7 @@ from rich.prompt import Confirm
 
 from . import __version__
 from .console import console
-from .constants import EATLOCAL_HOME, SUCCESS, SUGGESTION, WARNING
+from .constants import EATLOCAL_HOME, ConsoleStyle
 from .eatlocal import (
     Bite,
     choose_bite,
@@ -83,7 +83,7 @@ def init(
     if verbose:
         console.print(
             f"Successfully stored configuration variables under {EATLOCAL_HOME}.",
-            style=SUCCESS,
+            style=ConsoleStyle.SUCCESS.value,
         )
     with open(local_dir / ".local_bites.json", "w", encoding="utf-8") as fh:
         fh.write("{}")
@@ -114,10 +114,13 @@ def download(
         title, url = choose_bite(verbose)
         bite = Bite(title, url)
     except TypeError:
-        console.print(":warning: Unable to reach Pybites Platform.", style=WARNING)
+        console.print(
+            ":warning: Unable to reach Pybites Platform.",
+            style=ConsoleStyle.WARNING.value,
+        )
         console.print(
             "Ensure internet connect is good and platform is avaiable.",
-            style=SUGGESTION,
+            style=ConsoleStyle.SUGGESTION.value,
         )
         return
 

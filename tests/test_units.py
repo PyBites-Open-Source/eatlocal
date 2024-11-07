@@ -26,11 +26,20 @@ LOCAL_TEST_BITE = Bite(
     "Rotate string characters",
     "https://pybitesplatform.com/bites/rotate-string-characters/",
 )
+SUMMING_TEST_BITE = Bite(
+    "Sum n Numbers",
+    "https://pybitesplatform.com/bites/sum-n-numbers/",
+)
+
+ROTATE_TEST_BITE = Bite(
+    "Rotate string characters",
+    "https://pybitesplatform.com/bites/rotate-string-characters/",
+)
 
 
 def test_bite_implementation():
     """Test Bite class implementation."""
-    bite = Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/")
+    bite = SUMMING_TEST_BITE
     assert bite.title == "Sum n Numbers"
     assert bite.url == "https://pybitesplatform.com/bites/sum-n-numbers/"
     assert bite.platform_content is None
@@ -38,10 +47,7 @@ def test_bite_implementation():
 
 def test_bite_fetch_local_code(testing_config) -> None:
     """Test fetching local code."""
-    bite = Bite(
-        "Rotate string characters",
-        "https://pybitesplatform.com/bites/rotate-string-characters/",
-    )
+    bite = ROTATE_TEST_BITE
     bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate_string_characters"
     with open(bite_dir / "rotate.py", "r") as f:
         local_code = f.read()
@@ -120,9 +126,9 @@ def test_create_bite_dir(
     testing_config,
 ) -> None:
     """Create a directory for a bite."""
-    with open("./tests/testing_content/summing_content.txt", "r") as f:
+    with open(Path("./tests/testing_content/summing_content.txt"), "r") as f:
         platform_content = f.read()
-    bite = Bite("Sum n Numbers", "https://pybitesplatform.com/bites/sum-n-numbers/")
+    bite = SUMMING_TEST_BITE
     bite.platform_content = platform_content
     bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum_n_numbers"
 
