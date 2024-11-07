@@ -10,10 +10,13 @@ eatlocal has been updated to work with version 2.0 of the PyBites platform.
 
 ### Breaking Changes
 
-+ eatlocal version `0.9.0` only works on the new platform (v2).
++ eatlocal version `1.0.0` only works on the new platform (v2).
++ eatlocal directory no longer has to be a git repository.
 + submitting a bite no longer pushes it to github.
 + bite directories are now names by the bites instead of the number.
 + no need to download chrome and chrome driver.
++ no more verbose mode
++ eatlocal does not work with google / github logins yet.
 
 ## Table of Contents
 
@@ -44,7 +47,6 @@ eatlocal init
 Download and extract bites:
 
 ```bash
-# use -V, --verbose to print what's happening
 eatlocal download
 ```
 
@@ -58,7 +60,6 @@ eatlocal display
 Submit bites:
 
 ```bash
-# use -V, --verbose to print what's happening
 eatlocal submit
 ```
 
@@ -90,4 +91,4 @@ pip install eatlocal
 
 Run `eatlocal init` to configure your PyBites username, PyBites password*, and local git repository.
 
-*Note:  If you signed up for PyBites by authenticating through GitHub or Google, you may need to set a password manually in order to use `eatlocal`.
+*Note:  If you signed up for PyBites by authenticating through GitHub or Google, eatlocal does not work yet.

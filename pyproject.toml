@@ -1,15 +1,13 @@
 [project]
 name = "eatlocal"
-version = "0.9.1"
+version = "1.0.0"
 description = "Tool to solve Pybites Platform exercices locally."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.12.3",
-    "gitpython>=3.1.43",
     "install-playwright>=0.1.0",
     "iterfzf>=1.4.0.54.3",
-    "pytest-coverage>=0.0",
     "pytest-playwright>=0.5.2",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
@@ -25,6 +23,7 @@ dev = [
     "pytest>=8.3.3",
     "pytest-cov>=5.0.0",
     "pre-commit>=4.0.1",
+    "pytest-coverage>=0.0",
 ]
 
 [build-system]
