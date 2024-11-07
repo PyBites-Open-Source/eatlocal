@@ -8,3 +8,4 @@ __pycache__
 wily-report.html
 /* [0-9]* */
 .coverage
+.ropeproject
