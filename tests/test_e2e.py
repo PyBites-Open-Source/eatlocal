@@ -7,6 +7,8 @@ from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
 import shutil
 
+import pytest
+
 runner = CliRunner()
 
 SUMMING_TEST_BITE = Bite(
@@ -21,6 +23,7 @@ BAD_CONFIG = {
 }
 
 
+@pytest.mark.slow
 def test_eatlocal_cannot_download_premium_bite_wo_auth(
     capfd,
 ) -> None:
@@ -30,6 +33,7 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
     assert "Unable to login to PyBites." in output
 
 
+@pytest.mark.slow
 @patch("builtins.open", new_callable=mock_open)
 @patch("eatlocal.__main__.EATLOCAL_HOME", new=MagicMock())
 @patch("eatlocal.__main__.get_credentials")
@@ -57,6 +61,7 @@ def test_init_command(
     mock_install_browser.assert_called_once_with(True)
 
 
+@pytest.mark.slow
 @patch("eatlocal.__main__.load_config")
 @patch("eatlocal.eatlocal.iterfzf")
 def test_download_command(mock_iterfzf, mock_load_config, testing_config):
@@ -75,6 +80,7 @@ def test_download_command(mock_iterfzf, mock_load_config, testing_config):
     shutil.rmtree(testing_config["PYBITES_REPO"] / "parse_a_list_of_names")
 
 
+@pytest.mark.slow
 @patch("eatlocal.__main__.load_config")
 @patch("eatlocal.eatlocal.iterfzf")
 def test_submit_command(mock_iterfzf, mock_load_config, testing_config):
