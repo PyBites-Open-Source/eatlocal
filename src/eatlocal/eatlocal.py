@@ -109,7 +109,7 @@ def get_credentials() -> tuple[str, str]:
         A tuple containing the user's PyBites username and password.
 
     """
-    username = Prompt.ask("Enter your PyBites username")
+    email = Prompt.ask("Enter your PyBites email address")
     while True:
         password = Prompt.ask("Enter your PyBites user password", password=True)
         confirm_password = Prompt.ask("Confirm PyBites password", password=True)
@@ -118,7 +118,7 @@ def get_credentials() -> tuple[str, str]:
         console.print(
             ":warning: Password did not match.", style=ConsoleStyle.WARNING.value
         )
-    return username, password
+    return email, password
 
 
 def set_local_dir() -> str:

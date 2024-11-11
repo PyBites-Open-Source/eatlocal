@@ -25,11 +25,10 @@ eatlocal has been updated to work with version 2.0 of the PyBites platform.
 
 + eatlocal version `1.0.0` only works on the new platform (v2).
 + eatlocal directory no longer has to be a git repository.
-+ submitting a bite no longer pushes it to github.
-+ bite directories are now names by the bites instead of the number.
-+ no need to download chrome and chrome driver.
-+ no more verbose mode
-+ eatlocal does not work with google / github logins yet.
++ Submitting a bite no longer pushes it to GitHub.
++ Bite directories are now names by the bites instead of the number.
++ No need to download chrome and chrome driver.
++ No more verbose mode
 
 
 ## Usage
@@ -63,6 +62,14 @@ eatlocal submit
 
 There are a few options for install eatlocal.
 
+### Using uv
+
+If you have [uv](https://github.com/astral-sh/uv) installed:
+
+```bash
+uv tool install eatlocal
+```
+
 ### Using pipx
 
 If you have [pipx](https://pypa.github.io/pipx/) installed:
@@ -87,4 +94,4 @@ pip install eatlocal
 
 Run `eatlocal init` to configure your PyBites username, PyBites password*, and local git repository.
 
-*Note:  If you signed up for PyBites by authenticating through GitHub or Google, eatlocal does not work yet.
+*Note:  If you signed up for PyBites by authenticating through GitHub or Google, you will need to set a password on the platform first.
