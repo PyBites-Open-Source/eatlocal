@@ -26,6 +26,9 @@ dev = [
     "pytest-coverage>=0.0",
 ]
 
+[project.urls]
+Source = "https://github.com/PyBites-Open-Source/eatlocal"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
