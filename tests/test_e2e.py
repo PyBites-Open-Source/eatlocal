@@ -21,6 +21,7 @@ BAD_CONFIG = {
     "PYBITES_PASSWORD": "bar",
     "PYBITES_REPO": "baz",
 }
+TEST_DOWNLOAD_BITE = "parse-a-list-of-names"
 
 
 @pytest.mark.slow
@@ -70,12 +71,10 @@ def test_download_command(mock_iterfzf, mock_load_config, testing_config):
     runner.invoke(cli, ["download"])
 
     assert (
-        (Path(testing_config["PYBITES_REPO"]) / "parse_a_list_of_names")
-        .resolve()
-        .is_dir()
+        (Path(testing_config["PYBITES_REPO"]) / TEST_DOWNLOAD_BITE).resolve().is_dir()
     )
 
-    shutil.rmtree(testing_config["PYBITES_REPO"] / "parse_a_list_of_names")
+    shutil.rmtree(Path(testing_config["PYBITES_REPO"]) / TEST_DOWNLOAD_BITE)
 
 
 @pytest.mark.slow

@@ -51,7 +51,7 @@ class Bite:
     platform_content: str = None
 
     def bite_url_to_dir(self, pybites_repo: Path) -> Path:
-        bite_dir = self.url.split("/")[-2].replace("-", "_")
+        bite_dir = self.url.split("/")[-2]
         return Path(pybites_repo).resolve() / bite_dir
 
     def fetch_local_code(self, config: dict) -> None:

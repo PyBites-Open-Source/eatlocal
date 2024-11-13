@@ -45,7 +45,7 @@ def test_bite_implementation():
 def test_bite_fetch_local_code(testing_config) -> None:
     """Test fetching local code."""
     bite = LOCAL_TEST_BITE
-    bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate_string_characters"
+    bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate-string-characters"
     with open(bite_dir / "rotate.py", "r") as f:
         local_code = f.read()
     bite.fetch_local_code(testing_config)
@@ -126,7 +126,7 @@ def test_create_bite_dir(
         platform_content = f.read()
     bite = SUMMING_TEST_BITE
     bite.platform_content = platform_content
-    bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum_n_numbers"
+    bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum-n-numbers"
 
     create_bite_dir(bite, testing_config)
     html_file = bite_dir / "bite.html"
@@ -136,7 +136,7 @@ def test_create_bite_dir(
     assert python_file.exists()
     assert test_file.exists()
     assert bite_dir.is_dir()
-    assert bite_dir.name == "sum_n_numbers"
+    assert bite_dir.name == "sum-n-numbers"
     shutil.rmtree(bite_dir)
 
 
