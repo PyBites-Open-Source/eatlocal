@@ -13,7 +13,7 @@ runner = CliRunner()
 
 SUMMING_TEST_BITE = Bite(
     "Sum n Numbers",
-    "https://pybitesplatform.com/bites/sum-n-numbers/",
+    "sum-n-numbers",
 )
 TEST_BITES = []
 BAD_CONFIG = {
