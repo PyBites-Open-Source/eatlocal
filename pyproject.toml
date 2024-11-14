@@ -1,6 +1,6 @@
 [project]
 name = "eatlocal"
-version = "1.0.0"
+version = "1.1.0"
 description = "Tool to solve Pybites Platform exercices locally."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -25,6 +25,9 @@ dev = [
     "pre-commit>=4.0.1",
     "pytest-coverage>=0.0",
 ]
+
+[project.urls]
+Source = "https://github.com/PyBites-Open-Source/eatlocal"
 
 [build-system]
 requires = ["hatchling"]

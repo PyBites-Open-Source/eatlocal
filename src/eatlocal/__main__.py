@@ -95,9 +95,8 @@ def download(
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
     try:
-        with Status("Retrievng bites..."):
-            title, url = choose_bite()
-            bite = Bite(title, url)
+        title, slug = choose_bite()
+        bite = Bite(title, slug)
     except TypeError:
         console.print(
             ":warning: Unable to reach Pybites Platform.",
@@ -113,8 +112,8 @@ def download(
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:
             return
-        create_bite_dir(bite, config, force)
         track_local_bites(bite, config)
+    create_bite_dir(bite, config, force)
 
 
 @cli.command()
@@ -123,8 +122,8 @@ def submit(
 ) -> None:
     """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
-    title, url = choose_local_bite(config)
-    bite = Bite(title, url)
+    title, slug = choose_local_bite(config)
+    bite = Bite(title, slug)
     submit_bite(
         bite,
         config,
@@ -143,8 +142,8 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    title, url = choose_local_bite(config)
-    bite = Bite(title, url)
+    title, slug = choose_local_bite(config)
+    bite = Bite(title, slug)
     display_bite(bite, config, theme=theme)
 
 

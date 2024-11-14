@@ -23,7 +23,7 @@ from rich.traceback import install
 from .console import console
 from .constants import (
     BITE_URL,
-    EXERCISES_URL,
+    BITES_API,
     FZF_DEFAULT_OPTS,
     LOGIN_URL,
     PROFILE_URL,
@@ -41,21 +41,24 @@ class Bite:
 
     Attributes:
         title: The title of the bite.
-        url: The url of the bite.
+        slug: The slug of the bite.
         platform_content: The content of the bite downloaded from the platform.
 
     """
 
     title: str = None
-    url: str = None
+    slug: str = None
     platform_content: str = None
 
-    def bite_url_to_dir(self, pybites_repo: Path) -> Path:
-        bite_dir = self.url.split("/")[-2].replace("-", "_")
-        return Path(pybites_repo).resolve() / bite_dir
+    @property
+    def url(self) -> str:
+        return BITE_URL.format(bite_slug=self.slug)
+
+    def bite_slug_to_dir(self, pybites_repo: Path) -> Path:
+        return Path(pybites_repo).resolve() / self.slug
 
     def fetch_local_code(self, config: dict) -> None:
-        bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
+        bite_dir = self.bite_slug_to_dir(config["PYBITES_REPO"])
         if not bite_dir.is_dir():
             console.print(
                 f":warning: Unable to find bite {self.title} locally.",
@@ -109,7 +112,7 @@ def get_credentials() -> tuple[str, str]:
         A tuple containing the user's PyBites username and password.
 
     """
-    username = Prompt.ask("Enter your PyBites username")
+    email = Prompt.ask("Enter your PyBites email address")
     while True:
         password = Prompt.ask("Enter your PyBites user password", password=True)
         confirm_password = Prompt.ask("Confirm PyBites password", password=True)
@@ -118,7 +121,7 @@ def get_credentials() -> tuple[str, str]:
         console.print(
             ":warning: Password did not match.", style=ConsoleStyle.WARNING.value
         )
-    return username, password
+    return email, password
 
 
 def set_local_dir() -> str:
@@ -183,7 +186,7 @@ def track_local_bites(bite: Bite, config: dict) -> None:
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
-    bites[bite.title] = bite.url
+    bites[bite.title] = bite.slug
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "w") as local_bites:
         json.dump(bites, local_bites)
 
@@ -195,7 +198,7 @@ def choose_local_bite(config: dict) -> tuple[str, str]:
         config: Dictionary containing the user's PyBites credentials.
 
     Returns:
-        The name and url of the chosen bite.
+        The name and slug of the chosen bite.
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
@@ -210,23 +213,15 @@ def choose_bite() -> tuple[str, str]:
         The name and url of the chosen bite.
 
     """
-    r = requests.get(EXERCISES_URL)
-    if r.status_code != 200:
-        return
-    soup = BeautifulSoup(r.content, "html.parser")
-    rows = soup.table.find_all("tr")
-    bites = {}
-    for row in rows[1:]:
-        try:
-            bite = row.find_all("td")[1].a
-            bite_name = bite.text
-            bite_link = bite["href"]
-            bites[bite_name] = bite_link
-        except IndexError:
-            continue
+
+    with Status("Retrievng bites..."):
+        r = requests.get(BITES_API)
+        if r.status_code != 200:
+            return
+        bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
-    bite_url = BITE_URL.format(bite_name=bites[bite_to_download])
-    return bite_to_download, bite_url
+    slug = bites[bite_to_download]
+    return bite_to_download, slug
 
 
 def download_bite(
@@ -303,7 +298,7 @@ def create_bite_dir(
         None
 
     """
-    dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
+    dest_path = bite.bite_slug_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
         console.print(
             f":warning: There already exists a directory for {
@@ -323,7 +318,19 @@ def create_bite_dir(
     soup = BeautifulSoup(bite.platform_content, "html.parser")
 
     bite_description = parse_bite_description(soup)
-    code = soup.find(id="python-editor").text
+    try:
+        code = soup.find(id="python-editor").text
+    except AttributeError:
+        console.print(
+            f":warning: Unable to access {bite.title} on the platform.",
+            style=ConsoleStyle.WARNING.value,
+        )
+        console.print(
+            "Please make sure that your credentials are valid and you have access to this bite.",
+            style=ConsoleStyle.SUGGESTION.value,
+        )
+        return
+
     tests = soup.find(id="test-python-editor").text
     file_name = soup.find(id="filename").text.strip(".py")
 
@@ -335,7 +342,6 @@ def create_bite_dir(
 
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
-
     console.print(
         f"Wrote {bite.title} to: {dest_path}", style=ConsoleStyle.SUCCESS.value
     )
@@ -419,7 +425,7 @@ def display_bite(
         None
 
     """
-    path = bite.bite_url_to_dir(config["PYBITES_REPO"])
+    path = bite.bite_slug_to_dir(config["PYBITES_REPO"])
     if not path.is_dir():
         console.print(
             f":warning: Unable to display bite {

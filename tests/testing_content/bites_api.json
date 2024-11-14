@@ -1,0 +1,36 @@
+[
+    {
+        "title": "Sum n numbers",
+        "slug": "sum-n-numbers",
+        "description": "<p>Write a Python function that calculates the sum of a list of (int) numbers:</p>\r\n<ul>\r\n<li>The function should accept a list of numbers and return the sum of those numbers.</li>\r\n<li>If no argument is provided (that is, <code>numbers</code> is <code>None</code>), return the sum of the numbers 1 to 100 (<strong>Note</strong> that this&nbsp;is not the same as an empty list of numbers being passed in. In that case the sum returned will be 0).</li>\r\n</ul>\r\n<p>Have fun!</p>",
+        "level": "Beginner",
+        "tags": [
+            "sum",
+            "None",
+            "range",
+            "default args"
+        ]
+    },
+    {
+        "title": "Regex fun",
+        "slug": "regex-fun",
+        "description": "<p>Learn some Python regular expressions by completing the following three functions.</p>\r\n<p>Each function recieves a text string with different content, it's up you parse out and return the text described in each function's <code>docstring</code>.</p>\r\n<p><strong>Note:</strong> normally when we parse HTML we use a library of some sort. This Bite helps you appreciate the work that goes into those libraries!</p>",
+        "level": "Advanced",
+        "tags": [
+            "re",
+            "findall",
+            "regular expressions"
+        ]
+    },
+    {
+        "title": "Word values",
+        "slug": "word-values",
+        "description": "<p>Find the dictionary word with the highest value using <a href=\"https://en.wikipedia.org/wiki/Scrabble\" target=\"_blank\" rel=\"noopener\">Scrabble</a>&nbsp;rules.</p>\r\n<p>There are three tasks to complete for this Bite:</p>\r\n<ul>\r\n<li>Finish the function <code>load_words</code>&nbsp;which creates and returns a list of words from a text file.</li>\r\n<li>Finish the function <code>calc_word_value</code>&nbsp;which calculates and returns a word's Scrabble value.</li>\r\n<li>Finish the function <code>max_word_value</code>&nbsp;which finds and returns the dictionary word with the highest score.</li>\r\n</ul>\r\n<p><strong>Notes:</strong></p>\r\n<ul>\r\n<li>The text of the dictionary is downloaded for you and is available with the path contained in the variable <code>DICTIONARY</code>.</li>\r\n<li><span style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;\">The words in the file are separated by a newline character.</span></li>\r\n<li>Letters not found in <code>LETTER_SCORES</code> score zero points.</li>\r\n</ul>\r\n<p>Look at the <strong>TESTS</strong> tab to see what your code needs to pass. Enjoy!</p>",
+        "level": "Intermediate",
+        "tags": [
+            "sum",
+            "Scrabble",
+            "max"
+        ]
+    }
+]
