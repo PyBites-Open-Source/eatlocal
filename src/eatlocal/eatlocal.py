@@ -23,7 +23,7 @@ from rich.traceback import install
 from .console import console
 from .constants import (
     BITE_URL,
-    EXERCISES_URL,
+    BITES_API,
     FZF_DEFAULT_OPTS,
     LOGIN_URL,
     PROFILE_URL,
@@ -41,18 +41,21 @@ class Bite:
 
     Attributes:
         title: The title of the bite.
-        url: The url of the bite.
+        slug: The slug of the bite.
         platform_content: The content of the bite downloaded from the platform.
 
     """
 
     title: str = None
-    url: str = None
+    slug: str = None
     platform_content: str = None
 
+    @property
+    def url(self) -> str:
+        return "https://pybites.com/bites/" + self.slug + "/"
+
     def bite_url_to_dir(self, pybites_repo: Path) -> Path:
-        bite_dir = self.url.split("/")[-2]
-        return Path(pybites_repo).resolve() / bite_dir
+        return Path(pybites_repo).resolve() / self.slug
 
     def fetch_local_code(self, config: dict) -> None:
         bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
@@ -183,7 +186,7 @@ def track_local_bites(bite: Bite, config: dict) -> None:
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
-    bites[bite.title] = bite.url
+    bites[bite.title] = bite.slug
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "w") as local_bites:
         json.dump(bites, local_bites)
 
@@ -210,20 +213,22 @@ def choose_bite() -> tuple[str, str]:
         The name and url of the chosen bite.
 
     """
-    r = requests.get(EXERCISES_URL)
+    r = requests.get(BITES_API)
     if r.status_code != 200:
         return
-    soup = BeautifulSoup(r.content, "html.parser")
-    rows = soup.table.find_all("tr")
-    bites = {}
-    for row in rows[1:]:
-        try:
-            bite = row.find_all("td")[1].a
-            bite_name = bite.text
-            bite_link = bite["href"]
-            bites[bite_name] = bite_link
-        except IndexError:
-            continue
+    bites = {bite["title"]: bite["slug"] for bite in r.json()}
+
+    # soup = BeautifulSoup(r.content, "html.parser")
+    # rows = soup.table.find_all("tr")
+    # bites = {}
+    # for row in rows[1:]:
+    #     try:
+    #         bite = row.find_all("td")[1].a
+    #         bite_name = bite.text
+    #         bite_link = bite["href"]
+    #         bites[bite_name] = bite_link
+    #     except IndexError:
+    #         continue
     bite_to_download = iterfzf(bites, multi=False)
     bite_url = BITE_URL.format(bite_name=bites[bite_to_download])
     return bite_to_download, bite_url

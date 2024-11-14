@@ -96,8 +96,8 @@ def download(
     config = load_config(EATLOCAL_HOME / ".env")
     try:
         with Status("Retrievng bites..."):
-            title, url = choose_bite()
-            bite = Bite(title, url)
+            title, slug = choose_bite()
+            bite = Bite(title, slug)
     except TypeError:
         console.print(
             ":warning: Unable to reach Pybites Platform.",

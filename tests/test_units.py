@@ -38,7 +38,7 @@ def test_bite_implementation():
     """Test Bite class implementation."""
     bite = SUMMING_TEST_BITE
     assert bite.title == "Sum n Numbers"
-    assert bite.url == "https://pybitesplatform.com/bites/sum-n-numbers/"
+    assert bite.slug == "https://pybitesplatform.com/bites/sum-n-numbers/"
     assert bite.platform_content is None
 
 
@@ -66,7 +66,7 @@ def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
     mock_iterfzf.return_value = LOCAL_TEST_BITE.title
     bite = choose_local_bite(testing_config)
     assert bite[0] == LOCAL_TEST_BITE.title
-    assert bite[1] == LOCAL_TEST_BITE.url
+    assert bite[1] == LOCAL_TEST_BITE.slug
 
 
 @patch("eatlocal.eatlocal.Prompt.ask")
