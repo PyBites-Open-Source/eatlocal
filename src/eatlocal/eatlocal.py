@@ -52,13 +52,13 @@ class Bite:
 
     @property
     def url(self) -> str:
-        return "https://pybites.com/bites/" + self.slug + "/"
+        return BITE_URL.format(bite_slug=self.slug)
 
-    def bite_url_to_dir(self, pybites_repo: Path) -> Path:
+    def bite_slug_to_dir(self, pybites_repo: Path) -> Path:
         return Path(pybites_repo).resolve() / self.slug
 
     def fetch_local_code(self, config: dict) -> None:
-        bite_dir = self.bite_url_to_dir(config["PYBITES_REPO"])
+        bite_dir = self.bite_slug_to_dir(config["PYBITES_REPO"])
         if not bite_dir.is_dir():
             console.print(
                 f":warning: Unable to find bite {self.title} locally.",
@@ -198,7 +198,7 @@ def choose_local_bite(config: dict) -> tuple[str, str]:
         config: Dictionary containing the user's PyBites credentials.
 
     Returns:
-        The name and url of the chosen bite.
+        The name and slug of the chosen bite.
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
@@ -213,25 +213,15 @@ def choose_bite() -> tuple[str, str]:
         The name and url of the chosen bite.
 
     """
-    r = requests.get(BITES_API)
-    if r.status_code != 200:
-        return
-    bites = {bite["title"]: bite["slug"] for bite in r.json()}
 
-    # soup = BeautifulSoup(r.content, "html.parser")
-    # rows = soup.table.find_all("tr")
-    # bites = {}
-    # for row in rows[1:]:
-    #     try:
-    #         bite = row.find_all("td")[1].a
-    #         bite_name = bite.text
-    #         bite_link = bite["href"]
-    #         bites[bite_name] = bite_link
-    #     except IndexError:
-    #         continue
+    with Status("Retrievng bites..."):
+        r = requests.get(BITES_API)
+        if r.status_code != 200:
+            return
+        bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
-    bite_url = BITE_URL.format(bite_name=bites[bite_to_download])
-    return bite_to_download, bite_url
+    slug = bites[bite_to_download]
+    return bite_to_download, slug
 
 
 def download_bite(
@@ -308,7 +298,7 @@ def create_bite_dir(
         None
 
     """
-    dest_path = bite.bite_url_to_dir(config["PYBITES_REPO"])
+    dest_path = bite.bite_slug_to_dir(config["PYBITES_REPO"])
     if dest_path.is_dir() and not force:
         console.print(
             f":warning: There already exists a directory for {
@@ -340,7 +330,6 @@ def create_bite_dir(
 
     with open(dest_path / f"test_{file_name}.py", "w") as test_file:
         test_file.write(tests)
-
     console.print(
         f"Wrote {bite.title} to: {dest_path}", style=ConsoleStyle.SUCCESS.value
     )
@@ -424,7 +413,7 @@ def display_bite(
         None
 
     """
-    path = bite.bite_url_to_dir(config["PYBITES_REPO"])
+    path = bite.bite_slug_to_dir(config["PYBITES_REPO"])
     if not path.is_dir():
         console.print(
             f":warning: Unable to display bite {

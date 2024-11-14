@@ -8,7 +8,7 @@ class ConsoleStyle(Enum):
     WARNING = "red"
 
 
-BITE_URL = "https://pybitesplatform.com{bite_name}"
+BITE_URL = "https://pybitesplatform.com/bites/{bite_slug}/"
 EATLOCAL_HOME = Path().home() / ".eatlocal"
 BITES_API = "https://pybitesplatform.com/api/bites/"
 FZF_DEFAULT_OPTS = "--height 13 --layout=reverse --border rounded --margin=2%,5%,10%,2%"
