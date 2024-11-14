@@ -19,10 +19,14 @@ Eatlocal helps users solve [Pybites](https://pybitesplatform.com) code challenge
 
 ## Updates
 
-eatlocal has been updated to work with version 2.0 of the PyBites platform.
+eatlocal 1.0.0+ has been updated to work with version 2.0 of the PyBites platform.
 
 ### Breaking Changes
 
+#### Version 1.1.0
++ Uses the bite slug for the name of the directory.
+
+#### Version 1.0.0
 + eatlocal version `1.0.0` only works on the new platform (v2).
 + eatlocal directory no longer has to be a git repository.
 + Submitting a bite no longer pushes it to GitHub.
