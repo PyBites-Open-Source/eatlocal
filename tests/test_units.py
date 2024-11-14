@@ -90,9 +90,10 @@ def test_choose_bite(mock_iterfzf, mock_requests):
     mock_requests.return_value = mock_response
     mock_iterfzf.return_value = SUMMING_TEST_BITE.title
 
-    bite_name, bite_slug = choose_bite()
-    assert bite_name == SUMMING_TEST_BITE.title
-    assert bite_slug == SUMMING_TEST_BITE.slug
+    bite = choose_bite()
+    assert isinstance(bite, Bite)
+    assert bite.title == SUMMING_TEST_BITE.title
+    assert bite.slug == SUMMING_TEST_BITE.slug
 
 
 def test_display_bite(
