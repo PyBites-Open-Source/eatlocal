@@ -318,7 +318,19 @@ def create_bite_dir(
     soup = BeautifulSoup(bite.platform_content, "html.parser")
 
     bite_description = parse_bite_description(soup)
-    code = soup.find(id="python-editor").text
+    try:
+        code = soup.find(id="python-editor").text
+    except AttributeError:
+        console.print(
+            f":warning: Unable to access {bite.title} on the platform.",
+            style=ConsoleStyle.WARNING.value,
+        )
+        console.print(
+            "Please make sure that your credentials are valid and your subscription provides access.",
+            style=ConsoleStyle.SUGGESTION.value,
+        )
+        return
+
     tests = soup.find(id="test-python-editor").text
     file_name = soup.find(id="filename").text.strip(".py")
 
