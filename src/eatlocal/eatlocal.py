@@ -326,7 +326,7 @@ def create_bite_dir(
             style=ConsoleStyle.WARNING.value,
         )
         console.print(
-            "Please make sure that your credentials are valid and your subscription provides access.",
+            "Please make sure that your credentials are valid and you have access to this bite.",
             style=ConsoleStyle.SUGGESTION.value,
         )
         return
