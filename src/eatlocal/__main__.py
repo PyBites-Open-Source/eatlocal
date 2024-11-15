@@ -110,8 +110,7 @@ def submit(
 ) -> None:
     """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
-    title, slug = choose_local_bite(config)
-    bite = Bite(title, slug)
+    bite = choose_local_bite(config)
     submit_bite(
         bite,
         config,

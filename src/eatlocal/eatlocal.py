@@ -152,6 +152,7 @@ def install_browser() -> None:
 
     Returns:
         None
+
     """
     with sync_playwright() as p:
         install_playwright.install(p.chromium)
@@ -190,6 +191,7 @@ def track_local_bites(bite: Bite, config: dict) -> None:
 
     Returns:
         None
+
     """
     with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
@@ -198,26 +200,29 @@ def track_local_bites(bite: Bite, config: dict) -> None:
         json.dump(bites, local_bites)
 
 
-def choose_local_bite(config: dict) -> tuple[str, str]:
+def choose_local_bite(config: dict) -> Bite:
     """Choose a local bite to submit.
 
     Args:
         config: Dictionary containing the user's PyBites credentials.
 
     Returns:
-        The name and slug of the chosen bite.
+        A Bite object.
+
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
     bite = iterfzf(bites, multi=False)
-    return bite, bites[bite]
+    if bite is None:
+        sys.exit()
+    return Bite(bite, bites[bite])
 
 
 def choose_bite() -> Bite:
     """Choose which bite will be downloaded.
 
     Returns:
-        The name and url of the chosen bite.
+        A Bite object.
 
     """
 
