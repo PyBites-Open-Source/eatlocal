@@ -2,7 +2,8 @@
 
 import shutil
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch, MagicMock
+import json
 
 import pytest
 
@@ -20,24 +21,25 @@ from eatlocal.eatlocal import (
 NOT_DOWNLOADED = (
     Bite(
         "Made up Bite",
-        "https://pybitesplatform.com/bites/made-up-bite/",
+        "made-up-bite",
     ),
-    Bite("Write a property", "https://pybitesplatform.com/bites/write-a-property/"),
+    Bite("Write a property", "write-a-property"),
 )
 LOCAL_TEST_BITE = Bite(
     "Rotate string characters",
-    "https://pybitesplatform.com/bites/rotate-string-characters/",
+    "rotate-string-characters",
 )
 SUMMING_TEST_BITE = Bite(
-    "Sum n Numbers",
-    "https://pybitesplatform.com/bites/sum-n-numbers/",
+    "Sum n numbers",
+    "sum-n-numbers",
 )
 
 
 def test_bite_implementation():
     """Test Bite class implementation."""
     bite = SUMMING_TEST_BITE
-    assert bite.title == "Sum n Numbers"
+    assert bite.title == "Sum n numbers"
+    assert bite.slug == "sum-n-numbers"
     assert bite.url == "https://pybitesplatform.com/bites/sum-n-numbers/"
     assert bite.platform_content is None
 
@@ -45,7 +47,7 @@ def test_bite_implementation():
 def test_bite_fetch_local_code(testing_config) -> None:
     """Test fetching local code."""
     bite = LOCAL_TEST_BITE
-    bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate_string_characters"
+    bite_dir = Path(testing_config["PYBITES_REPO"]) / "rotate-string-characters"
     with open(bite_dir / "rotate.py", "r") as f:
         local_code = f.read()
     bite.fetch_local_code(testing_config)
@@ -65,8 +67,8 @@ def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
     """Test choosing a local bite."""
     mock_iterfzf.return_value = LOCAL_TEST_BITE.title
     bite = choose_local_bite(testing_config)
-    assert bite[0] == LOCAL_TEST_BITE.title
-    assert bite[1] == LOCAL_TEST_BITE.url
+    assert bite.title == LOCAL_TEST_BITE.title
+    assert bite.slug == LOCAL_TEST_BITE.slug
 
 
 @patch("eatlocal.eatlocal.Prompt.ask")
@@ -83,14 +85,15 @@ def test_set_local_dir(mock_exists, mock_prompt):
 def test_choose_bite(mock_iterfzf, mock_requests):
     mock_response = MagicMock()
     mock_response.status_code = 200
-    with open("./tests/testing_content/bites_list.html") as f:
-        mock_response.content = f.read()
+    api_data = json.load(open("./tests/testing_content/bites_api.json"))
+    mock_response.json.return_value = api_data
     mock_requests.return_value = mock_response
-    mock_iterfzf.return_value = "Sum n numbers"
+    mock_iterfzf.return_value = SUMMING_TEST_BITE.title
 
-    bite_name, bite_url = choose_bite()
-    assert bite_name == "Sum n numbers"
-    assert bite_url == "https://pybitesplatform.com/bites/sum-n-numbers/"
+    bite = choose_bite()
+    assert isinstance(bite, Bite)
+    assert bite.title == SUMMING_TEST_BITE.title
+    assert bite.slug == SUMMING_TEST_BITE.slug
 
 
 def test_display_bite(
@@ -126,7 +129,7 @@ def test_create_bite_dir(
         platform_content = f.read()
     bite = SUMMING_TEST_BITE
     bite.platform_content = platform_content
-    bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum_n_numbers"
+    bite_dir = Path(testing_config["PYBITES_REPO"]) / "sum-n-numbers"
 
     create_bite_dir(bite, testing_config)
     html_file = bite_dir / "bite.html"
@@ -136,7 +139,7 @@ def test_create_bite_dir(
     assert python_file.exists()
     assert test_file.exists()
     assert bite_dir.is_dir()
-    assert bite_dir.name == "sum_n_numbers"
+    assert bite_dir.name == "sum-n-numbers"
     shutil.rmtree(bite_dir)
 
 
