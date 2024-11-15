@@ -38,7 +38,7 @@ from .constants import (
 install(show_locals=True)
 environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
 requests_cache.install_cache(
-    CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=7)
+    CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=30)
 )
 
 
@@ -218,14 +218,15 @@ def choose_local_bite(config: dict) -> Bite:
     return Bite(bite, bites[bite])
 
 
-def choose_bite() -> Bite:
+def choose_bite(clear: bool = False) -> Bite:
     """Choose which bite will be downloaded.
 
     Returns:
         A Bite object.
 
     """
-
+    if clear:
+        requests_cache.clear()
     with Status("Retrieving bites..."):
         r = requests.get(BITES_API)
         if r.status_code != 200:

@@ -85,6 +85,13 @@ def init(
 @cli.command()
 def download(
     ctx: typer.Context,
+    clear: bool = typer.Option(
+        False,
+        "--clear-cache",
+        "-C",
+        is_flag=True,
+        help="Clear the bites cache to fetch fresh bites.",
+    ),
     force: bool = typer.Option(
         False,
         "--force",
@@ -95,7 +102,7 @@ def download(
 ) -> None:
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
-    bite = choose_bite()
+    bite = choose_bite(clear)
     with Status("Downloading bite..."):
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:
