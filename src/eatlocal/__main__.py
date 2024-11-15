@@ -9,8 +9,7 @@ from rich.prompt import Confirm
 from rich.status import Status
 
 from . import __version__
-from .console import console
-from .constants import EATLOCAL_HOME, ConsoleStyle
+from .constants import EATLOCAL_HOME, LOCAL_BITES_DB
 from .eatlocal import (
     Bite,
     choose_bite,
@@ -74,8 +73,10 @@ def init(
             fh.write(f"PYBITES_USERNAME={username}\n")
             fh.write(f"PYBITES_PASSWORD={password}\n")
             fh.write(f"PYBITES_REPO={local_dir}\n")
-        with open(local_dir / ".local_bites.json", "w", encoding="utf-8") as fh:
-            fh.write("{}")
+
+        if not LOCAL_BITES_DB.is_file():
+            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as fh:
+                fh.write("{}")
 
     with Status("Installing browser..."):
         install_browser()
@@ -84,6 +85,13 @@ def init(
 @cli.command()
 def download(
     ctx: typer.Context,
+    clear: bool = typer.Option(
+        False,
+        "--clear-cache",
+        "-C",
+        is_flag=True,
+        help="Clear the bites cache to fetch fresh bites.",
+    ),
     force: bool = typer.Option(
         False,
         "--force",
@@ -94,26 +102,13 @@ def download(
 ) -> None:
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
-    try:
-        title, slug = choose_bite()
-        bite = Bite(title, slug)
-    except TypeError:
-        console.print(
-            ":warning: Unable to reach Pybites Platform.",
-            style=ConsoleStyle.WARNING.value,
-        )
-        console.print(
-            "Ensure internet connect is good and platform is avaiable.",
-            style=ConsoleStyle.SUGGESTION.value,
-        )
-        return
-
+    bite = choose_bite(clear)
     with Status("Downloading bite..."):
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:
             return
-        track_local_bites(bite, config)
     create_bite_dir(bite, config, force)
+    track_local_bites(bite, config)
 
 
 @cli.command()
@@ -122,8 +117,7 @@ def submit(
 ) -> None:
     """Submit a bite back to the PyBites Platform."""
     config = load_config(EATLOCAL_HOME / ".env")
-    title, slug = choose_local_bite(config)
-    bite = Bite(title, slug)
+    bite = choose_local_bite(config)
     submit_bite(
         bite,
         config,
