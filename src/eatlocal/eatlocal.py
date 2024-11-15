@@ -235,6 +235,8 @@ def choose_bite() -> Bite:
             sys.exit()
         bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
+    if bite_to_download is None:
+        sys.exit()
     slug = bites[bite_to_download]
     return Bite(bite_to_download, slug)
 
