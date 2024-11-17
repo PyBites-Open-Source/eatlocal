@@ -5,11 +5,10 @@ from pathlib import Path
 
 import typer
 from rich import print
-from rich.prompt import Confirm
 from rich.status import Status
 
 from . import __version__
-from .constants import EATLOCAL_HOME, LOCAL_BITES_DB
+from .constants import EATLOCAL_HOME
 from .eatlocal import (
     Bite,
     choose_bite,
@@ -17,10 +16,8 @@ from .eatlocal import (
     create_bite_dir,
     display_bite,
     download_bite,
-    get_credentials,
-    install_browser,
+    initialize_eatlocal,
     load_config,
-    set_local_dir,
     submit_bite,
     track_local_bites,
 )
@@ -54,32 +51,8 @@ def global_options(
 def init(
     ctx: typer.Context,
 ) -> None:
-    """Configure PyBites credentials and repository."""
-    while True:
-        username, password = get_credentials()
-        local_dir = set_local_dir()
-
-        print(f"Your input - username: {username}, repo: {local_dir}.")
-        if Confirm.ask(
-            "Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"
-        ):
-            break
-
-    with Status("Initializing eatlocal..."):
-        if not EATLOCAL_HOME.is_dir():
-            EATLOCAL_HOME.mkdir()
-
-        with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
-            fh.write(f"PYBITES_USERNAME={username}\n")
-            fh.write(f"PYBITES_PASSWORD={password}\n")
-            fh.write(f"PYBITES_REPO={local_dir}\n")
-
-        if not LOCAL_BITES_DB.is_file():
-            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as fh:
-                fh.write("{}")
-
-    with Status("Installing browser..."):
-        install_browser()
+    """Configure PyBites credentials and directory."""
+    initialize_eatlocal()
 
 
 @cli.command()

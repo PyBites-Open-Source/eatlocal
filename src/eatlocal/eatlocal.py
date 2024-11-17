@@ -27,6 +27,7 @@ from .constants import (
     BITE_URL,
     CACHE_DB_LOCATION,
     BITES_API,
+    EATLOCAL_HOME,
     FZF_DEFAULT_OPTS,
     LOCAL_BITES_DB,
     LOGIN_URL,
@@ -131,7 +132,7 @@ def get_credentials() -> tuple[str, str]:
     return email, password
 
 
-def set_local_dir() -> str:
+def set_local_dir() -> Path:
     """Set the local directory for PyBites.
 
     Returns:
@@ -158,6 +159,50 @@ def install_browser() -> None:
         install_playwright.install(p.chromium)
 
 
+def initialize_eatlocal():
+    use_existing = False
+    if (EATLOCAL_HOME / ".env").is_file():
+        with open(EATLOCAL_HOME / ".env", "r", encoding="utf-8") as fh:
+            data = fh.read().splitlines()
+        username = data[0].split("PYBITES_USERNAME=")[1].strip()
+        password = data[1].split("PYBITES_PASSWORD=")[1].strip()
+        local_dir = Path(data[2].split("PYBITES_REPO=")[1].strip())
+        print(
+            f"You have previously initialized eatlocal with the following:\nUsername: {username}\nDirectory: {local_dir}"
+        )
+        if Confirm.ask(
+            "Would you like to use the same credentials and local directory?"
+        ):
+            use_existing = True
+
+    if not use_existing:
+        while True:
+            username, password = get_credentials()
+            local_dir = set_local_dir()
+            print(
+                f"Your input - username: {username}\nDirectory where bites will be stored: {local_dir}."
+            )
+            if Confirm.ask(
+                "Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"
+            ):
+                break
+
+    with Status("Initializing eatlocal..."):
+        if not EATLOCAL_HOME.is_dir():
+            EATLOCAL_HOME.mkdir()
+
+        with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
+            fh.write(f"PYBITES_USERNAME={username}\n")
+            fh.write(f"PYBITES_PASSWORD={password}\n")
+            fh.write(f"PYBITES_REPO={local_dir}\n")
+
+    create_local_bites_db(local_dir)
+
+    with Status("Installing browser..."):
+        install_browser()
+    console.print(":tada: Initialization complete.", style=ConsoleStyle.SUCCESS.value)
+
+
 def login(browser, username: str, password: str) -> Page:
     """Login to the PyBites platform.
 
@@ -180,6 +225,29 @@ def login(browser, username: str, password: str) -> Page:
     page.fill('input[name="password"]', password)
     page.click('button[type="submit"]')
     return page
+
+
+def create_local_bites_db(local_dir: Path) -> None:
+    """Create the local bites database.
+
+    Args:
+        local_dir: Path to the local directory for PyBites.
+
+    Returns:
+        None
+
+    """
+    with Status("Creating local bites database..."):
+        if (local_dir / ".local_bites.json").is_file():
+            with open(local_dir / ".local_bites.json", "r", encoding="utf-8") as db:
+                local_bites = json.load(db)
+            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as db:
+                json.dump(local_bites, db)
+            (local_dir / ".local_bites.json").unlink()
+
+        if not LOCAL_BITES_DB.is_file():
+            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as fh:
+                fh.write("{}")
 
 
 def track_local_bites(bite: Bite, config: dict) -> None:
