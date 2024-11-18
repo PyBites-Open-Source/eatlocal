@@ -24,7 +24,7 @@ eatlocal 1.0.0+ has been updated to work with version 2.0 of the PyBites platfor
 ### Breaking Changes
 
 #### Version 1.1.1
-+ Moved the local bites database to a new location. It used to be in the directory set by the user, now eatlocal will look for it in `~/.eatlocal`.
++ Moved the local bites database to a new location. It used to be in the directory set by the user, now eatlocal will look for it in `~/.eatlocal`. Run `eatlocal init` to set the new location.
 
 #### Version 1.1.0
 + Uses the bite slug for the name of the directory.
