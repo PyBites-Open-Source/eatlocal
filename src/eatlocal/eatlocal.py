@@ -4,11 +4,13 @@ import json
 import sys
 import webbrowser
 from dataclasses import dataclass
+from datetime import timedelta
 from os import environ, makedirs
 from pathlib import Path
 
 import install_playwright
 import requests
+import requests_cache
 from bs4 import BeautifulSoup
 from dotenv import dotenv_values
 from iterfzf import iterfzf
@@ -23,8 +25,11 @@ from rich.traceback import install
 from .console import console
 from .constants import (
     BITE_URL,
+    CACHE_DB_LOCATION,
     BITES_API,
+    EATLOCAL_HOME,
     FZF_DEFAULT_OPTS,
+    LOCAL_BITES_DB,
     LOGIN_URL,
     PROFILE_URL,
     TIMEOUT_LENGTH,
@@ -33,6 +38,9 @@ from .constants import (
 
 install(show_locals=True)
 environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
+requests_cache.install_cache(
+    CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=30)
+)
 
 
 @dataclass
@@ -124,7 +132,7 @@ def get_credentials() -> tuple[str, str]:
     return email, password
 
 
-def set_local_dir() -> str:
+def set_local_dir() -> Path:
     """Set the local directory for PyBites.
 
     Returns:
@@ -145,9 +153,54 @@ def install_browser() -> None:
 
     Returns:
         None
+
     """
     with sync_playwright() as p:
         install_playwright.install(p.chromium)
+
+
+def initialize_eatlocal():
+    use_existing = False
+    if (EATLOCAL_HOME / ".env").is_file():
+        with open(EATLOCAL_HOME / ".env", "r", encoding="utf-8") as fh:
+            data = fh.read().splitlines()
+        username = data[0].split("PYBITES_USERNAME=")[1].strip()
+        password = data[1].split("PYBITES_PASSWORD=")[1].strip()
+        local_dir = Path(data[2].split("PYBITES_REPO=")[1].strip())
+        print(
+            f"You have previously initialized eatlocal with the following:\nUsername: {username}\nDirectory: {local_dir}"
+        )
+        if Confirm.ask(
+            "Would you like to use the same credentials and local directory?"
+        ):
+            use_existing = True
+
+    if not use_existing:
+        while True:
+            username, password = get_credentials()
+            local_dir = set_local_dir()
+            print(
+                f"Your input - username: {username}\nDirectory where bites will be stored: {local_dir}."
+            )
+            if Confirm.ask(
+                "Are these inputs correct? If you confirm, they will be stored under .eatlocal in your user home directory"
+            ):
+                break
+
+    with Status("Initializing eatlocal..."):
+        if not EATLOCAL_HOME.is_dir():
+            EATLOCAL_HOME.mkdir()
+
+        with open(EATLOCAL_HOME / ".env", "w", encoding="utf-8") as fh:
+            fh.write(f"PYBITES_USERNAME={username}\n")
+            fh.write(f"PYBITES_PASSWORD={password}\n")
+            fh.write(f"PYBITES_REPO={local_dir}\n")
+
+    create_local_bites_db(local_dir)
+
+    with Status("Installing browser..."):
+        install_browser()
+    console.print(":tada: Initialization complete.", style=ConsoleStyle.SUCCESS.value)
 
 
 def login(browser, username: str, password: str) -> Page:
@@ -174,6 +227,29 @@ def login(browser, username: str, password: str) -> Page:
     return page
 
 
+def create_local_bites_db(local_dir: Path) -> None:
+    """Create the local bites database.
+
+    Args:
+        local_dir: Path to the local directory for PyBites.
+
+    Returns:
+        None
+
+    """
+    with Status("Creating local bites database..."):
+        if (local_dir / ".local_bites.json").is_file():
+            with open(local_dir / ".local_bites.json", "r", encoding="utf-8") as db:
+                local_bites = json.load(db)
+            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as db:
+                json.dump(local_bites, db)
+            (local_dir / ".local_bites.json").unlink()
+
+        if not LOCAL_BITES_DB.is_file():
+            with open(LOCAL_BITES_DB, "w", encoding="utf-8") as fh:
+                fh.write("{}")
+
+
 def track_local_bites(bite: Bite, config: dict) -> None:
     """Track the bites that have been downloaded locally.
 
@@ -183,51 +259,66 @@ def track_local_bites(bite: Bite, config: dict) -> None:
 
     Returns:
         None
+
     """
-    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
+    with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
     bites[bite.title] = bite.slug
-    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "w") as local_bites:
+    with open(LOCAL_BITES_DB, "w") as local_bites:
         json.dump(bites, local_bites)
 
 
-def choose_local_bite(config: dict) -> tuple[str, str]:
+def choose_local_bite(config: dict) -> Bite:
     """Choose a local bite to submit.
 
     Args:
         config: Dictionary containing the user's PyBites credentials.
 
     Returns:
-        The name and slug of the chosen bite.
+        A Bite object.
+
     """
     with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
         bites = json.load(local_bites)
     bite = iterfzf(bites, multi=False)
-    return bite, bites[bite]
+    if bite is None:
+        sys.exit()
+    return Bite(bite, bites[bite])
 
 
-def choose_bite() -> tuple[str, str]:
+def choose_bite(clear: bool = False) -> Bite:
     """Choose which bite will be downloaded.
 
     Returns:
-        The name and url of the chosen bite.
+        A Bite object.
 
     """
-
-    with Status("Retrievng bites..."):
+    if clear:
+        requests_cache.clear()
+    with Status("Retrieving bites..."):
         r = requests.get(BITES_API)
         if r.status_code != 200:
-            return
+            console.print(
+                ":warning: Unable to reach Pybites Platform.",
+                style=ConsoleStyle.WARNING.value,
+            )
+            console.print(
+                "Ensure internet connect is good and platform is avaiable.",
+                style=ConsoleStyle.SUGGESTION.value,
+            )
+            sys.exit()
         bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
+    if bite_to_download is None:
+        sys.exit()
     slug = bites[bite_to_download]
-    return bite_to_download, slug
+    return Bite(bite_to_download, slug)
 
 
 def download_bite(
     bite: Bite,
     config: dict,
-) -> str:
+) -> str | None:
     """Download the bite content from the PyBites platform.
 
     Args:
@@ -254,7 +345,7 @@ def download_bite(
                     "Ensure your credentials are valid.",
                     style=ConsoleStyle.SUGGESTION.value,
                 )
-                return
+                sys.exit()
             page.goto(bite.url)
             return page.content()
 
@@ -310,30 +401,28 @@ def create_bite_dir(
         )
         return
 
-    try:
-        makedirs(dest_path)
-    except FileExistsError:
-        pass
-
     soup = BeautifulSoup(bite.platform_content, "html.parser")
 
     bite_description = parse_bite_description(soup)
     try:
         code = soup.find(id="python-editor").text
+        tests = soup.find(id="test-python-editor").text
+        file_name = soup.find(id="filename").text.strip(".py")
     except AttributeError:
         console.print(
-            f":warning: Unable to access {bite.title} on the platform.",
+            f":warning: Unable to access {bite.title} content on the platform.",
             style=ConsoleStyle.WARNING.value,
         )
         console.print(
             "Please make sure that your credentials are valid and you have access to this bite.",
             style=ConsoleStyle.SUGGESTION.value,
         )
-        return
+        sys.exit()
 
-    tests = soup.find(id="test-python-editor").text
-    file_name = soup.find(id="filename").text.strip(".py")
-
+    try:
+        makedirs(dest_path)
+    except FileExistsError:
+        pass
     with open(dest_path / "bite.html", "w") as bite_html:
         bite_html.write(bite_description)
 

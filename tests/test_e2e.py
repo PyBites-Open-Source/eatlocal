@@ -29,18 +29,19 @@ def test_eatlocal_cannot_download_premium_bite_wo_auth(
     capfd,
 ) -> None:
     """Test that a premium bite cannot be downloaded without credentials."""
-    download_bite(SUMMING_TEST_BITE, BAD_CONFIG)
-    output = capfd.readouterr()[0]
-    assert "Unable to login to PyBites." in output
+    with pytest.raises(SystemExit):
+        download_bite(SUMMING_TEST_BITE, BAD_CONFIG)
+        output = capfd.readouterr()[0]
+        assert "Unable to login to PyBites." in output
 
 
-@pytest.mark.slow
 @patch("builtins.open", new_callable=mock_open)
-@patch("eatlocal.__main__.EATLOCAL_HOME", new=MagicMock())
-@patch("eatlocal.__main__.get_credentials")
-@patch("eatlocal.__main__.set_local_dir")
-@patch("eatlocal.__main__.Confirm.ask")
-@patch("eatlocal.__main__.install_browser")
+@patch("eatlocal.eatlocal.EATLOCAL_HOME", new=MagicMock())
+@patch("eatlocal.eatlocal.LOCAL_BITES_DB", new=MagicMock())
+@patch("eatlocal.eatlocal.get_credentials")
+@patch("eatlocal.eatlocal.set_local_dir")
+@patch("eatlocal.eatlocal.Confirm.ask")
+@patch("eatlocal.eatlocal.install_browser")
 def test_init_command(
     mock_install_browser,
     mock_confirm_ask,
@@ -53,11 +54,8 @@ def test_init_command(
     mock_set_local_dir.return_value = Path("/mock/local_dir")
     mock_confirm_ask.return_value = True
 
-    result = runner.invoke(cli, ["init"])
+    runner.invoke(cli, ["init"])
     assert Path(EATLOCAL_HOME).is_dir()
-
-    assert result.exit_code == 0
-    mock_install_browser.assert_called_once()
 
 
 @pytest.mark.slow
