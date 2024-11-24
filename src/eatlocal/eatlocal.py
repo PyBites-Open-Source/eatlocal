@@ -278,7 +278,7 @@ def choose_local_bite(config: dict) -> Bite:
         A Bite object.
 
     """
-    with open(Path(config["PYBITES_REPO"]) / ".local_bites.json", "r") as local_bites:
+    with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
     bite = iterfzf(bites, multi=False)
     if bite is None:
