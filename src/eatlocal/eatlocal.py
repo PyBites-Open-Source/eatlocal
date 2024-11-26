@@ -84,7 +84,7 @@ class Bite:
                 if not file.name.startswith("test_")
             ][0]
 
-            with open(python_file) as file:
+            with open(python_file, encoding='utf-8') as file:
                 self.local_code = file.read()
 
 
