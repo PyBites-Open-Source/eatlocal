@@ -82,6 +82,10 @@ def test_submit_command(mock_iterfzf, mock_load_config, testing_config):
     """Test the submit command."""
     mock_load_config.return_value = testing_config
     mock_iterfzf.return_value = "Rotate string characters"
-    result = runner.invoke(cli, ["submit"])
+    with patch(
+        "eatlocal.eatlocal.LOCAL_BITES_DB",
+        Path.cwd() / "tests/testing_repo/.local_bites.json",
+    ):
+        result = runner.invoke(cli, ["submit"])
 
     assert "Code did not pass the tests." in result.output

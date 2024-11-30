@@ -84,7 +84,7 @@ class Bite:
                 if not file.name.startswith("test_")
             ][0]
 
-            with open(python_file, encoding='utf-8') as file:
+            with open(python_file, encoding="utf-8") as file:
                 self.local_code = file.read()
 
 
@@ -423,13 +423,13 @@ def create_bite_dir(
         makedirs(dest_path)
     except FileExistsError:
         pass
-    with open(dest_path / "bite.html", "w", encoding='utf-8') as bite_html:
+    with open(dest_path / "bite.html", "w", encoding="utf-8") as bite_html:
         bite_html.write(bite_description)
 
-    with open(dest_path / f"{file_name}.py", "w", encoding='utf-8') as py_file:
+    with open(dest_path / f"{file_name}.py", "w", encoding="utf-8") as py_file:
         py_file.write(code)
 
-    with open(dest_path / f"test_{file_name}.py", "w", encoding='utf-8') as test_file:
+    with open(dest_path / f"test_{file_name}.py", "w", encoding="utf-8") as test_file:
         test_file.write(tests)
     console.print(
         f"Wrote {bite.title} to: {dest_path}", style=ConsoleStyle.SUCCESS.value

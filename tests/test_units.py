@@ -66,7 +66,11 @@ def test_bite_fetch_local_code_no_file(capsys, testing_config) -> None:
 def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
     """Test choosing a local bite."""
     mock_iterfzf.return_value = LOCAL_TEST_BITE.title
-    bite = choose_local_bite(testing_config)
+    with patch(
+        "eatlocal.eatlocal.LOCAL_BITES_DB",
+        Path.cwd() / "tests/testing_repo/.local_bites.json",
+    ):
+        bite = choose_local_bite(testing_config)
     assert bite.title == LOCAL_TEST_BITE.title
     assert bite.slug == LOCAL_TEST_BITE.slug
 
