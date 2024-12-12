@@ -11,17 +11,13 @@ import pytest
 
 runner = CliRunner()
 
-SUMMING_TEST_BITE = Bite(
-    "Sum n Numbers",
-    "sum-n-numbers",
-)
-TEST_BITES = []
+SUMMING_TEST_BITE = Bite("Sum n numbers", "sum-n-numbers")
+PARSE_TEST_BITE = Bite("Parse a list of names", "parse-a-list-of-names")
 BAD_CONFIG = {
     "PYBITES_USERNAME": "foo",
     "PYBITES_PASSWORD": "bar",
     "PYBITES_REPO": "baz",
 }
-TEST_DOWNLOAD_BITE = "parse-a-list-of-names"
 
 
 @pytest.mark.slow
@@ -64,15 +60,17 @@ def test_init_command(
 def test_download_command(mock_iterfzf, mock_load_config, testing_config):
     """Test the download command."""
     mock_load_config.return_value = testing_config
-    mock_iterfzf.return_value = "Parse a list of names"
+    mock_iterfzf.return_value = SUMMING_TEST_BITE.title
 
     runner.invoke(cli, ["download"])
 
     assert (
-        (Path(testing_config["PYBITES_REPO"]) / TEST_DOWNLOAD_BITE).resolve().is_dir()
+        (Path(testing_config["PYBITES_REPO"]) / SUMMING_TEST_BITE.slug)
+        .resolve()
+        .is_dir()
     )
 
-    shutil.rmtree(Path(testing_config["PYBITES_REPO"]) / TEST_DOWNLOAD_BITE)
+    shutil.rmtree(Path(testing_config["PYBITES_REPO"]) / SUMMING_TEST_BITE.slug)
 
 
 @pytest.mark.slow
@@ -81,7 +79,11 @@ def test_download_command(mock_iterfzf, mock_load_config, testing_config):
 def test_submit_command(mock_iterfzf, mock_load_config, testing_config):
     """Test the submit command."""
     mock_load_config.return_value = testing_config
-    mock_iterfzf.return_value = "Rotate string characters"
-    result = runner.invoke(cli, ["submit"])
+    mock_iterfzf.return_value = PARSE_TEST_BITE.title
+    with patch(
+        "eatlocal.eatlocal.LOCAL_BITES_DB",
+        Path.cwd() / "tests/testing_repo/.local_bites.json",
+    ):
+        result = runner.invoke(cli, ["submit"])
 
-    assert "Code did not pass the tests." in result.output
+    assert "Congrats, you passed" in result.output

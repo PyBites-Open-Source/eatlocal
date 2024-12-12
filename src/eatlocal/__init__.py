@@ -1,4 +1,4 @@
-""" A package to solve PyBites locally"""
+"""A package to solve PyBites locally"""
 
 import importlib.metadata
 
