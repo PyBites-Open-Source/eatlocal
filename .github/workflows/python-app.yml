@@ -27,5 +27,8 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Run unit tests
+      - name: Install Playwright browers
+        run: uv run playwright install
+
+      - name: Run tests
         run: uv run pytest tests
