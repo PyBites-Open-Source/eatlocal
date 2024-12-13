@@ -10,7 +10,6 @@ from rich.status import Status
 from . import __version__
 from .constants import EATLOCAL_HOME
 from .eatlocal import (
-    Bite,
     choose_bite,
     choose_local_bite,
     create_bite_dir,
@@ -109,8 +108,7 @@ def display(
 ) -> None:
     """Read a bite directly in the terminal."""
     config = load_config(EATLOCAL_HOME / ".env")
-    title, slug = choose_local_bite(config)
-    bite = Bite(title, slug)
+    bite = choose_local_bite(config)
     display_bite(bite, config, theme=theme)
 
 
