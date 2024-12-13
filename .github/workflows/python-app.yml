@@ -27,8 +27,5 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Install Playwright browers
-        run: uv run playwright install
-
       - name: Run tests
         run: uv run pytest tests -k "not test_e2e"
