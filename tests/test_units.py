@@ -75,6 +75,19 @@ def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
     assert bite.slug == LOCAL_TEST_BITE.slug
 
 
+@pytest.fixture
+def test_choose_local_bite_from_dir(monkeypatch, testing_config) -> None:
+    """Test choosing a local bite."""
+    with patch(
+        "eatlocal.eatlocal.LOCAL_BITES_DB",
+        Path.cwd() / "tests/testing_repo/.local_bites.json",
+    ):
+        monkeypatch.chdir("tests/testing_repo/parse-a-list-of-names/")
+        bite = choose_local_bite(testing_config)
+    assert bite.title == LOCAL_TEST_BITE.title
+    assert bite.slug == LOCAL_TEST_BITE.slug
+
+
 @patch("eatlocal.eatlocal.Prompt.ask")
 @patch("eatlocal.eatlocal.Path.exists")
 def test_set_local_dir(mock_exists, mock_prompt):
