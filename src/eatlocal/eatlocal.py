@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from os import environ, makedirs
 from pathlib import Path
+from typing import Optional, FrozenSet
 
 import install_playwright
 import requests
@@ -40,6 +41,10 @@ install(show_locals=True)
 environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
 requests_cache.install_cache(
     CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=30)
+)
+
+VALID_LEVELS: FrozenSet[str] = frozenset(
+    ["newbie", "intro", "beginner", "intermediate", "advanced"]
 )
 
 
@@ -286,8 +291,8 @@ def choose_local_bite(config: dict) -> Bite:
     return Bite(bite, bites[bite])
 
 
-def choose_bite(clear: bool = False) -> Bite:
-    """Choose which bite will be downloaded.
+def choose_bite(clear: bool = False, level: Optional[str] = None) -> Bite:
+    """Choose which level of bite will be downloaded.
 
     Returns:
         A Bite object.
@@ -307,7 +312,26 @@ def choose_bite(clear: bool = False) -> Bite:
                 style=ConsoleStyle.SUGGESTION.value,
             )
             sys.exit()
-        bites = {bite["title"]: bite["slug"] for bite in r.json()}
+        if level:
+            # Filter bites by level (case-insensitive)
+            if level not in VALID_LEVELS:
+                console.print(
+                    f":warning: Invalid level: {level}.",
+                    style=ConsoleStyle.WARNING.value,
+                )
+                console.print(
+                    f"Valid levels are: {', '.join(VALID_LEVELS)}.",
+                    style=ConsoleStyle.SUGGESTION.value,
+                )
+                sys.exit()
+            bites = {
+                bite["title"]: bite["slug"]
+                for bite in r.json()
+                if bite["level"].lower() == level
+            }
+        else:
+            # Display bites of all levels.
+            bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
     if bite_to_download is None:
         sys.exit()

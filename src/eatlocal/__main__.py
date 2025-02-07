@@ -6,6 +6,7 @@ from pathlib import Path
 import typer
 from rich import print
 from rich.status import Status
+from typing import Optional
 
 from . import __version__
 from .constants import EATLOCAL_HOME
@@ -71,10 +72,16 @@ def download(
         is_flag=True,
         help="Overwrite bite directory with a fresh version.",
     ),
+    level: Optional[str] = typer.Option(
+        None,
+        "--level",
+        "-l",
+        help="Filter bites by difficulty level.",
+    ),
 ) -> None:
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
-    bite = choose_bite(clear)
+    bite = choose_bite(clear, level=level.lower())
     with Status("Downloading bite..."):
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:
