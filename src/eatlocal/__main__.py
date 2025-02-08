@@ -81,7 +81,7 @@ def download(
 ) -> None:
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
-    bite = choose_bite(clear, level=level.lower())
+    bite = choose_bite(clear, level=level)
     with Status("Downloading bite..."):
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:

@@ -314,7 +314,7 @@ def choose_bite(clear: bool = False, level: Optional[str] = None) -> Bite:
             sys.exit()
         if level:
             # Filter bites by level (case-insensitive)
-            if level not in VALID_LEVELS:
+            if level.lower() not in VALID_LEVELS:
                 console.print(
                     f":warning: Invalid level: {level}.",
                     style=ConsoleStyle.WARNING.value,
@@ -327,7 +327,7 @@ def choose_bite(clear: bool = False, level: Optional[str] = None) -> Bite:
             bites = {
                 bite["title"]: bite["slug"]
                 for bite in r.json()
-                if bite["level"].lower() == level
+                if bite["level"].lower() == level.lower()
             }
         else:
             # Display bites of all levels.
