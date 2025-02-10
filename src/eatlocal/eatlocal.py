@@ -280,6 +280,10 @@ def choose_local_bite(config: dict) -> Bite:
     """
     with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
+    if Path.cwd().name in bites.values():
+        for title, slug in bites.items():
+            if Path.cwd().name == slug:
+                return Bite(title, slug)
     bite = iterfzf(bites, multi=False)
     if bite is None:
         sys.exit()
