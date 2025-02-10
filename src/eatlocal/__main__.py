@@ -6,7 +6,6 @@ from pathlib import Path
 import typer
 from rich import print
 from rich.status import Status
-from typing import Optional
 
 from . import __version__
 from .constants import EATLOCAL_HOME
@@ -72,7 +71,7 @@ def download(
         is_flag=True,
         help="Overwrite bite directory with a fresh version.",
     ),
-    level: Optional[str] = typer.Option(
+    level: str | None = typer.Option(
         None,
         "--level",
         "-l",

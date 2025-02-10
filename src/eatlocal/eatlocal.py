@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from os import environ, makedirs
 from pathlib import Path
-from typing import Optional, FrozenSet
+from typing import FrozenSet
 
 import install_playwright
 import requests
@@ -291,7 +291,7 @@ def choose_local_bite(config: dict) -> Bite:
     return Bite(bite, bites[bite])
 
 
-def choose_bite(clear: bool = False, level: Optional[str] = None) -> Bite:
+def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
     """Choose which level of bite will be downloaded.
 
     Returns:
@@ -312,7 +312,7 @@ def choose_bite(clear: bool = False, level: Optional[str] = None) -> Bite:
                 style=ConsoleStyle.SUGGESTION.value,
             )
             sys.exit()
-        if level:
+        if level is not None:
             # Filter bites by level (case-insensitive)
             if level.lower() not in VALID_LEVELS:
                 console.print(
