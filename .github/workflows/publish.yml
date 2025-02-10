@@ -1,0 +1,32 @@
+name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-and-publish:
+    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.5.25"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to TestPyPI (for test tags)
+        if: startsWith(github.ref, 'refs/tags/test-')
+        run: uv publish --index-url https://test.pypi.org/legacy/ --token ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+      - name: Publish to PyPI (for versioned releases)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}

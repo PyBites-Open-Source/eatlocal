@@ -71,10 +71,16 @@ def download(
         is_flag=True,
         help="Overwrite bite directory with a fresh version.",
     ),
+    level: str | None = typer.Option(
+        None,
+        "--level",
+        "-l",
+        help="Filter bites by difficulty level.",
+    ),
 ) -> None:
     """Download and extract bite code from pybitesplatform.com."""
     config = load_config(EATLOCAL_HOME / ".env")
-    bite = choose_bite(clear)
+    bite = choose_bite(clear, level=level)
     with Status("Downloading bite..."):
         bite.platform_content = download_bite(bite, config)
         if bite.platform_content is None:

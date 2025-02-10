@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from os import environ, makedirs
 from pathlib import Path
+from typing import FrozenSet
 
 import install_playwright
 import requests
@@ -40,6 +41,10 @@ install(show_locals=True)
 environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
 requests_cache.install_cache(
     CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=30)
+)
+
+VALID_LEVELS: FrozenSet[str] = frozenset(
+    ["newbie", "intro", "beginner", "intermediate", "advanced"]
 )
 
 
@@ -280,14 +285,18 @@ def choose_local_bite(config: dict) -> Bite:
     """
     with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
+    if Path.cwd().name in bites.values():
+        for title, slug in bites.items():
+            if Path.cwd().name == slug:
+                return Bite(title, slug)
     bite = iterfzf(bites, multi=False)
     if bite is None:
         sys.exit()
     return Bite(bite, bites[bite])
 
 
-def choose_bite(clear: bool = False) -> Bite:
-    """Choose which bite will be downloaded.
+def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
+    """Choose which level of bite will be downloaded.
 
     Returns:
         A Bite object.
@@ -307,7 +316,26 @@ def choose_bite(clear: bool = False) -> Bite:
                 style=ConsoleStyle.SUGGESTION.value,
             )
             sys.exit()
-        bites = {bite["title"]: bite["slug"] for bite in r.json()}
+        if level is not None:
+            # Filter bites by level (case-insensitive)
+            if level.lower() not in VALID_LEVELS:
+                console.print(
+                    f":warning: Invalid level: {level}.",
+                    style=ConsoleStyle.WARNING.value,
+                )
+                console.print(
+                    f"Valid levels are: {', '.join(VALID_LEVELS)}.",
+                    style=ConsoleStyle.SUGGESTION.value,
+                )
+                sys.exit()
+            bites = {
+                bite["title"]: bite["slug"]
+                for bite in r.json()
+                if bite["level"].lower() == level.lower()
+            }
+        else:
+            # Display bites of all levels.
+            bites = {bite["title"]: bite["slug"] for bite in r.json()}
     bite_to_download = iterfzf(bites, multi=False)
     if bite_to_download is None:
         sys.exit()
