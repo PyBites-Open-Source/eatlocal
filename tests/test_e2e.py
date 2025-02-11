@@ -1,7 +1,7 @@
 """eatlocal End to End Tests"""
 
 from typer.testing import CliRunner
-from eatlocal.eatlocal import download_bite, Bite
+from eatlocal.eatlocal import download_bite, Bite, _format_bite_key
 from eatlocal.__main__ import cli, EATLOCAL_HOME
 from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
@@ -12,6 +12,7 @@ import pytest
 runner = CliRunner()
 
 SUMMING_TEST_BITE = Bite("Sum n numbers", "sum-n-numbers")
+SUMMING_TEST_BITE_LEVEL = "Beginner"
 PARSE_TEST_BITE = Bite("Parse a list of names", "parse-a-list-of-names")
 BAD_CONFIG = {
     "PYBITES_USERNAME": "foo",
@@ -60,7 +61,10 @@ def test_init_command(
 def test_download_command(mock_iterfzf, mock_load_config, testing_config):
     """Test the download command."""
     mock_load_config.return_value = testing_config
-    mock_iterfzf.return_value = SUMMING_TEST_BITE.title
+    formatted_title = _format_bite_key(
+        SUMMING_TEST_BITE.title, SUMMING_TEST_BITE_LEVEL, len(SUMMING_TEST_BITE.title)
+    )
+    mock_iterfzf.return_value = formatted_title
 
     runner.invoke(cli, ["download"])
 
