@@ -55,7 +55,23 @@ eatlocal init
 Download bites:
 
 ```bash
+# Show all bites
 eatlocal download
+
+# Show only newbie bites
+eatlocal download --level newbie
+
+# Show only intro bites
+eatlocal download --level intro
+
+# Show only beginner bites
+eatlocal download --level Beginner
+
+# Show only intermediate bites
+eatlocal download --level Intermediate
+
+# Show only advanced bites
+eatlocal download --level Advanced
 ```
 
 If you want to force a re-download of a given bite use the `--force` flag. This will overwrite the bite directory.
