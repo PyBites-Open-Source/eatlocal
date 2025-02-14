@@ -16,6 +16,8 @@ from eatlocal.eatlocal import (
     get_credentials,
     load_config,
     set_local_dir,
+    _unformat_bite_key,
+    _format_bite_key,
 )
 
 NOT_DOWNLOADED = (
@@ -105,11 +107,27 @@ def test_choose_bite(mock_iterfzf, mock_requests):
     api_data = json.load(open("./tests/testing_content/bites_api.json"))
     mock_response.json.return_value = api_data
     mock_requests.return_value = mock_response
-    mock_iterfzf.return_value = SUMMING_TEST_BITE.title
+
+    # Create the formatted title that would be displayed in iterfzf
+    max_title_length = max(len(bite["title"]) for bite in api_data)
+    padding = max_title_length + 10
+    formatted_title = _format_bite_key(
+        SUMMING_TEST_BITE.title,
+        next(
+            bite["level"]
+            for bite in api_data
+            if bite["title"] == SUMMING_TEST_BITE.title
+        ),
+        padding,
+    )
+
+    # Mock iterfzf to return the formatted title
+    mock_iterfzf.return_value = formatted_title
 
     bite = choose_bite()
     assert isinstance(bite, Bite)
-    assert bite.title == SUMMING_TEST_BITE.title
+    # We need to unformat the title to match it with the original
+    assert _unformat_bite_key(bite.title) == SUMMING_TEST_BITE.title
     assert bite.slug == SUMMING_TEST_BITE.slug
 
 
