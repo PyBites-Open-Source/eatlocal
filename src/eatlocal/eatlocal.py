@@ -317,15 +317,9 @@ def _unformat_bite_key(formatted_key: str) -> str:
     Returns:
         The original title string.
     """
-    # Remove the ANSI color codes
     uncolored = formatted_key.replace(GREEN, "").replace(RESET, "")
-
-    # Split into title and level parts and get just the title
-    # The title is everything before the right-aligned level (40 spaces)
-    title = uncolored.rstrip()  # Remove trailing spaces
-    # Split on multiple spaces to separate title from level
+    title = uncolored.rstrip()
     parts = title.split()
-    # Return everything except the last word (which is the level)
     return " ".join(parts[:-1])
 
 
@@ -352,7 +346,6 @@ def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
             sys.exit()
         bites_data = r.json()
         if level is not None:
-            # Filter bites by level (case-insensitive)
             if level.lower() not in VALID_LEVELS:
                 console.print(
                     f":warning: Invalid level: {level}.",
@@ -369,10 +362,8 @@ def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
                 if bite["level"].lower() == level.lower()
             }
         else:
-            # Display bites of all levels.
             bites = {}
             max_title_length = 0
-            # Store original titles and slug for Bite object.
             bite_mapping = {}
 
             for bite in bites_data:
@@ -381,9 +372,6 @@ def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
 
                 bites[bite["title"]] = (bite["level"], bite["slug"])
                 bite_mapping[bite["title"]] = bite["slug"]
-
-            # bite levels will always be aligned on the right side, with some consistent spacing
-            # between the title and level.
             padding = max_title_length + 10
             formatted_bites = {
                 _format_bite_key(title, level, padding): slug
