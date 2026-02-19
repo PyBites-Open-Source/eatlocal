@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from os import environ, makedirs
 from pathlib import Path
+from typing import FrozenSet
 
 import install_playwright
 import requests
@@ -41,6 +42,15 @@ environ["FZF_DEFAULT_OPTS"] = FZF_DEFAULT_OPTS
 requests_cache.install_cache(
     CACHE_DB_LOCATION, backend="sqlite", expire_after=timedelta(days=30)
 )
+
+VALID_LEVELS: FrozenSet[str] = frozenset(
+    ["newbie", "intro", "beginner", "intermediate", "advanced"]
+)
+
+# ANSI escape code for green color
+GREEN = "\033[32m"
+# Reset color back to default
+RESET = "\033[0m"
 
 
 @dataclass
@@ -280,14 +290,41 @@ def choose_local_bite(config: dict) -> Bite:
     """
     with open(LOCAL_BITES_DB, "r") as local_bites:
         bites = json.load(local_bites)
+    if Path.cwd().name in bites.values():
+        for title, slug in bites.items():
+            if Path.cwd().name == slug:
+                return Bite(title, slug)
     bite = iterfzf(bites, multi=False)
     if bite is None:
         sys.exit()
     return Bite(bite, bites[bite])
 
 
-def choose_bite(clear: bool = False) -> Bite:
-    """Choose which bite will be downloaded.
+def _format_bite_key(title: str, level: str, padding: int) -> str:
+    """Format the bite key with for display.
+    Returns:
+        A formatted string with the bite title and level.
+    """
+    return f"{title:<{padding}}{GREEN}{level.capitalize():>40}{RESET}"
+
+
+def _unformat_bite_key(formatted_key: str) -> str:
+    """Unformat a bite key to get the original title.
+
+    Args:
+        formatted_key: The formatted string containing title and level.
+
+    Returns:
+        The original title string.
+    """
+    uncolored = formatted_key.replace(GREEN, "").replace(RESET, "")
+    title = uncolored.rstrip()
+    parts = title.split()
+    return " ".join(parts[:-1])
+
+
+def choose_bite(clear: bool = False, *, level: str | None = None) -> Bite:
+    """Choose which level of bite will be downloaded.
 
     Returns:
         A Bite object.
@@ -307,11 +344,52 @@ def choose_bite(clear: bool = False) -> Bite:
                 style=ConsoleStyle.SUGGESTION.value,
             )
             sys.exit()
-        bites = {bite["title"]: bite["slug"] for bite in r.json()}
-    bite_to_download = iterfzf(bites, multi=False)
+        bites_data = r.json()
+        if level is not None:
+            if level.lower() not in VALID_LEVELS:
+                console.print(
+                    f":warning: Invalid level: {level}.",
+                    style=ConsoleStyle.WARNING.value,
+                )
+                console.print(
+                    f"Valid levels are: {', '.join(VALID_LEVELS)}.",
+                    style=ConsoleStyle.SUGGESTION.value,
+                )
+                sys.exit()
+            bites = {
+                bite["title"]: bite["slug"]
+                for bite in bites_data
+                if bite["level"].lower() == level.lower()
+            }
+        else:
+            bites = {}
+            max_title_length = 0
+            bite_mapping = {}
+
+            for bite in bites_data:
+                title_length = len(bite["title"])
+                max_title_length = max(max_title_length, title_length)
+
+                bites[bite["title"]] = (bite["level"], bite["slug"])
+                bite_mapping[bite["title"]] = bite["slug"]
+            padding = max_title_length + 10
+            formatted_bites = {
+                _format_bite_key(title, level, padding): slug
+                for title, (level, slug) in bites.items()
+            }
+
+    choices = bites if level is not None else formatted_bites
+    bite_to_download = iterfzf(choices, multi=False, ansi=True)
+
     if bite_to_download is None:
         sys.exit()
-    slug = bites[bite_to_download]
+
+    slug = (
+        bites[bite_to_download]
+        if level is not None
+        else bite_mapping[_unformat_bite_key(bite_to_download)]
+    )
+
     return Bite(bite_to_download, slug)
 
 

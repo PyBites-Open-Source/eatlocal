@@ -16,6 +16,8 @@ from eatlocal.eatlocal import (
     get_credentials,
     load_config,
     set_local_dir,
+    _unformat_bite_key,
+    _format_bite_key,
 )
 
 NOT_DOWNLOADED = (
@@ -75,6 +77,19 @@ def test_choose_local_bite(mock_iterfzf, testing_config) -> None:
     assert bite.slug == LOCAL_TEST_BITE.slug
 
 
+@pytest.fixture
+def test_choose_local_bite_from_dir(monkeypatch, testing_config) -> None:
+    """Test choosing a local bite."""
+    with patch(
+        "eatlocal.eatlocal.LOCAL_BITES_DB",
+        Path.cwd() / "tests/testing_repo/.local_bites.json",
+    ):
+        monkeypatch.chdir("tests/testing_repo/parse-a-list-of-names/")
+        bite = choose_local_bite(testing_config)
+    assert bite.title == LOCAL_TEST_BITE.title
+    assert bite.slug == LOCAL_TEST_BITE.slug
+
+
 @patch("eatlocal.eatlocal.Prompt.ask")
 @patch("eatlocal.eatlocal.Path.exists")
 def test_set_local_dir(mock_exists, mock_prompt):
@@ -92,11 +107,27 @@ def test_choose_bite(mock_iterfzf, mock_requests):
     api_data = json.load(open("./tests/testing_content/bites_api.json"))
     mock_response.json.return_value = api_data
     mock_requests.return_value = mock_response
-    mock_iterfzf.return_value = SUMMING_TEST_BITE.title
+
+    # Create the formatted title that would be displayed in iterfzf
+    max_title_length = max(len(bite["title"]) for bite in api_data)
+    padding = max_title_length + 10
+    formatted_title = _format_bite_key(
+        SUMMING_TEST_BITE.title,
+        next(
+            bite["level"]
+            for bite in api_data
+            if bite["title"] == SUMMING_TEST_BITE.title
+        ),
+        padding,
+    )
+
+    # Mock iterfzf to return the formatted title
+    mock_iterfzf.return_value = formatted_title
 
     bite = choose_bite()
     assert isinstance(bite, Bite)
-    assert bite.title == SUMMING_TEST_BITE.title
+    # We need to unformat the title to match it with the original
+    assert _unformat_bite_key(bite.title) == SUMMING_TEST_BITE.title
     assert bite.slug == SUMMING_TEST_BITE.slug
 
 
