@@ -166,7 +166,7 @@ def install_browser() -> None:
 
     """
     with sync_playwright() as p:
-        install_playwright.install(p.chromium)
+        install_playwright.install([p.chromium])
 
 
 def initialize_eatlocal():
