@@ -15,3 +15,9 @@ repos:
   hooks:
     # Update the uv lockfile
     - id: uv-lock
+
+- repo: https://github.com/bbelderbos/code_quality
+  rev: main
+  hooks:
+    - id: pybites-quality
+      args: ["--fail-mi-below", "60", "--fail-typing-below", "80"]

@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.12.3",
-    "install-playwright>=0.1.0",
+    "install-playwright>=1.0.0",
     "iterfzf>=1.4.0.54.3",
     "pytest-playwright>=0.5.2",
     "python-dotenv>=1.0.1",
